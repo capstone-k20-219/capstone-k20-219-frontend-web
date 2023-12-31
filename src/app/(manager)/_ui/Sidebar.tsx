@@ -132,7 +132,7 @@ export default function Sidebar() {
               >
                 <div
                   className={`w-1 h-3/5 bg-white absolute left-0 top-1/2 -translate-y-1/2 ${
-                    isSelected ? "block" : "hidden"
+                    isSelected ? "block indicator" : "hidden"
                   }`}
                 />
                 <Link href={item.link} className="w-full flex gap-3 text-white">
