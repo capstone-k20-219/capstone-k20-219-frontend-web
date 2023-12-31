@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
     "@mui/material-nextjs": "^5.15.0",
     "@reduxjs/toolkit": "^1.9.7",
     "next": "13.5.6",
