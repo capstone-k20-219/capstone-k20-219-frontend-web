@@ -20,9 +20,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ReduxProvider>
-          <AppRouterCacheProvider options={{ enableCssLayer: true }}>
+          {/* <AppRouterCacheProvider options={{ enableCssLayer: true }}>
             {children}
-          </AppRouterCacheProvider>
+          </AppRouterCacheProvider> */}
+          {children}
         </ReduxProvider>
       </body>
     </html>
