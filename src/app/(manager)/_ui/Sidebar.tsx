@@ -18,7 +18,7 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Divider from "@mui/material/Divider";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import Link from "next/link";
 
 // Setup
@@ -70,14 +70,20 @@ const NavListItemSecondary: NavItem[] = [
 ];
 
 // Component(s)
-export default function Sidebar() {
+export default function Sidebar({
+  onCurrentpage,
+}: {
+  onCurrentpage: Dispatch<SetStateAction<string>>;
+}) {
   const [selectedIndex, setSelectedIndex] = useState(1);
 
   const handleListItemClick = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    index: number
+    index: number,
+    name: string
   ) => {
     setSelectedIndex(index);
+    onCurrentpage(name);
   };
 
   return (
@@ -98,7 +104,9 @@ export default function Sidebar() {
               <ListItemButton
                 key={index}
                 selected={isSelected}
-                onClick={(event) => handleListItemClick(event, index)}
+                onClick={(event) =>
+                  handleListItemClick(event, index, item.name)
+                }
                 className={isSelected ? "opacity-100" : "opacity-70"}
               >
                 <div
@@ -127,7 +135,9 @@ export default function Sidebar() {
               <ListItemButton
                 key={index + 5}
                 selected={isSelected}
-                onClick={(event) => handleListItemClick(event, index + 5)}
+                onClick={(event) =>
+                  handleListItemClick(event, index + 5, item.name)
+                }
                 className={isSelected ? "opacity-100" : "opacity-70"}
               >
                 <div

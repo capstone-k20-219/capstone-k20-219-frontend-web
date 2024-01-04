@@ -31,3 +31,13 @@ body {
     height: 60%;
   }
 }
+
+// remove scroll bar
+.Content {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.Content::-webkit-scrollbar {
+  display: none;
+}
