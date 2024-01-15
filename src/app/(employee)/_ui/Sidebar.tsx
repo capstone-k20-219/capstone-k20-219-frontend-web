@@ -2,11 +2,8 @@
 
 // Assets
 import Logo from "../../../img/logo-white.png";
-import DashboardIcon from "../../../img/dashboard.png";
 import MapIcon from "../../../img/map.png";
-import EmployeeIcon from "../../../img/employee.png";
 import ServiceIcon from "../../../img/service.png";
-import VehicleTypeIcon from "../../../img/vehicle-type.png";
 import HelpIcon from "../../../img/help.png";
 import SettingIcon from "../../../img/setting.png";
 
@@ -30,29 +27,14 @@ interface NavItem {
 
 const NavListItemMain: NavItem[] = [
   {
-    name: "Dashboard",
-    icon: DashboardIcon,
-    link: "/m-home",
-  },
-  {
-    name: "Employee",
-    icon: EmployeeIcon,
-    link: "/m-employee",
-  },
-  {
     name: "Map",
     icon: MapIcon,
-    link: "/m-map",
-  },
-  {
-    name: "Vehicle type",
-    icon: VehicleTypeIcon,
-    link: "/m-vehicle",
+    link: "/e-map",
   },
   {
     name: "Service",
     icon: ServiceIcon,
-    link: "/m-service",
+    link: "/e-service",
   },
 ];
 
@@ -60,24 +42,16 @@ const NavListItemSecondary: NavItem[] = [
   {
     name: "Help",
     icon: HelpIcon,
-    link: "/m-home",
+    link: "/e-map",
   },
   {
     name: "Setting",
     icon: SettingIcon,
-    link: "/m-home",
+    link: "/e-map",
   },
 ];
 
-const ListNav = [
-  "Dashboard",
-  "Employee",
-  "Map",
-  "Vehicle Type",
-  "Service",
-  "Help",
-  "Setting",
-];
+const ListNav = ["Map", "Service", "Help", "Setting"];
 
 // Component(s)
 export default function Sidebar({
@@ -108,6 +82,7 @@ export default function Sidebar({
 
   return (
     <div className="w-64 h-full bg-neutral-900 flex flex-col">
+      <h1>Hello</h1>
       <div className="flex justify-center items-center w-full h-20">
         <Image
           src={Logo}
@@ -156,7 +131,7 @@ export default function Sidebar({
                 key={index + 5}
                 selected={isSelected}
                 onClick={(event) =>
-                  handleListItemClick(event, index + 5, "Dashboard")
+                  handleListItemClick(event, index + 5, "Map")
                 }
                 className={isSelected ? "opacity-100" : "opacity-70"}
               >

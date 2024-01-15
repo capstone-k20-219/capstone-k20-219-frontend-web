@@ -118,7 +118,7 @@ export default function Header() {
                   <ClickAwayListener onClickAway={handleClose}>
                     <MenuList autoFocusItem={open} id="composition-menu">
                       <MenuItem onClick={handleClose}>
-                        <Link href={"/m-profile"}>Profile</Link>
+                        <Link href={"/e-profile"}>Profile</Link>
                       </MenuItem>
                       <MenuItem onClick={handleLogout}>Logout</MenuItem>
                     </MenuList>

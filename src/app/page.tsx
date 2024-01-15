@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import Login from "./login/page";
 import Manager from "./(manager)/m-home/page";
-import Employee from "./(employee)/e-home/page";
+import Employee from "./(employee)/e-map/page";
 
 export default function Home() {
   const [inital, setInitial] = useState(false);

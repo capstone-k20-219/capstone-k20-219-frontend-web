@@ -1,51 +1,70 @@
 "use client";
 
 //Assets
+import Home from "../../../img/home-outline.png";
 
 //Libraries
+import Card from "../_ui/Card";
+import SmallStatisticsContent from "../_ui/SmallStatisticsContent";
+import Image from "next/image";
+import Breadcrumbs from "@mui/material/Breadcrumbs";
+import Typography from "@mui/material/Typography";
+
+//Define
+
+const SmallStatistics = [
+  {
+    name: "Current parking vehicle",
+    value: "60",
+  },
+  {
+    name: "Current available slot",
+    value: "34",
+  },
+  {
+    name: "Today booking",
+    value: "12",
+  },
+  {
+    name: "Yesterday revenue",
+    value: "$974,99",
+  },
+  {
+    name: "Total service",
+    value: "5",
+  },
+];
 
 export default function Manager() {
   return (
-    <div className="Content overflow-auto my-6 pt-6 pb-12 flex flex-col gap-6 h-full">
-      <div className="Analytics w-full justify-between items-center flex">
-        <div className="TotalIncome w-[180px] h-24 p-[18px] bg-white rounded-lg shadow border border-gray-200 flex-col justify-between items-start inline-flex">
-          <div className="CurrentParkingVehicle text-zinc-500 text-xs font-medium ">
-            Current parking vehicle
-          </div>
-          <div className=" text-zinc-800 text-lg font-semibold ">60</div>
+    <div className="Content w-full h-full px-16 pt-6 pb-12 overflow-hidden">
+      <Breadcrumbs
+        separator="›"
+        aria-label="breadcrumb"
+        className="text-black text-opacity-70 text-base font-medium"
+      >
+        <Typography key="1" className="flex gap-2">
+          <Image src={Home} alt="home-icon" className="w-6 h-6" />
+          Home
+        </Typography>
+        ,<Typography key="2">Dashboard</Typography>
+      </Breadcrumbs>
+      <div className="Content overflow-auto my-6 pt-6 pb-12 flex flex-col gap-6 h-full">
+        {/* Cards for small statistics */}
+        <div className="w-full justify-between items-center flex">
+          {SmallStatistics.map((item, index) => {
+            return (
+              <Card key={index + Math.random() * 100}>
+                <SmallStatisticsContent {...item} />
+              </Card>
+            );
+          })}
         </div>
-        <div className="TotalIncome w-[180px] h-24 p-[18px] bg-white rounded-lg shadow border border-gray-200 flex-col justify-between items-start inline-flex">
-          <div className="CurrentAvailableSlot text-zinc-500 text-xs font-medium ">
-            Current available slot
-          </div>
-          <div className=" text-zinc-800 text-lg font-semibold ">34</div>
-        </div>
-        <div className="TotalIncome w-[180px] h-24 p-[18px] bg-white rounded-lg shadow border border-gray-200 flex-col justify-between items-start inline-flex">
-          <div className="TodayBooking text-zinc-500 text-xs font-medium ">
-            Today booking{" "}
-          </div>
-          <div className=" text-zinc-800 text-lg font-semibold ">12</div>
-        </div>
-        <div className="TotalIncome w-[180px] h-24 p-[18px] bg-white rounded-lg shadow border border-gray-200 flex-col justify-between items-start inline-flex">
-          <div className="YesterdayRevenue text-zinc-500 text-xs font-medium ">
-            Yesterday revenue
-          </div>
-          <div className="97499 text-zinc-800 text-lg font-semibold ">
-            $974,99
-          </div>
-        </div>
-        <div className="TotalIncome w-[180px] h-24 p-[18px] bg-white rounded-lg shadow border border-gray-200 flex-col justify-between items-start inline-flex">
-          <div className="TotalService w-[85px] text-zinc-500 text-xs font-medium ">
-            Total service
-          </div>
-          <div className=" text-zinc-800 text-lg font-semibold ">5</div>
-        </div>
-      </div>
-      <div className="Group91 flex flex-col gap-6">
-        <div className="Frame129 w-full h-[286px] justify-between items-center gap-6 flex">
-          <div className="Group89 min-w-[556px] w-3/5 h-full relative">
-            <div className="Rectangle583 w-full h-full bg-white rounded-[10px] shadow border border-gray-200">
-              {/* mocked UI */}
+        {/* Charts */}
+        <div className="flex flex-col gap-6">
+          {/* mocked UI */}
+          <div className="Frame129 w-full h-[286px] justify-between items-center gap-6 flex">
+            <Card className="min-w-[556px] w-3/5 h-full relative">
               <div className="Group105 w-full h-[242px] left-[35px] top-[22px] absolute">
                 <div className="Group106 w-[486px] h-[207px] left-0 top-[35px] absolute">
                   <div className="Frame125 w-[451px] h-[207px] left-[35px] top-0 absolute flex-col justify-start items-center gap-3 inline-flex">
@@ -107,11 +126,8 @@ export default function Manager() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-          <div className="Group107 min-w-[452px] w-2/5 h-full relative">
-            <div className="Rectangle586 w-full h-full bg-white rounded-[10px] shadow border border-gray-200">
-              {/* mocked UI */}
+            </Card>
+            <Card className="min-w-[452px] w-2/5 h-full relative">
               <div className="Group110 w-[403px] h-[257.95px] left-[25px] top-[28.05px] absolute">
                 <div className="ParkingLotTraffic12102023 w-[267.36px] h-[25.39px] left-[68.80px] top-0 absolute text-center text-black text-base font-bold ">
                   Parking lot traffic - 12/10/2023
@@ -134,83 +150,70 @@ export default function Manager() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Card>
           </div>
-        </div>
-        <div className="Frame128 w-full h-[334px] justify-between items-center gap-6 flex">
-          <div className="PieVehicleType min-w-[452px] w-2/5 h-[334px] relative">
-            <div className="Rectangle582 w-full h-[334px] bg-white rounded-[10px] shadow border border-gray-200">
-              {/* mocked UI */}
-              <div className="Group112 w-[388px] h-[294px] left-[32px] top-[20px] absolute">
-                <div className="VehicleTypeDistribution left-[96px] top-0 absolute text-center text-black text-base font-bold ">
-                  Vehicle type distribution
+          {/* mocked UI */}
+          <div className="Frame128 w-full h-[286px] justify-between items-center gap-6 flex">
+            <Card className="min-w-[452px] w-2/5 h-full relative p-5 flex flex-col gap-6 items-center">
+              <div className="VehicleTypeDistribution text-center text-black text-base font-bold ">
+                Vehicle type distribution
+              </div>
+              <div className="Frame133 justify-start items-center gap-5 flex">
+                <div className="Group92 w-[180px] h-[180px] relative">
+                  <div className="Ellipse12 w-[180px] h-[180px] bg-rose-500 rounded-full" />
                 </div>
-                <div className="Frame133 w-[388px] h-[255px] left-0 top-[39px] absolute justify-start items-center gap-5 inline-flex">
-                  <div className="Group92 w-[245px] h-[245px] relative">
-                    <div className="Ellipse12 w-[245px] h-[245px] left-0 top-0 absolute bg-rose-500 rounded-full" />
-                    <div className="Ellipse14 w-[245px] h-[245px] left-0 top-0 absolute bg-green-400 rounded-full" />
-                    <div className="Ellipse13 w-[245px] h-[245px] left-0 top-0 absolute bg-blue-400 rounded-full" />
+                <div className="Frame102 p-2.5 flex-col justify-start items-start gap-5 inline-flex">
+                  <div className="Frame101 justify-center items-center gap-3 inline-flex">
+                    <div className="Rectangle587 w-5 h-5 bg-rose-500" />
+                    <div className="Motobike text-black text-base font-normal ">
+                      Motobike
+                    </div>
                   </div>
-                  <div className="Frame102 p-2.5 flex-col justify-start items-start gap-5 inline-flex">
-                    <div className="Frame101 justify-center items-center gap-3 inline-flex">
-                      <div className="Rectangle587 w-5 h-5 bg-rose-500" />
-                      <div className="Motobike text-black text-base font-normal ">
-                        Motobike
-                      </div>
+                  <div className="Frame102 justify-center items-center gap-3 inline-flex">
+                    <div className="Rectangle587 w-5 h-5 bg-blue-400" />
+                    <div className="Car text-black text-base font-normal ">
+                      Car
                     </div>
-                    <div className="Frame102 justify-center items-center gap-3 inline-flex">
-                      <div className="Rectangle587 w-5 h-5 bg-blue-400" />
-                      <div className="Car text-black text-base font-normal ">
-                        Car
-                      </div>
-                    </div>
-                    <div className="Frame103 justify-center items-center gap-3 inline-flex">
-                      <div className="Rectangle587 w-5 h-5 bg-green-400" />
-                      <div className="Truck text-black text-base font-normal ">
-                        Truck
-                      </div>
+                  </div>
+                  <div className="Frame103 justify-center items-center gap-3 inline-flex">
+                    <div className="Rectangle587 w-5 h-5 bg-green-400" />
+                    <div className="Truck text-black text-base font-normal ">
+                      Truck
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-          <div className="Group111 min-w-[556px] w-3/5 h-[334px] relative">
-            <div className="Rectangle585 w-full h-[334px] bg-white rounded-[10px] shadow border border-gray-200">
-              {/* mocked UI */}
-              <div className="Group115 w-[391px] h-[296.19px] left-[83px] top-[19px] absolute">
-                <div className="Group114 w-[391px] h-[244px] left-0 top-[52.19px] absolute">
-                  <div className="Group113 w-[244px] h-[244px] left-[147px] top-0 absolute">
-                    <div className="Ellipse18 w-[244px] h-[244px] left-0 top-0 absolute bg-red-400 rounded-full" />
-                    <div className="Ellipse20 w-[244px] h-[244px] left-0 top-0 absolute bg-blue-400 rounded-full" />
-                    <div className="Ellipse19 w-[244px] h-[244px] left-0 top-0 absolute bg-green-400 rounded-full" />
-                  </div>
-                  <div className="Frame103 w-[136px] h-[120px] p-2.5 left-0 top-[62px] absolute flex-col justify-start items-end gap-5 inline-flex">
-                    <div className="Frame101 justify-center items-center gap-3 inline-flex">
-                      <div className="Washing text-black text-base font-normal ">
-                        Washing
-                      </div>
-                      <div className="Rectangle587 w-5 h-5 bg-rose-500" />
-                    </div>
-                    <div className="Frame102 justify-center items-center gap-3 inline-flex">
-                      <div className="Charging text-black text-base font-normal ">
-                        Charging
-                      </div>
-                      <div className="Rectangle587 w-5 h-5 bg-blue-400" />
-                    </div>
-                    <div className="Frame103 justify-center items-center gap-3 inline-flex">
-                      <div className="Truck text-black text-base font-normal ">
-                        Maintaning
-                      </div>
-                      <div className="Rectangle587 w-5 h-5 bg-green-400" />
-                    </div>
-                  </div>
+            </Card>
+            <Card className="min-w-[556px] w-3/5 h-full relative p-5 flex flex-col gap-6 items-center">
+              <div className="RevenueContributionByService text-center text-black text-base font-bold ">
+                Revenue contribution by service
+              </div>
+              <div className="Group114 justify-start items-center gap-5 flex flex-row-reverse">
+                <div className="Group113 w-[180px] h-[180px] relative">
+                  <div className="Ellipse18 w-[180px] h-[180px] bg-red-500 rounded-full" />
                 </div>
-                <div className="RevenueContributionByService w-[259px] h-[28.19px] left-[52px] top-0 absolute text-center text-black text-base font-bold ">
-                  Revenue contribution by service
+                <div className="Frame103 w-[136px] h-[120px] p-2.5 flex-col justify-start items-end gap-5 inline-flex">
+                  <div className="Frame101 justify-center items-center gap-3 inline-flex">
+                    <div className="Washing text-black text-base font-normal ">
+                      Washing
+                    </div>
+                    <div className="Rectangle587 w-5 h-5 bg-rose-500" />
+                  </div>
+                  <div className="Frame102 justify-center items-center gap-3 inline-flex">
+                    <div className="Charging text-black text-base font-normal ">
+                      Charging
+                    </div>
+                    <div className="Rectangle587 w-5 h-5 bg-blue-400" />
+                  </div>
+                  <div className="Frame103 justify-center items-center gap-3 inline-flex">
+                    <div className="Truck text-black text-base font-normal ">
+                      Maintaning
+                    </div>
+                    <div className="Rectangle587 w-5 h-5 bg-green-400" />
+                  </div>
                 </div>
               </div>
-            </div>
+            </Card>
           </div>
         </div>
       </div>
