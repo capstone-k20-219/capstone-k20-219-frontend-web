@@ -19,7 +19,7 @@ export default function Emplpoyee() {
           <Image src={Home} alt="home-icon" className="w-6 h-6" />
           Home
         </Typography>
-        ,<Typography key="2">Service</Typography>
+        ,<Typography key="2">Map</Typography>
       </Breadcrumbs>
       <div className="w-full relative my-6 pt-6 pb-12 h-full flex gap-3">
         <Card className="w-full h-full p-5">
