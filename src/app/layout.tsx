@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.scss";
-import { ReduxProvider } from "@/redux/provider";
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
+import AppContainer from "@/components/AppContainer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,13 +17,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <ReduxProvider>
-          {/* <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-            {children}
-          </AppRouterCacheProvider> */}
-          {children}
-        </ReduxProvider>
+      <body
+        suppressHydrationWarning={true}
+        className={`${inter.className} text-neutral-900 bg-white sm:bg-gray-100`}
+      >
+        <AppContainer children={children} />
       </body>
     </html>
   );

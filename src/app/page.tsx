@@ -1,29 +1,19 @@
 // import Image from "next/image";
 "use client";
 
-import { useState, useEffect } from "react";
-import Login from "./login/page";
-import Manager from "./(manager)/m-home/page";
-import Employee from "./(employee)/e-map/page";
+import { useAppSelector } from "@/redux/store";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default function Home() {
-  const [inital, setInitial] = useState(false);
-  const [isManager, setIsManager] = useState(false);
-  const [isEmployee, setIsEmployee] = useState(false);
+export default function Page() {
+  const { isAuth, role } = useAppSelector((state) => state.authReducer.value);
+  const router = useRouter();
   // check session & cookies
   //...
 
   useEffect(() => {
-    setInitial(true);
-    // setIsManager(true);
+    if (!isAuth || !role) router.push("/login");
+    else if (role === "m") router.push(`/${role}-home`);
+    else router.push(`/${role}-map`);
   }, []);
-
-  if (!inital) return null;
-  else
-    return (
-      <div>
-        {isManager ? <Manager /> : isEmployee ? <Employee /> : <Login />}
-      </div>
-      // <Login />
-    );
 }
