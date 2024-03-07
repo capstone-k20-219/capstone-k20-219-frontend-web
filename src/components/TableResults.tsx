@@ -102,63 +102,63 @@ export default function TableResults({
   const columns = tableColumns[tableType];
 
   return (
-    <div className="Content w-full h-full overflow-auto">
-      <div className="h-fit flex-col justify-start items-center flex text-neutral-900 text-base leading-tight">
-        {data ? (
-          <table aria-label="sticky table" className="w-full h-full">
-            <thead className="sticky top-0 bg-white font-bold h-10">
-              <tr className="">
-                {columns.map((column) => (
-                  <th
-                    key={`header-${column.id}`}
-                    align={column.align}
-                    style={{ minWidth: column.minWidth }}
-                    className="border-b border-neutral-900"
-                  >
-                    {column.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="font-normal">
-              {data?.map((row) => (
-                <tr
-                  tabIndex={-1}
-                  key={row.id}
-                  className="h-[60px] border-b border-neutral-500"
+    <div className="w-full h-fit text-neutral-900 text-sm leading-tight overflow-auto">
+      {data ? (
+        <table
+          aria-label="sticky table"
+          className="w-full h-full overflow-auto"
+        >
+          <thead className="sticky top-0 bg-white font-bold h-10 shadow-sm">
+            <tr className="bg-slate-200">
+              {columns.map((column) => (
+                <th
+                  key={`header-${column.id}`}
+                  align={column.align}
+                  style={{ minWidth: column.minWidth }}
                 >
-                  {columns.slice(0, columns.length - 1).map((column) => {
-                    const value = row[column.id];
-                    return (
-                      <td key={column.id} align={column.align}>
-                        {column.format && typeof value === "number"
-                          ? column.format(value)
-                          : value}
-                      </td>
-                    );
-                  })}
-                  {columns.slice(-1).map((column) => {
-                    return (
-                      <td
-                        key={column.id}
-                        align={column.align}
-                        className="flex gap-3 justify-center items-center h-full"
-                      >
-                        <Button name="Update" className="p-2.5" />
-                        <Button name="Delete" className="p-2.5" />
-                      </td>
-                    );
-                  })}
-                </tr>
+                  {column.label}
+                </th>
               ))}
-            </tbody>
-          </table>
-        ) : tableType === "service_request" ? (
-          <NoBookingRequest />
-        ) : (
-          <NoDataFound />
-        )}
-      </div>
+            </tr>
+          </thead>
+          <tbody>
+            {data?.map((row) => (
+              <tr
+                tabIndex={-1}
+                key={row.id + `${Math.random() * 100000}`}
+                className="h-[50px] border-b border-neutral-500"
+              >
+                {columns.slice(0, columns.length - 1).map((column) => {
+                  const value = row[column.id];
+                  return (
+                    <td key={column.id} align={column.align}>
+                      {column.format && typeof value === "number"
+                        ? column.format(value)
+                        : value}
+                    </td>
+                  );
+                })}
+                {columns.slice(-1).map((column) => {
+                  return (
+                    <td
+                      key={column.id}
+                      align={column.align}
+                      className="flex gap-3 justify-center items-center h-full"
+                    >
+                      <Button name="Update" className="p-2 px-2.5 text-sm" />
+                      <Button name="Delete" className="p-2 px-2.5 text-sm" />
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : tableType === "service_request" ? (
+        <NoBookingRequest />
+      ) : (
+        <NoDataFound />
+      )}
     </div>
   );
 }

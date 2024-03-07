@@ -17,36 +17,35 @@ import {
   NavListItemSecondary,
 } from "@/lib/data";
 import { FiMenu } from "react-icons/fi";
+import { AppDispatch, useAppSelector } from "@/redux/store";
+import { useDispatch } from "react-redux";
+import { onActive } from "@/redux/features/active-slice";
 // import { TbChartTreemap } from "react-icons/tb";
 
 export default function Sidebar({
-  role = null,
+  // role = null,
   setOpen,
   open,
   toggleWdith,
   setWidthSidebar,
 }: {
-  role: RoleType;
+  // role: RoleType;
   setOpen: Dispatch<SetStateAction<boolean>>;
   open: boolean;
   toggleWdith: boolean;
   setWidthSidebar: Dispatch<SetStateAction<boolean>>;
 }) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const { role, index, name } = useAppSelector((state) => state.active.value);
+  const dispatch = useDispatch<AppDispatch>();
+  const [selectedIndex, setSelectedIndex] = useState<number>(index);
+  const [currentpage, setCurrentpage] = useState<string>(name);
   const navListItemMain: NavItem[] =
     role === "m" ? NavListItemMainManager : NavListItemMainEmployee;
   const listNav: string[] = role === "m" ? ListNavManager : ListNavEmployee;
-  const [currentpage, setCurrentpage] = useState<string>(
-    role === "m" ? "Dashboard" : "Map"
-  );
 
-  const handleListItemClick = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    index: number,
-    name: string
-  ) => {
-    setSelectedIndex(index);
-    setCurrentpage(name);
+  const handleListItemClick = (indexActive: number, nameActive: string) => {
+    setSelectedIndex(indexActive);
+    setCurrentpage(nameActive);
   };
 
   const handleMenuButton = () => {
@@ -59,12 +58,10 @@ export default function Sidebar({
   };
 
   useEffect(() => {
-    if (listNav.includes(currentpage)) {
-      setSelectedIndex(listNav.indexOf(currentpage));
-    } else {
-      setSelectedIndex(-1);
+    if (selectedIndex !== index) {
+      dispatch(onActive({ role, index: selectedIndex, name: currentpage }));
     }
-  }, []);
+  }, [selectedIndex]);
 
   return (
     <div
@@ -88,15 +85,12 @@ export default function Sidebar({
       </div>
       <div className="w-full text-neutral-500 text-sm">
         <List component="nav" aria-label="main">
-          {navListItemMain.map((item, index) => {
-            const isSelected = selectedIndex === index;
+          {navListItemMain.map((item, indexItem) => {
+            const isSelected = indexItem === selectedIndex;
             return (
               <ListItemButton
-                key={index}
+                key={indexItem}
                 selected={isSelected}
-                onClick={(event) =>
-                  handleListItemClick(event, index, item.name)
-                }
                 className={isSelected ? "opacity-100" : "opacity-70"}
               >
                 <div
@@ -106,6 +100,7 @@ export default function Sidebar({
                 />
                 <Link
                   href={item.link}
+                  onClick={() => handleListItemClick(indexItem, item.name)}
                   className="w-full flex gap-2 text-white items-center"
                 >
                   <span>{item.icon}</span>
@@ -117,9 +112,9 @@ export default function Sidebar({
         </List>
         <div className="w-4/5 border-b border-b-neutral-500 m-auto"></div>
         <List component="nav" aria-label="secondary">
-          {NavListItemSecondary.map((item, index) => {
+          {NavListItemSecondary.map((item, indexItem) => {
             return (
-              <ListItemButton key={index + 5} className="opacity-70">
+              <ListItemButton key={indexItem + 5} className="opacity-70">
                 <div className="w-1 h-3/5 bg-white absolute left-0 top-1/2 -translate-y-1/2 hidden" />
                 <div className="w-full flex gap-3 text-white">
                   <span>{item.icon}</span>

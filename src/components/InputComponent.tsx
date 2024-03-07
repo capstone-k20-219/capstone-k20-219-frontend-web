@@ -1,6 +1,6 @@
 "use client";
 
-import { InputComponentType } from "../lib/type";
+import { InputComponentType } from "@/lib/type";
 
 export default function InputComponent({
   label,
@@ -14,8 +14,8 @@ export default function InputComponent({
   onChangeFunction,
 }: InputComponentType) {
   return (
-    <div className="w-full flex-col justify-start items-start gap-1 inline-flex text-base">
-      <label htmlFor={name} className="text-black font-semibold">
+    <div className="w-full flex-col justify-start items-start gap-1 inline-flex text-sm">
+      <label htmlFor={name} className="text-neutral-900 font-semibold">
         {label}
       </label>
       <input
@@ -27,7 +27,8 @@ export default function InputComponent({
         autoFocus={autoFocus}
         required={required}
         onChange={onChangeFunction}
-        className={`w-full px-2 py-1.5 rounded-md border border-neutral-300 text-neutral-900 font-normal ${
+        className={`w-full px-2 py-1.5 rounded-md border border-neutral-300 
+        text-neutral-900 font-normal focus:border-sky-600 outline-none ${
           disable ? "bg-neutral-200" : "bg-white"
         }`}
       />

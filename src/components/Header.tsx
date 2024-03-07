@@ -24,20 +24,18 @@ import { AppDispatch } from "@/redux/store";
 import { logOut } from "@/redux/features/auth-slice";
 import { RoleType } from "@/lib/type";
 import { FiMenu } from "react-icons/fi";
+import { setInitial } from "@/redux/features/active-slice";
 
 export default function Header({
-  role,
   setOpenSidebar,
   setWidthSidebar,
 }: {
-  role: RoleType;
   setOpenSidebar: Dispatch<SetStateAction<boolean>>;
   setWidthSidebar: Dispatch<SetStateAction<boolean>>;
 }) {
   const [date, setDate] = useState("");
   const [open, setOpen] = useState(false);
   const anchorRef = useRef<HTMLButtonElement>(null);
-  const router = useRouter();
 
   const dispatch = useDispatch<AppDispatch>();
 
@@ -68,7 +66,7 @@ export default function Header({
 
   const handleLogout = () => {
     dispatch(logOut());
-    router.push("/login");
+    dispatch(setInitial());
   };
 
   // return focus to the button when we transitioned from !open -> open
@@ -91,7 +89,7 @@ export default function Header({
       <div className="w-full items-center flex">
         <FiMenu
           style={{ width: 24, height: 24 }}
-          className="mr-4"
+          className="mr-4 cursor-pointer"
           onClick={handleMenuButton}
         />
         <div className="mr-auto text-neutral-500 text-sm font-medium">
@@ -109,8 +107,9 @@ export default function Header({
           >
             <Image
               src={User}
-              alt={role as string}
-              id={role as string}
+              priority={true}
+              alt="avartar"
+              id="user-avartar"
               className="w-10 h-10 rounded-full cursor-pointer
               border-[0.5px] border-neutral-400"
             />

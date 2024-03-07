@@ -9,9 +9,9 @@ export default function ManagerLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuth, role } = useAppSelector((state) => state.authReducer.value);
+  const { isAuth, role } = useAppSelector((state) => state.auth.value);
 
   if (!isAuth) redirect("/login");
   else if (role == "m") return children;
-  else <NoAccess />;
+  else return <NoAccess />;
 }

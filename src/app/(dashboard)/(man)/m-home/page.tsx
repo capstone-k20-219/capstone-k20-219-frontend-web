@@ -3,17 +3,17 @@
 import Card from "@/components/Card";
 import SmallStatisticsContent from "@/components/SmallStatisticsContent";
 import BreadcrumbsComponent from "@/components/BreadcrumbsComponent";
-import { useAppSelector } from "@/redux/store";
-import React, { Fragment } from "react";
+import { AppDispatch, useAppSelector } from "@/redux/store";
+import React, { Fragment, useEffect } from "react";
 import { SmallStatistics } from "@/lib/data";
 import InComeAWeek from "../../../../components/InComeAWeek";
 import ParkingTraffic from "@/components/ParkingTraffic";
 import VehicleTypeDistribution from "@/components/VehicleTypeDistribution";
 import ServiceRevenueContribution from "@/components/ServiceRevenueContribution";
+import { useDispatch } from "react-redux";
+import { onActive } from "@/redux/features/active-slice";
 
 export default function ManagerHome() {
-  const role = useAppSelector((state) => state.authReducer.value.role);
-
   return (
     <Fragment>
       <BreadcrumbsComponent dir={["Dashboard"]} />

@@ -122,6 +122,32 @@ const config: Config = {
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
+      keyframes: {
+        "fade-top-in": {
+          from: {
+            opacity: "0%",
+            "margin-top": "-200px",
+          },
+          to: {
+            opacity: "100%",
+            "margin-top": "0px",
+          },
+        },
+        "fade-top-out": {
+          from: {
+            opacity: "100%",
+            "margin-top": "0px",
+          },
+          to: {
+            opacity: "0%",
+            "margin-top": "-200px",
+          },
+        },
+      },
+      animation: {
+        fadeTopIn: "fade-top-in 300ms ease-out",
+        fadeTopOut: "fade-top-out 300ms ease",
+      },
     },
   },
   plugins: [],

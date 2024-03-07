@@ -123,3 +123,13 @@ export type LoginType = {
   id: string;
   role: RoleType;
 };
+
+export type ActiveState = {
+  role: null | "m" | "e";
+  index: number;
+  name: string;
+};
+
+export type InitialActiveState = {
+  value: ActiveState;
+};

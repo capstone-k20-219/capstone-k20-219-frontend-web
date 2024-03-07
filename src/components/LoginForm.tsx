@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { RoleType } from "@/lib/type";
+import { onActive } from "@/redux/features/active-slice";
 
 const LoginForm = () => {
   const [role, setRole] = useState<RoleType>(null);
@@ -46,8 +47,13 @@ const LoginForm = () => {
           const username = data.username as string;
           const id = data.id; // get after validation
           dispatch(logIn({ username, role, id }));
-          if (role === "m") router.push(`/${role}-home`);
-          else router.push(`/${role}-map`);
+          if (role === "m") {
+            router.push(`/${role}-home`);
+            dispatch(onActive({ role, index: 0, name: "Dashboard" }));
+          } else {
+            router.push(`/${role}-map`);
+            dispatch(onActive({ role, index: 0, name: "Map" }));
+          }
         }
       }}
       className="flex flex-col ml-px gap-6 w-full items-start"

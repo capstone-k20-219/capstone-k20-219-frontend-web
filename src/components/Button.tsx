@@ -14,7 +14,7 @@ export default function Button({
   return (
     <button
       type={type}
-      className={`bg-neutral-900 rounded-lg justify-center items-center flex 
+      className={`bg-neutral-900 rounded-md justify-center items-center flex 
       hover:bg-neutral-800 active:scale-95 transition-all ${className}`}
       onClick={onClickFunction}
     >

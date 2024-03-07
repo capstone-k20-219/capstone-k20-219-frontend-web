@@ -17,7 +17,6 @@ export default function EmployeeService() {
   const [serviceList, setServiceList] = useState<string[]>([]);
   const [service, setService] = useState<string>("");
   const [data, setData] = useState<ServiceRequestData[] | null>(null);
-  // const role = useAppSelector((state) => state.authReducer.value.role);
 
   useEffect(() => {
     const serviceListTmp = ServiceName; // use api later to fetch

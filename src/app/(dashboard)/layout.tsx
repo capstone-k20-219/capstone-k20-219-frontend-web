@@ -1,8 +1,8 @@
 "use client";
 import Header from "@/components/Header";
+import Loading from "@/components/Loading";
 import Sidebar from "@/components/Sidebar";
 import { useAppSelector } from "@/redux/store";
-import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
 export default function DashBoardLayout({
@@ -13,7 +13,7 @@ export default function DashBoardLayout({
   const [inital, setInitial] = useState(false);
   const [open, setOpen] = useState(false);
   const [widthSideBar, setWidthSideBar] = useState(false);
-  const { role } = useAppSelector((state) => state.authReducer.value);
+  const { role } = useAppSelector((state) => state.auth.value);
 
   useEffect(() => {
     setInitial(true);
@@ -25,7 +25,7 @@ export default function DashBoardLayout({
       <div className="w-full h-dvh relative bg-stone-50 flex">
         {/* sidebar */}
         <Sidebar
-          role={role}
+          // role={role}
           setOpen={setOpen}
           open={open}
           toggleWdith={widthSideBar}
@@ -33,11 +33,7 @@ export default function DashBoardLayout({
         />
         {/* header */}
         <div className="flex flex-col w-full h-full overflow-hidden">
-          <Header
-            setOpenSidebar={setOpen}
-            role={role}
-            setWidthSidebar={setWidthSideBar}
-          />
+          <Header setOpenSidebar={setOpen} setWidthSidebar={setWidthSideBar} />
           <div className="Content w-full h-[calc(100%-68px)] p-6 overflow-hidden">
             {children}
           </div>

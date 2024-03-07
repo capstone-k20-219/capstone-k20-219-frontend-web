@@ -8,10 +8,10 @@ import { useAppSelector } from "@/redux/store";
 import { Fragment } from "react";
 
 export default function ManagerMap() {
-  const role = useAppSelector((state) => state.authReducer.value.role);
+  const role = useAppSelector((state) => state.auth.value.role);
   return (
     <Fragment>
-      <BreadcrumbsComponent dir={["Map"]} />
+      <BreadcrumbsComponent dir={["Map management"]} />
       <div className="Content mt-5 flex flex-col gap-3 h-full overflow-auto">
         <div
           className="w-full items-center grid gap-3 grid-flow-row sm:grid-flow-col

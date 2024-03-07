@@ -1,8 +1,5 @@
 "use client";
 
-import Home from "@/img/home-outline.png";
-
-import Image from "next/image";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Typography from "@mui/material/Typography";
 import { IoHomeOutline } from "react-icons/io5";
