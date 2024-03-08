@@ -77,16 +77,13 @@ export const ServiceRequestRows3: ServiceRequestData[] = [
 
 export const mockData: {
   [key: string]: any;
-  washing: ServiceRequestData[] | null;
-  charging: ServiceRequestData[] | null;
-  maintaining: ServiceRequestData[] | null;
 } = {
   washing: ServiceRequestRows,
   charging: ServiceRequestRows2,
   maintaining: null,
 };
 
-export const ServiceName = ["Washing", "Charging", "Maintaining"];
+export const ServiceList = ["Washing", "Charging", "Maintaining"];
 
 export const employeeRows: EmployeeData[] = [
   {
