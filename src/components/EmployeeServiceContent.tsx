@@ -8,11 +8,9 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { useEffect, useState } from "react";
-import Button from "./Button";
-import { useFormState } from "react-dom";
 import { getServiceReservationsByName } from "@/lib/actions";
 import { ServiceRequestData } from "@/lib/type";
-// import { ServiceList } from "@/lib/data";
+import toast from "react-hot-toast";
 
 export default function EmployeeServiceContent({
   serviceList,
@@ -22,16 +20,18 @@ export default function EmployeeServiceContent({
   const [service, setService] = useState(serviceList[0]);
   const [data, setData] = useState<ServiceRequestData[] | null>(null);
 
-  const handleChangeSelect = (event: SelectChangeEvent) => {
-    setService(event.target.value);
+  const handleChangeSelect = (e: SelectChangeEvent) => {
+    setService(e.target.value);
   };
 
   useEffect(() => {
     const fetchServiceData = async () => {
       const res = await getServiceReservationsByName(service);
       if (typeof res !== "string") setData(res);
+      else {
+        toast.error(res);
+      }
     };
-
     fetchServiceData();
   }, [service]);
 

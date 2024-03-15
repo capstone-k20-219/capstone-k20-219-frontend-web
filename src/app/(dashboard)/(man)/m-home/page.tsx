@@ -3,19 +3,15 @@
 import Card from "@/components/Card";
 import SmallStatisticsContent from "@/components/SmallStatisticsContent";
 import BreadcrumbsComponent from "@/components/BreadcrumbsComponent";
-import { AppDispatch, useAppSelector } from "@/redux/store";
-import React, { Fragment, useEffect } from "react";
 import { SmallStatistics } from "@/lib/data";
 import InComeAWeek from "../../../../components/InComeAWeek";
 import ParkingTraffic from "@/components/ParkingTraffic";
 import VehicleTypeDistribution from "@/components/VehicleTypeDistribution";
 import ServiceRevenueContribution from "@/components/ServiceRevenueContribution";
-import { useDispatch } from "react-redux";
-import { onActive } from "@/redux/features/active-slice";
 
 export default function ManagerHome() {
   return (
-    <Fragment>
+    <>
       <BreadcrumbsComponent dir={["Dashboard"]} />
       <div className="mt-5 flex flex-col gap-3 h-full">
         {/* Cards for small statistics */}
@@ -42,6 +38,6 @@ export default function ManagerHome() {
           </div>
         </div>
       </div>
-    </Fragment>
+    </>
   );
 }

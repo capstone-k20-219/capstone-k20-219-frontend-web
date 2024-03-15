@@ -2,15 +2,14 @@
 
 import Card from "@/components/Card";
 import BreadcrumbsComponent from "@/components/BreadcrumbsComponent";
-import { Fragment } from "react";
-import { getServiceList } from "@/lib/actions";
+import { getServiceListName } from "@/lib/actions";
 import EmployeeServiceContent from "@/components/EmployeeServiceContent";
 
 export default async function EmployeeService() {
-  const serviceList = await getServiceList();
+  const serviceList = await getServiceListName();
 
   return (
-    <Fragment>
+    <>
       <BreadcrumbsComponent dir={["Service"]} />
       <div className="mt-5 w-full h-full overflow-hidden pb-10">
         {serviceList ? (
@@ -21,6 +20,6 @@ export default async function EmployeeService() {
           </Card>
         )}
       </div>
-    </Fragment>
+    </>
   );
 }

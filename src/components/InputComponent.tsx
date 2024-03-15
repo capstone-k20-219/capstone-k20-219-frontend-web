@@ -1,5 +1,3 @@
-"use client";
-
 import { InputComponentType } from "@/lib/type";
 
 export default function InputComponent({

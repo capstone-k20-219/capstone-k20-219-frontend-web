@@ -5,13 +5,10 @@ import Logo2 from "@/img/logo.png";
 import Image from "next/image";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import Link from "next/link";
-import { NavItem, RoleType } from "@/lib/type";
+import { NavItem } from "@/lib/type";
 import {
-  ListNavEmployee,
-  ListNavManager,
   NavListItemMainEmployee,
   NavListItemMainManager,
   NavListItemSecondary,
@@ -20,19 +17,16 @@ import { FiMenu } from "react-icons/fi";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { useDispatch } from "react-redux";
 import { onActive } from "@/redux/features/active-slice";
-// import { TbChartTreemap } from "react-icons/tb";
 
 export default function Sidebar({
-  // role = null,
-  setOpen,
   open,
   toggleWdith,
+  setOpen,
   setWidthSidebar,
 }: {
-  // role: RoleType;
-  setOpen: Dispatch<SetStateAction<boolean>>;
   open: boolean;
   toggleWdith: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
   setWidthSidebar: Dispatch<SetStateAction<boolean>>;
 }) {
   const { role, index, name } = useAppSelector((state) => state.active.value);
@@ -41,7 +35,6 @@ export default function Sidebar({
   const [currentpage, setCurrentpage] = useState<string>(name);
   const navListItemMain: NavItem[] =
     role === "m" ? NavListItemMainManager : NavListItemMainEmployee;
-  const listNav: string[] = role === "m" ? ListNavManager : ListNavEmployee;
 
   const handleListItemClick = (indexActive: number, nameActive: string) => {
     setSelectedIndex(indexActive);
@@ -58,9 +51,14 @@ export default function Sidebar({
   };
 
   useEffect(() => {
-    if (selectedIndex !== index) {
+    let ignore = false;
+    if (selectedIndex !== index && !ignore) {
       dispatch(onActive({ role, index: selectedIndex, name: currentpage }));
     }
+
+    return () => {
+      ignore = true;
+    };
   }, [selectedIndex]);
 
   return (
