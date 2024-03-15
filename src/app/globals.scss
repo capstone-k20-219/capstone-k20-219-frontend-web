@@ -76,3 +76,8 @@
 .loader svg rect {
   fill: #0091ff;
 }
+
+.vertical-text {
+  writing-mode: vertical-lr;
+  // transform: rotate(-180deg);
+}

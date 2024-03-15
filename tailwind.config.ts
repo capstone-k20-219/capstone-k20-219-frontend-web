@@ -133,6 +133,16 @@ const config: Config = {
             "margin-top": "0px",
           },
         },
+        "fade-top-in-2": {
+          from: {
+            opacity: "0%",
+            "margin-top": "50px",
+          },
+          to: {
+            opacity: "100%",
+            "margin-top": "0px",
+          },
+        },
         "fade-top-out": {
           from: {
             opacity: "100%",
@@ -146,6 +156,7 @@ const config: Config = {
       },
       animation: {
         fadeTopIn: "fade-top-in 300ms ease-out",
+        fadeTopIn2: "fade-top-in-2 500ms ease-out",
         fadeTopOut: "fade-top-out 300ms ease",
       },
     },
