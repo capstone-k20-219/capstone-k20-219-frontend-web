@@ -16,12 +16,12 @@ export interface EmployeeColumn {
   format?: (value: number) => string;
 }
 
-export interface EmployeeData {
+export type EmployeeData = {
   [key: string]: any;
   id: string;
   name: string;
   phone: string;
-}
+};
 
 // Type for Vehicle Type Table
 export interface VehicleTypeColumn {
@@ -32,12 +32,13 @@ export interface VehicleTypeColumn {
   format?: (value: number) => string;
 }
 
-export interface VehicleTypeData {
+export type VehicleTypeData = {
   [key: string]: any;
+  id: string;
   name: string;
   bookingFee: number;
   parkingFee: number;
-}
+};
 
 // Type for Service Table
 export interface ServiceColumn {
@@ -48,12 +49,12 @@ export interface ServiceColumn {
   format?: (value: number) => string;
 }
 
-export interface ServiceData {
+export type ServiceData = {
   [key: string]: any;
   name: string;
   price: number;
   typ: string;
-}
+};
 
 // Type for Service Request Table
 export interface ServiceRequestColumn {
@@ -64,12 +65,12 @@ export interface ServiceRequestColumn {
   format?: (value: number) => string;
 }
 
-export interface ServiceRequestData {
+export type ServiceRequestData = {
   [key: string]: any;
   plate: string;
   phone: string;
   time: string;
-}
+};
 
 // Type for Table Data
 export type tableColumn =
@@ -133,3 +134,11 @@ export type ActiveState = {
 export type InitialActiveState = {
   value: ActiveState;
 };
+
+export interface ProfileType {
+  id: string;
+  role: string;
+  username: string;
+  fullname: string;
+  dob: string;
+}

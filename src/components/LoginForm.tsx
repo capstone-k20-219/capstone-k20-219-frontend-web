@@ -2,7 +2,7 @@
 
 import Button from "@/components/Button";
 import InputComponent from "@/components/InputComponent";
-import { onLogin } from "@/action/auth";
+import { onLogin } from "@/lib/actions";
 import { logIn } from "@/redux/features/auth-slice";
 import { AppDispatch } from "@/redux/store";
 import { useRouter } from "next/navigation";
@@ -18,20 +18,8 @@ const LoginForm = () => {
 
   const dispatch = useDispatch<AppDispatch>();
 
-  // const onLogin = (e: FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   // if (username === "Manager" && password === "Admin123")
-  //   //   router.replace("/m-home");
-  //   // else if (username === "Employee" && password === "Admin456")
-  //   //   router.replace("/e-map");
-  //   // else setErr(true);
-  //   // const id = "567890987654gdajbk"; // get after validation
-  //   // dispatch(logIn({ username, role, id }));
-  // };
-
   return (
     <form
-      // onSubmit={(e) => onLogin(e)}
       action={async (formData) => {
         if (!role) {
           setErr(true);

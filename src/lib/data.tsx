@@ -88,42 +88,42 @@ export const ServiceList = ["Washing", "Charging", "Maintaining"];
 export const employeeRows: EmployeeData[] = [
   {
     id: "MPL23456",
-    name: "Nguyen Huu Duc",
+    name: "Thai Tai",
     phone: "0983786674",
   },
   {
-    id: "MPL23456",
-    name: "Nguyen Huu Duc",
+    id: "MPL23457",
+    name: "Pham Huu Duc",
     phone: "0983786674",
   },
   {
-    id: "MPL23456",
-    name: "Nguyen Huu Duc",
+    id: "MPL23458",
+    name: "Nguyen Viet Hoa",
     phone: "0983786674",
   },
   {
-    id: "MPL23456",
-    name: "Nguyen Huu Duc",
+    id: "MPL23459",
+    name: "Pham Chau Thanh",
     phone: "0983786674",
   },
   {
-    id: "MPL23456",
-    name: "Nguyen Huu Duc",
+    id: "MPL23460",
+    name: "Tran Cong An",
     phone: "0983786674",
   },
   {
-    id: "MPL23456",
-    name: "Nguyen Huu Duc",
+    id: "MPL23461",
+    name: "Nguyen Huy Hoang",
     phone: "0983786674",
   },
   {
-    id: "MPL23456",
-    name: "Nguyen Huu Duc",
+    id: "MPL23462",
+    name: "Nguyen Huu Phuoc",
     phone: "0983786674",
   },
   {
-    id: "MPL23456",
-    name: "Nguyen Huu Duc",
+    id: "MPL23463",
+    name: "Nguyen Van A",
     phone: "0983786674",
   },
 ];
@@ -178,6 +178,7 @@ export const vehicleTypeRows: VehicleTypeData[] = [
   },
 ];
 
+// export const mockDataProfile = null;
 export const mockDataProfile = {
   id: "MPL2354",
   role: "Manager",

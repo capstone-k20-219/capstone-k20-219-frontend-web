@@ -18,7 +18,7 @@ const persistenceConfig = {
   },
 };
 
-const persistedReducer = combineReducers({
+const persistedReducer: any = combineReducers({
   auth: persistReducer(persistenceConfig["auth"], authReducer),
   active: persistReducer(persistenceConfig["active"], activeReducer),
 });
