@@ -1,62 +1,72 @@
-import React, { Dispatch, SetStateAction } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import InputComponent from "./InputComponent";
 import Button from "./Button";
+import { ProfileType } from "@/lib/type";
 
+const initialProfile: ProfileType = {
+  id: "",
+  role: "",
+  username: "",
+  fullname: "",
+  dob: "",
+};
+
+interface ProfileUpdateInfoFormProps {
+  profile: ProfileType;
+}
 export default function ProfileUpdateInfoForm({
-  userID,
-  userRole,
-  userName,
-  fullName,
-  dateOfBirth,
-  onChangeUserName,
-  onChangeFullName,
-  onChangeDateOfBirth,
-}: {
-  userID: string;
-  userRole: string;
-  userName: string;
-  fullName: string;
-  dateOfBirth: string;
-  onChangeUserName: Dispatch<SetStateAction<string>>;
-  onChangeFullName: Dispatch<SetStateAction<string>>;
-  onChangeDateOfBirth: Dispatch<SetStateAction<string>>;
-}) {
+  profile,
+}: ProfileUpdateInfoFormProps) {
+  const [userProfile, setUserProfile] = useState<ProfileType>(initialProfile);
+
+  const handleFormChange = (e: any) => {
+    setUserProfile((prev) => {
+      return { ...prev, [e.target.name]: e.target.value };
+    });
+  };
+
+  useEffect(() => {
+    setUserProfile(profile);
+  }, []);
+
   return (
     <form className="w-full gap-2 gap-y-6 grid grid-cols-2 sm:gap-4">
       {/* <FormControl> */}
       <InputComponent
-        name="user-id"
+        name="id"
         type="text"
-        value={userID}
+        value={userProfile.id}
         label="User ID"
         disable={true}
       />
       <InputComponent
-        name="user-role"
+        name="role"
         type="text"
-        value={userRole}
+        value={userProfile.role}
         label="Role"
         disable={true}
       />
       <InputComponent
-        name="user-name"
+        name="username"
         type="text"
-        value={userName}
+        value={userProfile.username}
         label="Username"
-        onChangeFunction={(e) => onChangeUserName(e.target.value)}
+        onChangeFunction={handleFormChange}
       />
       <InputComponent
-        name="full-name"
+        name="fullname"
         type="text"
-        value={fullName}
+        value={userProfile.fullname}
         label="Full name"
-        onChangeFunction={(e) => onChangeFullName(e.target.value)}
+        onChangeFunction={handleFormChange}
       />
       <InputComponent
-        name="date-of-birth"
+        name="dob"
         type="date"
-        value={dateOfBirth}
-        onChangeFunction={(e) => onChangeDateOfBirth(e.target.value)}
+        value={userProfile.dob}
+        onChangeFunction={handleFormChange}
         label="Date of birth"
       />
       {/* </FormControl> */}
