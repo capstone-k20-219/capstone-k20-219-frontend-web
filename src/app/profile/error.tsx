@@ -2,8 +2,6 @@
 
 import Button from "@/components/Button";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import toast from "react-hot-toast";
 import { MdError, MdWifiTetheringError } from "react-icons/md";
 
 export default function Error({

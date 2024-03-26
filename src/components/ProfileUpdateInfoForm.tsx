@@ -8,8 +8,9 @@ import { ProfileType } from "@/lib/type";
 const initialProfile: ProfileType = {
   id: "",
   role: "",
-  username: "",
-  fullname: "",
+  name: "",
+  email: "",
+  phone: "",
   dob: "",
 };
 
@@ -29,7 +30,7 @@ export default function ProfileUpdateInfoForm({
 
   useEffect(() => {
     setUserProfile(profile);
-  }, []);
+  }, [profile]);
 
   return (
     <form className="w-full gap-2 gap-y-6 grid grid-cols-2 sm:gap-4">
@@ -49,17 +50,24 @@ export default function ProfileUpdateInfoForm({
         disable={true}
       />
       <InputComponent
-        name="username"
+        name="name"
         type="text"
-        value={userProfile.username}
+        value={userProfile.name}
         label="Username"
         onChangeFunction={handleFormChange}
       />
       <InputComponent
-        name="fullname"
+        name="email"
+        type="email"
+        value={userProfile.email}
+        label="Email"
+        onChangeFunction={handleFormChange}
+      />
+      <InputComponent
+        name="phone"
         type="text"
-        value={userProfile.fullname}
-        label="Full name"
+        value={userProfile.phone}
+        label="Phone"
         onChangeFunction={handleFormChange}
       />
       <InputComponent
@@ -73,7 +81,7 @@ export default function ProfileUpdateInfoForm({
       <Button
         type="button"
         name="Update"
-        className="px-6 py-2 font-semibold text-sm h-fit self-end"
+        className="col-span-2 px-6 py-2 font-semibold text-sm h-fit self-end"
       />
     </form>
   );

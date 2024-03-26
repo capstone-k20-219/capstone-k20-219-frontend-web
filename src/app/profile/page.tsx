@@ -32,7 +32,7 @@ async function ProfileCard() {
           <div className="justify-center items-end gap-6 flex">
             <UserAvatar />
             <span className="text-neutral-900 text-lg font-semibold sm:text-2xl">
-              {profile.fullname}
+              {profile.name}
             </span>
           </div>
           <ProfileUpdateInfoForm profile={profile} />
