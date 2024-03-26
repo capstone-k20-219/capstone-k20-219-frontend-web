@@ -1,8 +1,5 @@
 "use client";
 
-import React from "react";
-import Card from "./Card";
-import TableResults from "@/components/TableResults";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -11,6 +8,151 @@ import { useEffect, useState } from "react";
 import { getServiceReservationsByName } from "@/lib/actions";
 import { ServiceRequestData } from "@/lib/type";
 import toast from "react-hot-toast";
+import NoDataFound from "@/components/NoDataFound";
+import Button from "@/components/Button";
+import {
+  DataBottomContainer,
+  PageContentContainer,
+  TableBodyContainer,
+  TableContainer,
+  TableHeadContainer,
+  TableRowBodyContainer,
+  TableRowHeadContainer,
+} from "@/components/ContainerUI";
+
+interface ServiceRequestColumn {
+  id: "id" | "plate" | "name" | "phone" | "time" | "action";
+  label: string;
+  minWidth?: number;
+  align?: "center" | "left" | "right" | "justify" | "char" | undefined;
+  format?: (value: number) => string;
+  paddingLeft?: string;
+}
+
+const columns: readonly ServiceRequestColumn[] = [
+  {
+    id: "id",
+    label: "Booking ID",
+    minWidth: 100,
+    align: "left",
+    paddingLeft: "20px",
+  },
+  {
+    id: "plate",
+    label: "Vehicle",
+    minWidth: 100,
+    align: "left",
+    paddingLeft: "12px",
+  },
+  {
+    id: "name",
+    label: "Customer's name",
+    minWidth: 150,
+    align: "left",
+    paddingLeft: "12px",
+  },
+  {
+    id: "phone",
+    label: "Phone number",
+    minWidth: 130,
+    align: "left",
+    paddingLeft: "12px",
+  },
+  {
+    id: "time",
+    label: "Booking time",
+    minWidth: 130,
+    align: "left",
+    paddingLeft: "12px",
+  },
+  {
+    id: "action",
+    label: "Action",
+    minWidth: 170,
+    align: "left",
+    paddingLeft: "12px",
+  },
+];
+
+type TableResultsProps = {
+  data: ServiceRequestData[] | null;
+  onAcceptRequest: (id: number) => void;
+  onRejectRequest: (id: number) => void;
+};
+
+function TableResults({
+  data,
+  onAcceptRequest,
+  onRejectRequest,
+}: TableResultsProps) {
+  return (
+    <>
+      {data && data.length !== 0 ? (
+        <TableContainer>
+          <TableHeadContainer>
+            <TableRowHeadContainer>
+              {columns.map((column) => (
+                <th
+                  key={`header-${column.id}`}
+                  align={column.align}
+                  style={{
+                    minWidth: column.minWidth,
+                    paddingLeft: column.paddingLeft,
+                  }}
+                >
+                  {column.label}
+                </th>
+              ))}
+            </TableRowHeadContainer>
+          </TableHeadContainer>
+          <TableBodyContainer>
+            {data?.map((row) => (
+              <TableRowBodyContainer key={row.id + `${Math.random() * 100000}`}>
+                {columns.slice(0, columns.length - 1).map((column) => {
+                  const value = row[column.id];
+                  return (
+                    <td
+                      key={column.id}
+                      align={column.align}
+                      style={{ paddingLeft: column.paddingLeft }}
+                    >
+                      {column.format && typeof value === "number"
+                        ? column.format(value)
+                        : value}
+                    </td>
+                  );
+                })}
+                {columns.slice(-1).map((column) => {
+                  return (
+                    <td
+                      key={column.id}
+                      align={column.align}
+                      style={{ paddingLeft: column.paddingLeft }}
+                      className="flex gap-3 items-center h-full"
+                    >
+                      <Button
+                        name="Accept"
+                        className="button-action"
+                        onClickFunction={() => onAcceptRequest(row.id)}
+                      />
+                      <Button
+                        name="Reject"
+                        className="button-action"
+                        onClickFunction={() => onRejectRequest(row.id)}
+                      />
+                    </td>
+                  );
+                })}
+              </TableRowBodyContainer>
+            ))}
+          </TableBodyContainer>
+        </TableContainer>
+      ) : (
+        <NoDataFound>There is no booking request for this service!</NoDataFound>
+      )}
+    </>
+  );
+}
 
 export default function EmployeeServiceContent({
   serviceList,
@@ -22,6 +164,24 @@ export default function EmployeeServiceContent({
 
   const handleChangeSelect = (e: SelectChangeEvent) => {
     setService(e.target.value);
+  };
+
+  const handleAcceptRequest = (id: number) => {
+    // remove from queue and update the bill
+    setData((prev) => {
+      if (prev === null) return prev;
+      return prev.filter((item) => item.id !== id);
+    });
+    toast.success("The request is accepted.");
+  };
+
+  const handleRejectRequest = (id: number) => {
+    // remove from queue without updating the bill
+    setData((prev) => {
+      if (prev === null) return prev;
+      return prev.filter((item) => item.id !== id);
+    });
+    toast.success("The request is rejected.");
   };
 
   useEffect(() => {
@@ -36,12 +196,8 @@ export default function EmployeeServiceContent({
   }, [service]);
 
   return (
-    <Card className="w-full h-full p-8 px-6 flex flex-col item-center gap-6">
-      <FormControl
-        sx={{ m: 0, minWidth: 120 }}
-        size="small"
-        className="min-w-fit"
-      >
+    <PageContentContainer>
+      <FormControl sx={{ m: 0, minWidth: 120 }} size="small" className="w-full">
         <InputLabel id="demo-select-small-label">Service</InputLabel>
         <Select
           labelId="demo-select-small-label"
@@ -58,10 +214,13 @@ export default function EmployeeServiceContent({
           ))}
         </Select>
       </FormControl>
-      <div className="w-full h-full overflow-hidden flex flex-col items-center gap-9">
-        {/* Table of results */}
-        <TableResults tableType="service_request" data={data} />
-      </div>
-    </Card>
+      <DataBottomContainer>
+        <TableResults
+          data={data}
+          onAcceptRequest={handleAcceptRequest}
+          onRejectRequest={handleRejectRequest}
+        />
+      </DataBottomContainer>
+    </PageContentContainer>
   );
 }

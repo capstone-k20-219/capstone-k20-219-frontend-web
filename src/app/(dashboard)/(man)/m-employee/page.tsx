@@ -1,122 +1,391 @@
 "use client";
 
-import Card from "@/components/Card";
 import Button from "@/components/Button";
 import SearchBar from "@/components/SearchBar";
-import TableResults from "@/components/TableResults";
-import InputComponent from "@/components/InputComponent";
-import { Dispatch, Fragment, SetStateAction, useEffect, useState } from "react";
-import ButtonWhite from "@/components/ButtonWhite";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import BreadcrumbsComponent from "@/components/BreadcrumbsComponent";
-import { EmployeeData } from "@/lib/type";
-import { AppDispatch, useAppSelector } from "@/redux/store";
-import { employeeRows } from "@/lib/data";
-import { useDispatch } from "react-redux";
-import { onActive } from "@/redux/features/active-slice";
+import { EmployeeData, RoleType } from "@/lib/type";
+import {
+  formatInputDateString,
+  formatValueDateString,
+  getEmployeeList,
+  validateKeySearch,
+} from "@/lib/actions";
+import { useFormState } from "react-dom";
+import NoDataFound from "@/components/NoDataFound";
+import InputComponent from "@/components/InputComponent";
+import ButtonWhite from "@/components/ButtonWhite";
+import {
+  DialogContainer,
+  PageContentContainer,
+  ActionTopContainer,
+  TableBodyContainer,
+  TableContainer,
+  DataBottomContainer,
+  TableHeadContainer,
+  TableRowBodyContainer,
+  TableRowHeadContainer,
+} from "@/components/ContainerUI";
 
-function AddEmployeeForm({
-  onClose,
-  open,
-}: {
-  onClose: Dispatch<SetStateAction<boolean>>;
-  open: boolean;
-}) {
-  const [newUsername, setNewUsername] = useState("");
-  const [newFullname, setNewFullname] = useState("");
-  const [newDateOfBirth, setNewDateOfBirth] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [isClose, setIsClose] = useState(true);
+interface EmployeeColumn {
+  id: "id" | "name" | "phone" | "email" | "dob" | "action";
+  label: string;
+  minWidth?: number;
+  align?: "center" | "left" | "right" | "justify" | "char" | undefined;
+  format?: (value: string) => string;
+  paddingLeft?: string;
+}
 
+const columns: readonly EmployeeColumn[] = [
+  { id: "id", label: "ID", minWidth: 80, align: "left", paddingLeft: "20px" },
+  {
+    id: "name",
+    label: "Username",
+    minWidth: 120,
+    align: "left",
+    paddingLeft: "12px",
+  },
+  {
+    id: "phone",
+    label: "Phone number",
+    minWidth: 100,
+    align: "left",
+    paddingLeft: "12px",
+  },
+  {
+    id: "dob",
+    label: "Date of birth",
+    minWidth: 100,
+    align: "left",
+    paddingLeft: "12px",
+    format: (s: string) => formatValueDateString(s),
+  },
+  {
+    id: "email",
+    label: "Email",
+    minWidth: 100,
+    align: "left",
+    paddingLeft: "12px",
+  },
+  {
+    id: "action",
+    label: "Action",
+    minWidth: 150,
+    align: "left",
+    paddingLeft: "12px",
+  },
+];
+
+type TableResultsProps = {
+  data: EmployeeData[] | null;
+  onEdit: () => void;
+  onSetupEditData: (data: EmployeeData | null) => void;
+  onDeleteRecord: (value: any) => void;
+};
+
+function TableResults({
+  data,
+  onEdit,
+  onSetupEditData,
+  onDeleteRecord,
+}: TableResultsProps) {
   return (
-    open && (
-      <div className="w-full h-full absolute top-0 left-0 z-100 bg-neutral-700 bg-opacity-50 overflow-hidden flex items-center justify-center">
-        <Card
-          className={`w-3/4 h-auto p-6 py-5 sm:w-1/2 ${
-            isClose ? "animate-fadeTopIn" : "animate-fadeTopOut"
-          }`}
-        >
-          <form className="w-full h-full flex-col justify-center gap-2.5 flex">
-            <InputComponent
-              name="username"
-              type="text"
-              value={newUsername}
-              label="Username"
-              onChangeFunction={(e) => setNewUsername(e.target.value)}
-            />
-
-            <InputComponent
-              name="fullname"
-              type="text"
-              value={newFullname}
-              label="Fullname"
-              onChangeFunction={(e) => setNewFullname(e.target.value)}
-            />
-            <InputComponent
-              name="dateOfBirth"
-              type="date"
-              value={newDateOfBirth}
-              onChangeFunction={(e) => setNewDateOfBirth(e.target.value)}
-              label="Date of birth"
-            />
-            <InputComponent
-              name="password"
-              type="password"
-              value={newPassword}
-              onChangeFunction={(e) => setNewPassword(e.target.value)}
-              label="Password"
-            />
-
-            <div className="w-full font-bold mt-2.5 flex gap-4">
-              <ButtonWhite
-                name="Cancel"
-                className="w-full text-sm px-2.5 py-2"
-                onClickFunction={() => {
-                  setIsClose(false);
-                  setTimeout(() => {
-                    onClose(false);
-                    setIsClose(true);
-                  }, 300);
-                }}
-              />
-              <Button
-                name="Add"
-                className="w-full text-sm px-2.5 py-2"
-                type="submit"
-              />
-            </div>
-          </form>
-        </Card>
-      </div>
-    )
+    <>
+      {data ? (
+        <TableContainer>
+          <TableHeadContainer>
+            <TableRowHeadContainer>
+              {columns.map((column) => (
+                <th
+                  key={`header-${column.id}`}
+                  align={column.align}
+                  style={{
+                    minWidth: column.minWidth,
+                    paddingLeft: column.paddingLeft,
+                  }}
+                >
+                  {column.label}
+                </th>
+              ))}
+            </TableRowHeadContainer>
+          </TableHeadContainer>
+          <TableBodyContainer>
+            {data?.map((row) => (
+              <TableRowBodyContainer key={row.id + `${Math.random() * 100000}`}>
+                {columns.slice(0, columns.length - 1).map((column) => {
+                  const value = row[column.id] as string;
+                  return (
+                    <td
+                      key={column.id}
+                      align={column.align}
+                      style={{ paddingLeft: column.paddingLeft }}
+                    >
+                      {column.format && column.id === "dob"
+                        ? column.format(value)
+                        : value}
+                    </td>
+                  );
+                })}
+                {columns.slice(-1).map((column) => {
+                  return (
+                    <td
+                      key={column.id}
+                      align={column.align}
+                      style={{ paddingLeft: column.paddingLeft }}
+                      className="flex gap-3 items-center h-full"
+                    >
+                      <>
+                        <Button
+                          name="Update"
+                          className="button-action"
+                          onClickFunction={() => {
+                            onSetupEditData(row);
+                            onEdit();
+                          }}
+                        />
+                        <Button
+                          name="Delete"
+                          className="button-action"
+                          onClickFunction={() => {
+                            onDeleteRecord(row.id);
+                          }}
+                        />
+                      </>
+                    </td>
+                  );
+                })}
+              </TableRowBodyContainer>
+            ))}
+          </TableBodyContainer>
+        </TableContainer>
+      ) : (
+        <NoDataFound>There is no data in the system!</NoDataFound>
+      )}
+    </>
   );
 }
 
-export default function ManagerEmployee() {
-  const [isAdd, setIsAdd] = useState(false);
-  const [data, setData] = useState<EmployeeData[] | null>(null);
+type AddEmployeeFormProps = {
+  existData: EmployeeData | null;
+  onToggleModal: () => void;
+  onExistData: (data: EmployeeData | null) => void;
+  onChangeData: (id: string, data: EmployeeData) => void;
+};
 
-  useEffect(() => {
-    const retrieve = employeeRows; // use api later to fetch an format
-    setData(retrieve);
-  }, []);
+const initialEmployeeData: EmployeeData = {
+  id: "",
+  name: "",
+  email: "",
+  phone: "",
+  dob: "",
+};
 
-  return (
-    <Fragment>
-      <BreadcrumbsComponent dir={["Employee management"]} />
-      <div className="mt-5 h-full w-full pb-12">
-        <Card className="w-full h-full p-5 overflow-hidden flex flex-col items-center gap-4">
-          <div className="w-full justify-between items-center flex gap-10">
-            <SearchBar />
+const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
+  ({ existData, onToggleModal, onExistData, onChangeData }, refModal) => {
+    const [isUpdate, setIsUpdate] = useState(false);
+    const [formData, setFormData] = useState<EmployeeData>(initialEmployeeData);
+
+    const handleFormChange = (e: any) => {
+      setFormData((prev) => {
+        return {
+          ...prev,
+          [e.target.name]: e.target.value,
+        };
+      });
+    };
+
+    const handleCloseModal = () => {
+      setFormData(initialEmployeeData);
+      onExistData(null);
+      onToggleModal();
+      setIsUpdate(false);
+    };
+
+    // mock action
+    const handleFormAction = (formData: FormData) => {
+      const id = formData.get("id") as string;
+      const name = formData.get("name") as string;
+      const phone = formData.get("phone") as string;
+      const email = formData.get("email") as string;
+      const dob = formData.get("dob") as string;
+      // const role = formData.get("role") as RoleType;
+
+      if (id === "") {
+        // add new record
+        const record: EmployeeData = {
+          id: String(Math.round(Math.random() * 1000)),
+          name: name,
+          phone: phone,
+          email: email,
+          dob: dob,
+          // role: role,
+        };
+        onChangeData(id, record);
+      } else {
+        // update record
+        const record: EmployeeData = {
+          id: id,
+          name: name,
+          phone: phone,
+          email: email,
+          dob: dob,
+          // role: role,
+        };
+        onChangeData(id, record);
+      }
+      handleCloseModal();
+    };
+
+    useEffect(() => {
+      if (existData !== null) {
+        setFormData(existData);
+        setIsUpdate(true);
+      }
+    }, [existData]);
+
+    return (
+      <DialogContainer ref={refModal}>
+        <form
+          action={handleFormAction}
+          className="w-full h-full flex-col justify-center gap-2.5 flex"
+        >
+          <input type="hidden" value={formData.id} name="id" />
+          {/* select option for role (optional) */}
+          <InputComponent
+            name="name"
+            type="text"
+            value={formData.name}
+            label="Username"
+            onChangeFunction={handleFormChange}
+          />
+          <InputComponent
+            name="phone"
+            type="text"
+            value={formData.phone}
+            label="Phone number"
+            onChangeFunction={handleFormChange}
+          />
+          <InputComponent
+            name="email"
+            type="email"
+            value={formData.email}
+            label="Email"
+            onChangeFunction={handleFormChange}
+          />
+          <InputComponent
+            name="dob"
+            type="date"
+            value={formatInputDateString(formData.dob)}
+            onChangeFunction={handleFormChange}
+            label="Date of birth (mm/dd/yyyy)"
+          />
+          <div className="w-full font-bold mt-2.5 flex gap-4">
+            <ButtonWhite
+              name="Cancel"
+              className="w-full text-sm px-2.5 py-2"
+              onClickFunction={handleCloseModal}
+            />
             <Button
-              name="Add new account"
-              className="p-2.5 px-3 leading-4 text-sm"
-              onClickFunction={() => setIsAdd(true)}
+              name={isUpdate ? "Update" : "Add"}
+              className="w-full text-sm px-2.5 py-2"
+              type="submit"
             />
           </div>
-          <TableResults tableType="employee" data={data} />
-        </Card>
-        <AddEmployeeForm onClose={setIsAdd} open={isAdd} />
-      </div>
-    </Fragment>
+        </form>
+      </DialogContainer>
+    );
+  }
+);
+
+export default function ManagerEmployee() {
+  const [updateData, setUpdateData] = useState<EmployeeData | null>(null);
+  const [data, setData] = useState<EmployeeData[] | null>([]);
+  const [formState, formAction] = useFormState(validateKeySearch, ""); // search action
+  const refSearchBar = useRef<HTMLFormElement>(null);
+  const refModal = useRef<HTMLDialogElement>(null);
+
+  const toggleModal = () => {
+    if (!refModal?.current) return;
+    refModal.current.hasAttribute("open")
+      ? refModal.current.close()
+      : refModal.current.showModal();
+  };
+
+  const handleUpdateData = (data: EmployeeData | null) => {
+    setUpdateData(data);
+  };
+
+  const handleData = (id: string, record: EmployeeData) => {
+    if (id === "") {
+      setData((prev) => {
+        if (prev === null) return prev;
+        return [...prev, record];
+      });
+    } else {
+      setData((prev) => {
+        if (prev === null) return prev;
+        const afterDelete = prev.filter((item) => {
+          return item.id !== id;
+        });
+        return [...afterDelete, record];
+      });
+    }
+  };
+
+  const handleDeleteRecord = (id: string) => {
+    // call some action to delete in DB
+    setData((prev) => {
+      if (prev === null) return prev;
+      const newData = prev.filter((item) => item.id !== id);
+      return newData;
+    });
+  };
+
+  useEffect(() => {
+    const fetchEmployeeList = async () => {
+      const res = await getEmployeeList(formState);
+      if (res !== null) setData(res);
+    };
+    fetchEmployeeList();
+  }, [formState]);
+
+  return (
+    <>
+      <BreadcrumbsComponent dir={["Employee management"]} />
+      <PageContentContainer>
+        <ActionTopContainer>
+          <form
+            ref={refSearchBar}
+            action={formAction}
+            className="w-1/2 justify-center items-center gap-4 flex text-sm"
+          >
+            <SearchBar refForm={refSearchBar} />
+          </form>
+          <Button
+            name="Add new account"
+            className="p-2.5 px-3 leading-4 text-sm"
+            onClickFunction={() => {
+              setUpdateData(null);
+              toggleModal();
+            }}
+          />
+        </ActionTopContainer>
+        <DataBottomContainer>
+          <TableResults
+            data={data}
+            onEdit={toggleModal}
+            onSetupEditData={handleUpdateData}
+            onDeleteRecord={handleDeleteRecord}
+          />
+        </DataBottomContainer>
+      </PageContentContainer>
+      <AddEmployeeForm
+        ref={refModal}
+        onToggleModal={toggleModal}
+        existData={updateData}
+        onExistData={handleUpdateData}
+        onChangeData={handleData} // temporary strategy
+      />
+    </>
   );
 }
