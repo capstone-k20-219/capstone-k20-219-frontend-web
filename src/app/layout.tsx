@@ -24,7 +24,7 @@ export default function RootLayout({
         suppressHydrationWarning={true}
         className={`${inter.className} text-neutral-900 bg-white sm:bg-gray-100`}
       >
-        <AppContainer children={children} />
+        <AppContainer>{children}</AppContainer>
         <Toaster />
       </body>
     </html>
