@@ -4,41 +4,65 @@ import Button from "@/components/Button";
 import Card from "@/components/Card";
 import SmallStatisticsContent from "@/components/SmallStatisticsContent";
 import BreadcrumbsComponent from "@/components/BreadcrumbsComponent";
-import { useAppSelector } from "@/redux/store";
-import { Fragment } from "react";
+import { useState } from "react";
+import { SlotBlock, ParkingLotMapEdit } from "@/components/ParkingLotMap";
+import { getSlotList } from "@/lib/actions";
+import toast from "react-hot-toast";
+import { PageContentCotainer2 } from "@/components/ContainerUI";
+
+function CardsContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="w-full items-center grid gap-3 grid-flow-row sm:grid-flow-col sm:grid-cols-3">
+      {children}
+    </div>
+  );
+}
 
 export default function ManagerMap() {
-  const role = useAppSelector((state) => state.auth.value.role);
+  const [isEdit, setIsEdit] = useState<boolean>(false);
+  const [data, setData] = useState<SlotBlock[]>([]);
+
+  getSlotList().then((value) => {
+    if (!value.success) {
+      toast.error("Error when fetching parking lot information");
+    } else {
+      setData(value.data as SlotBlock[]);
+    }
+  });
+
   return (
-    <Fragment>
+    <>
       <BreadcrumbsComponent dir={["Map management"]} />
-      <div className="Content mt-5 flex flex-col gap-3 h-full overflow-auto">
-        <div
-          className="w-full items-center grid gap-3 grid-flow-row sm:grid-flow-col
-        sm:grid-cols-3"
-        >
-          <Card className="h-full w-full">
-            <SmallStatisticsContent name="Total slots" value="120" />
-          </Card>
-          <Card className="h-full w-full">
-            <SmallStatisticsContent
-              name="Parking lot status"
-              value="Still in business"
+      <PageContentCotainer2 className="overflow-hidden pb-32">
+        {!isEdit && (
+          <CardsContainer>
+            <Card className="h-full w-full">
+              <SmallStatisticsContent name="Total slots" value="120" />
+            </Card>
+            <Card className="h-full w-full">
+              <SmallStatisticsContent
+                name="Parking lot status"
+                value="Still in business"
+              />
+            </Card>
+            <Button
+              name="Edit Map"
+              className="p-5 font-bold w-full h-full"
+              onClickFunction={() => setIsEdit(true)}
             />
-          </Card>
-          <Button name="Edit Map" className="p-5 font-bold w-full h-full" />
-        </div>
-        <div className="w-full h-full overflow-hidden pb-8">
-          <Card className="w-full h-full p-4 overflow-hidden">
-            <div
-              className="w-full h-full border 
-            border-neutral-400/40 rounded-md overflow-auto"
-            >
-              <div className="min-w-full min-h-full w-auto h-auto">...</div>
-            </div>
-          </Card>
-        </div>
-      </div>
-    </Fragment>
+          </CardsContainer>
+        )}
+        {isEdit && (
+          <Button
+            name="Save Map"
+            className="p-5 py-2.5 font-bold w-full"
+            onClickFunction={() => {
+              setIsEdit(false);
+            }}
+          />
+        )}
+        <ParkingLotMapEdit editable={isEdit} dataInit={data} />
+      </PageContentCotainer2>
+    </>
   );
 }
