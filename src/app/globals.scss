@@ -2,20 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-// :root {
-//   --foreground-rgb: 0, 0, 0;
-//   --background-start-rgb: 214, 219, 220;
-//   --background-end-rgb: 255, 255, 255;
-// }
-
-// @media (prefers-color-scheme: dark) {
-//   :root {
-//     --foreground-rgb: 255, 255, 255;
-//     --background-start-rgb: 0, 0, 0;
-//     --background-end-rgb: 0, 0, 0;
-//   }
-// }
-
 .indicator {
   animation: indicator 0.3s ease-in;
 }
@@ -29,13 +15,12 @@
   }
 }
 
-// remove scroll bar
-.Content {
+.scrollbar-none {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
 
-.Content::-webkit-scrollbar {
+.scrollbar-none::-webkit-scrollbar {
   display: none;
 }
 
@@ -61,23 +46,15 @@
   }
 }
 
-.loader {
-  margin: 0 0 2em;
-  height: 100px;
-  width: 20%;
-  text-align: center;
-  padding: 1em;
-  margin: 0 auto 1em;
-  display: inline-block;
-  vertical-align: top;
-}
-
-.loader svg path,
-.loader svg rect {
-  fill: #0091ff;
-}
-
 .vertical-text {
   writing-mode: vertical-lr;
   // transform: rotate(-180deg);
+}
+
+.button-action {
+  @apply p-2 px-2.5 text-sm;
+}
+
+dialog[open] {
+  @apply animate-zoomOut;
 }

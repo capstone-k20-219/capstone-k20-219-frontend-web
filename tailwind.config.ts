@@ -123,10 +123,30 @@ const config: Config = {
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
       keyframes: {
+        "zoom-out": {
+          from: {
+            opacity: "0%",
+            scale: "0%",
+          },
+          to: {
+            opacity: "100%",
+            scale: "100%",
+          },
+        },
+        "zoom-in": {
+          from: {
+            opacity: "100%",
+            scale: "100%",
+          },
+          to: {
+            opacity: "0%",
+            scale: "0%",
+          },
+        },
         "fade-top-in": {
           from: {
             opacity: "0%",
-            "margin-top": "-200px",
+            "margin-top": "-500px",
           },
           to: {
             opacity: "100%",
@@ -155,6 +175,8 @@ const config: Config = {
         },
       },
       animation: {
+        zoomIn: "zoom-in 300ms ease-out",
+        zoomOut: "zoom-out 300ms ease-out",
         fadeTopIn: "fade-top-in 300ms ease-out",
         fadeTopIn2: "fade-top-in-2 500ms ease-out",
         fadeTopOut: "fade-top-out 300ms ease",
