@@ -5,7 +5,7 @@ import Logo2 from "@/img/logo.png";
 import Image from "next/image";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { NavItem } from "@/lib/type";
 import {
@@ -26,8 +26,8 @@ export default function Sidebar({
 }: {
   open: boolean;
   toggleWdith: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
-  setWidthSidebar: Dispatch<SetStateAction<boolean>>;
+  setOpen: (state?: boolean) => void;
+  setWidthSidebar: (state?: boolean) => void;
 }) {
   const { role, index, name } = useAppSelector((state) => state.active.value);
   const dispatch = useDispatch<AppDispatch>();
@@ -46,7 +46,7 @@ export default function Sidebar({
       setOpen(false);
       setWidthSidebar(false);
     } else {
-      setWidthSidebar((prev) => !prev);
+      setWidthSidebar();
     }
   };
 
@@ -59,7 +59,7 @@ export default function Sidebar({
     return () => {
       ignore = true;
     };
-  }, [selectedIndex]);
+  }, [selectedIndex, currentpage, index, role, dispatch]);
 
   return (
     <div
