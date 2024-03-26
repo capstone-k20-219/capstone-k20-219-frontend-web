@@ -2,8 +2,14 @@ import Logo from "@/img/logo-black.png";
 import React from "react";
 import Image from "next/image";
 import LoginForm from "@/components/LoginForm";
+import { Metadata } from "next";
 
-const Login = () => {
+export const metadata: Metadata = {
+  title: "PakiSlot | Login",
+  description: "The user login to system by account.",
+};
+
+export default function Login() {
   return (
     <div
       id="login-page"
@@ -13,7 +19,7 @@ const Login = () => {
         <div className="flex flex-col ml-px gap-3 w-full items-start">
           <Image
             src={Logo}
-            priority={true}
+            loading="lazy"
             alt="Logo"
             id="logo"
             className="h-[60px] aspect-[178.476/60]"
@@ -27,6 +33,4 @@ const Login = () => {
       </div>
     </div>
   );
-};
-
-export default Login;
+}

@@ -2,48 +2,56 @@
 
 import Button from "@/components/Button";
 import InputComponent from "@/components/InputComponent";
-import { onLogin } from "@/lib/actions";
+import { handleLogin } from "@/lib/actions";
 import { logIn } from "@/redux/features/auth-slice";
 import { AppDispatch } from "@/redux/store";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { RoleType } from "@/lib/type";
+import { LoginFormStateType, LoginType, RoleType } from "@/lib/type";
 import { onActive } from "@/redux/features/active-slice";
+import SelectOptionComponent from "./SelectOptionComponent";
+import { useFormState } from "react-dom";
 
-const LoginForm = () => {
-  const [role, setRole] = useState<RoleType>(null);
-  const [err, setErr] = useState(false);
+const RoleOption = [
+  {
+    value: "m",
+    name: "Manager",
+  },
+  {
+    value: "e",
+    name: "Employee",
+  },
+];
+
+const initialState: LoginFormStateType = {
+  success: null,
+  data: null,
+};
+
+export default function LoginForm() {
+  const [formState, formAction] = useFormState(handleLogin, initialState);
   const router = useRouter();
-
   const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    if (formState.success && formState.data !== null) {
+      const data = formState.data;
+      dispatch(logIn({ ...(data as LoginType) }));
+      const role = data.role as RoleType;
+      if (role === "m") {
+        dispatch(onActive({ role: role, index: 0, name: "Dashboard" }));
+        router.push(`/${role}-home`);
+      } else {
+        dispatch(onActive({ role: role, index: 0, name: "Map" }));
+        router.push(`/${role}-map`);
+      }
+    }
+  }, [formState, dispatch, router]);
 
   return (
     <form
-      action={async (formData) => {
-        if (!role) {
-          setErr(true);
-          return;
-        }
-        formData.append("role", role as string);
-        const data = await onLogin(formData);
-        if (!data) {
-          setErr(true);
-          return;
-        } else {
-          setErr(false);
-          const username = data.username as string;
-          const id = data.id; // get after validation
-          dispatch(logIn({ username, role, id }));
-          if (role === "m") {
-            router.push(`/${role}-home`);
-            dispatch(onActive({ role, index: 0, name: "Dashboard" }));
-          } else {
-            router.push(`/${role}-map`);
-            dispatch(onActive({ role, index: 0, name: "Map" }));
-          }
-        }
-      }}
+      action={formAction}
       className="flex flex-col ml-px gap-6 w-full items-start"
     >
       <InputComponent
@@ -59,17 +67,9 @@ const LoginForm = () => {
         label="Password"
         required={true}
       />
-      <select
-        className="w-full px-2 py-1.5 rounded-md border border-neutral-300 font-normal text-base"
-        onChange={(e) => {
-          setRole(e.target.value as RoleType);
-        }}
-      >
-        <option value="">User role</option>
-        <option value="m">Manager</option>
-        <option value="e">Employee</option>
-      </select>
-      {err && (
+      <SelectOptionComponent label="Role" name="role" options={RoleOption} />
+
+      {formState.success === false && (
         <div className="text-red-500">
           <i>The account information is incorrect.</i>
         </div>
@@ -81,6 +81,4 @@ const LoginForm = () => {
       />
     </form>
   );
-};
-
-export default LoginForm;
+}
