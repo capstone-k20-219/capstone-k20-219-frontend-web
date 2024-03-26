@@ -1,5 +1,3 @@
-import { IconType } from "react-icons";
-
 export enum TableType {
   Employee,
   VehicleType,
@@ -7,30 +5,16 @@ export enum TableType {
   ServiceRequest,
 }
 
-// Type for Employee Table
-export interface EmployeeColumn {
-  id: "id" | "name" | "phone" | "action";
-  label: string;
-  minWidth?: number;
-  align?: "center" | "left" | "right" | "justify" | "char" | undefined;
-  format?: (value: number) => string;
-}
+type AdminData = EmployeeData & { role: RoleType };
 
 export type EmployeeData = {
   [key: string]: any;
   id: string;
   name: string;
   phone: string;
+  email: string;
+  dob: string;
 };
-
-// Type for Vehicle Type Table
-export interface VehicleTypeColumn {
-  id: "id" | "name" | "bookingFee" | "parkingFee" | "action";
-  label: string;
-  minWidth?: number;
-  align?: "center" | "left" | "right" | "justify" | "char" | undefined;
-  format?: (value: number) => string;
-}
 
 export type VehicleTypeData = {
   [key: string]: any;
@@ -40,63 +24,29 @@ export type VehicleTypeData = {
   parkingFee: number;
 };
 
-// Type for Service Table
-export interface ServiceColumn {
-  id: "name" | "price" | "typ" | "action";
-  label: string;
-  minWidth?: number;
-  align?: "center" | "left" | "right" | "justify" | "char" | undefined;
-  format?: (value: number) => string;
-}
-
 export type ServiceData = {
   [key: string]: any;
+  id: string;
   name: string;
   price: number;
   typ: string;
 };
 
-// Type for Service Request Table
-export interface ServiceRequestColumn {
-  id: "plate" | "phone" | "time" | "action";
-  label: string;
-  minWidth?: number;
-  align?: "center" | "left" | "right" | "justify" | "char" | undefined;
-  format?: (value: number) => string;
-}
-
 export type ServiceRequestData = {
   [key: string]: any;
-  plate: string;
-  phone: string;
+  id: number; // booking id
+  name: string; // get from customer id
+  phone: string; //
+  plate: string; // get from vehicle id
   time: string;
 };
 
-// Type for Table Data
-export type tableColumn =
-  | EmployeeColumn
-  | ServiceColumn
-  | VehicleTypeColumn
-  | ServiceRequestColumn;
 export type TableData =
   | EmployeeData[]
   | VehicleTypeData[]
   | ServiceData[]
   | ServiceRequestData[]
   | null;
-
-// Type for input component
-export interface InputComponentType {
-  label: string;
-  value?: string;
-  type: string;
-  name: string;
-  placeholder?: string;
-  disable?: boolean;
-  autoFocus?: boolean;
-  required?: boolean;
-  onChangeFunction?: (value: any) => void;
-}
 
 // Type for Sidebar nav items
 export interface NavItem {
@@ -138,7 +88,33 @@ export type InitialActiveState = {
 export interface ProfileType {
   id: string;
   role: string;
-  username: string;
-  fullname: string;
+  name: string;
+  email: string;
+  phone: string;
   dob: string;
 }
+
+export type FormStateType = {
+  error: {
+    [key: string]: string;
+  } | null;
+  success: boolean;
+  data: unknown;
+};
+
+export interface OptionType {
+  value: string;
+  name: string;
+}
+
+export interface LoginFormStateType {
+  success: boolean | null;
+  data: { username: string; role: string; id: string } | null;
+}
+
+export type FeedbackData = {
+  id: number | string;
+  content: string;
+  rate: number;
+  date: string;
+};

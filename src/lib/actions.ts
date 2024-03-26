@@ -3,11 +3,14 @@
 import {
   ServiceList,
   ServiceRows,
+  SlotList,
   employeeRows,
-  mockData,
+  mockFeedbackData,
+  mockServiceRequestData,
   temporaryLoginInfo,
   vehicleTypeRows,
 } from "./data";
+import { FormStateType, LoginFormStateType } from "./type";
 
 export const getServiceListName = async () => {
   // fetch something
@@ -23,10 +26,25 @@ export const getServiceReservationsByName = async (serviceName: string) => {
       const key = serviceName.toLowerCase();
       // fetch something
       // ...
-      return mockData[key];
+      return mockServiceRequestData[key];
     }
   } catch (e) {
     return "Cannot find service reservations.";
+  }
+};
+
+export const getFeedbacksByName = async (serviceName: string) => {
+  try {
+    if (!serviceName) {
+      throw new Error();
+    } else {
+      const key = serviceName.toLowerCase();
+      // fetch something
+      // ...
+      return mockFeedbackData[key];
+    }
+  } catch (e) {
+    return "Cannot find service feedbacks.";
   }
 };
 
@@ -95,10 +113,46 @@ export const getServiceList = async (keySearch: string) => {
   }
 };
 
-export const onLogin = (formData: FormData) => {
-  const username = formData.get("username");
-  const password = formData.get("password");
-  const role = formData.get("role");
+export const getSlotList = async () => {
+  const res = SlotList; // fetch api later
+
+  if (!res) {
+    return {
+      success: false,
+      data: [],
+    };
+  } else {
+    return {
+      success: true,
+      data: res,
+    };
+  }
+};
+
+export const getVehicleTypeNames = () => {
+  const list = vehicleTypeRows;
+
+  if (list === null || list.length === 0) return [];
+  return list.map((type) => type.name);
+};
+
+export const updateService = (currState: FormStateType, formData: FormData) => {
+  // validate the form data
+  // ...
+  const id = formData.get("id") as string;
+  if (id === "") {
+    // add new record
+  } else {
+    // update record
+  }
+};
+
+export const checkAuthorization = (
+  username: string,
+  password: string,
+  role: string
+) => {
+  console.log("username:", username, "\npsswd:", password, "\nrole:", role);
   let id = "";
   const isValid: boolean = temporaryLoginInfo.some((e) => {
     if (e.username === username && e.password === password && e.role === role) {
@@ -106,5 +160,37 @@ export const onLogin = (formData: FormData) => {
       return true;
     }
   });
-  return isValid ? { username, id } : null;
+  return { isValid, id };
 };
+
+export const handleLogin = async (
+  currState: LoginFormStateType,
+  formData: FormData
+) => {
+  const username = formData.get("username") as string;
+  const password = formData.get("password") as string;
+  const role = formData.get("role") as string;
+  const { isValid, id } = checkAuthorization(username, password, role);
+  console.log(isValid);
+  if (isValid) {
+    return {
+      success: isValid,
+      data: { username, role, id },
+    };
+  } else {
+    return {
+      success: isValid,
+      data: null,
+    };
+  }
+};
+
+export function formatInputDateString(s: string) {
+  let reFormattedDate = s.split("/");
+  return reFormattedDate.reverse().join("-");
+}
+
+export function formatValueDateString(s: string) {
+  let reFormattedDate = s.split("-");
+  return reFormattedDate.reverse().join("/");
+}
