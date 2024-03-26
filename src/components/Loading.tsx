@@ -1,15 +1,21 @@
-"use client";
-
-import React from "react";
-import LoadingIcon from "./LoadingIcon";
-
-export default function Loading() {
+function LoadingIcon() {
   return (
     <div
-      className="w-full h-full flex items-center justify-center 
-    text-2xl font-bold bg-black/10"
+      className="w-12 h-12 rounded-full border-[6px] border-white border-opacity-50
+    border-t-neutral-700 animate-[spin_3s_linear_finite]"
+    ></div>
+  );
+}
+
+function DashboardLoadingUI() {
+  return (
+    <div
+      className="mt-5 h-full w-full pb-12 rounded-lg 
+      bg-gray-200 opacity-50 flex items-center justify-center"
     >
       <LoadingIcon />
     </div>
   );
 }
+
+export { LoadingIcon, DashboardLoadingUI };
