@@ -4,18 +4,45 @@ import Card from "@/components/Card";
 import SmallStatisticsContent from "@/components/SmallStatisticsContent";
 import BreadcrumbsComponent from "@/components/BreadcrumbsComponent";
 import { SmallStatistics } from "@/lib/data";
-import InComeAWeek from "../../../../components/InComeAWeek";
-import ParkingTraffic from "@/components/ParkingTraffic";
-import VehicleTypeDistribution from "@/components/VehicleTypeDistribution";
-import ServiceRevenueContribution from "@/components/ServiceRevenueContribution";
+import {
+  InComeAWeek,
+  ParkingTraffic,
+  ServiceRevenueContribution,
+  VehicleTypeDistribution,
+} from "@/components/BigStatisticsContent";
+import { PageContentCotainer2 } from "@/components/ContainerUI";
+
+function CardsContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="w-full justify-between items-center flex gap-3">
+      {children}
+    </div>
+  );
+}
+
+function ChartSetOuterContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-3 text-xs h-full w-full pb-12 overflow-auto">
+      {children}
+    </div>
+  );
+}
+
+function ChartSetInnerContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="w-full min-h-80 md:max-h-[342px] items-center gap-3 flex flex-col md:flex-row">
+      {children}
+    </div>
+  );
+}
 
 export default function ManagerHome() {
   return (
     <>
       <BreadcrumbsComponent dir={["Dashboard"]} />
-      <div className="mt-5 flex flex-col gap-3 h-full">
+      <PageContentCotainer2>
         {/* Cards for small statistics */}
-        <div className="w-full justify-between items-center flex gap-3">
+        <CardsContainer>
           {SmallStatistics.map((item, index) => {
             return (
               <Card key={index + Math.random() * 100} className="w-full h-full">
@@ -23,21 +50,19 @@ export default function ManagerHome() {
               </Card>
             );
           })}
-        </div>
+        </CardsContainer>
         {/* Charts */}
-        <div className="flex flex-col gap-3 text-xs h-full w-full pb-12 overflow-auto">
-          {/* mocked UI */}
-          <div className="w-full min-h-80 md:max-h-[342px] items-center gap-3 flex flex-col md:flex-row">
+        <ChartSetOuterContainer>
+          <ChartSetInnerContainer>
             <InComeAWeek />
             <ServiceRevenueContribution />
-          </div>
-          {/* mocked UI */}
-          <div className="w-full min-h-80 md:max-h-[342px] items-center gap-3 flex flex-col md:flex-row">
+          </ChartSetInnerContainer>
+          <ChartSetInnerContainer>
             <VehicleTypeDistribution />
             <ParkingTraffic />
-          </div>
-        </div>
-      </div>
+          </ChartSetInnerContainer>
+        </ChartSetOuterContainer>
+      </PageContentCotainer2>
     </>
   );
 }
