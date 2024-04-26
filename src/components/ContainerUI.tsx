@@ -66,9 +66,11 @@ function TableContainer({ children }: ChildrenProps) {
   );
 }
 
-function DataBottomContainer({ children }: ChildrenProps) {
+function DataBottomContainer({ children, className }: ChildrenProps) {
   return (
-    <div className="w-full h-fit text-neutral-900 text-sm leading-tight overflow-auto">
+    <div
+      className={`w-full h-fit text-neutral-900 text-sm leading-tight ${className}`}
+    >
       {children}
     </div>
   );

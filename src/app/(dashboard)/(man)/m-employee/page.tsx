@@ -26,6 +26,7 @@ import {
   TableRowBodyContainer,
   TableRowHeadContainer,
 } from "@/components/ContainerUI";
+import { Stack, Pagination } from "@mui/material";
 
 interface EmployeeColumn {
   id: "id" | "name" | "phone" | "email" | "dob" | "action";
@@ -81,6 +82,7 @@ type TableResultsProps = {
   onEdit: () => void;
   onSetupEditData: (data: EmployeeData | null) => void;
   onDeleteRecord: (value: any) => void;
+  onDecreasePage: () => void;
 };
 
 function TableResults({
@@ -88,10 +90,15 @@ function TableResults({
   onEdit,
   onSetupEditData,
   onDeleteRecord,
+  onDecreasePage,
 }: TableResultsProps) {
+  useEffect(() => {
+    if (data === null) return;
+    if (data.length === 0) onDecreasePage();
+  }, [data]);
   return (
     <>
-      {data ? (
+      {data && data.length > 0 ? (
         <TableContainer>
           <TableHeadContainer>
             <TableRowHeadContainer>
@@ -303,6 +310,28 @@ export default function ManagerEmployee() {
   const [formState, formAction] = useFormState(validateKeySearch, ""); // search action
   const refSearchBar = useRef<HTMLFormElement>(null);
   const refModal = useRef<HTMLDialogElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const recordsPerPage = 7;
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+
+  const currentRecords = data
+    ? data.slice(indexOfFirstRecord, indexOfLastRecord)
+    : null;
+
+  const handleChangePage = (
+    event: React.ChangeEvent<unknown>,
+    newPage: number
+  ) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleDecreasePage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
 
   const toggleModal = () => {
     if (!refModal?.current) return;
@@ -372,12 +401,24 @@ export default function ManagerEmployee() {
         </ActionTopContainer>
         <DataBottomContainer>
           <TableResults
-            data={data}
+            data={currentRecords}
             onEdit={toggleModal}
             onSetupEditData={handleUpdateData}
             onDeleteRecord={handleDeleteRecord}
+            onDecreasePage={handleDecreasePage}
           />
         </DataBottomContainer>
+        {data && data.length > recordsPerPage && (
+          <Stack mt={"auto"}>
+            <Pagination
+              defaultPage={1}
+              count={Math.ceil(data.length / recordsPerPage)}
+              shape="rounded"
+              page={currentPage}
+              onChange={handleChangePage}
+            />
+          </Stack>
+        )}
       </PageContentContainer>
       <AddEmployeeForm
         ref={refModal}

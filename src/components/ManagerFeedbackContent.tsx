@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import NoDataFound from "@/components/NoDataFound";
 import Rating from "@mui/material/Rating";
 import { DataBottomContainer, PageContentContainer } from "./ContainerUI";
+import { Stack, Pagination } from "@mui/material";
 
 type FeedbackListProps = {
   data: FeedbackData[] | null;
@@ -56,6 +57,22 @@ export default function ManagerFeedbackContent({
 }) {
   const [service, setService] = useState(serviceList[0]);
   const [data, setData] = useState<FeedbackData[] | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const recordsPerPage = 9;
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+
+  const currentRecords = data
+    ? data.slice(indexOfFirstRecord, indexOfLastRecord)
+    : null;
+
+  const handleChangePage = (
+    event: React.ChangeEvent<unknown>,
+    newPage: number
+  ) => {
+    setCurrentPage(newPage);
+  };
 
   const handleChangeSelect = (e: SelectChangeEvent) => {
     setService(e.target.value);
@@ -76,6 +93,7 @@ export default function ManagerFeedbackContent({
       }
     };
     fetchFeedbackData();
+    setCurrentPage(1);
   }, [service]);
 
   return (
@@ -97,7 +115,7 @@ export default function ManagerFeedbackContent({
           ))}
         </Select>
       </FormControl>
-      <DataBottomContainer>
+      <DataBottomContainer className="overflow-auto">
         <div className="w-full flex gap-4 text-lg font-semibold items-center mb-4">
           <div>Results({data ? data.length : "0"})</div>
           <Rating
@@ -108,8 +126,19 @@ export default function ManagerFeedbackContent({
             readOnly
           />
         </div>
-        <FeedbackList data={data} />
+        <FeedbackList data={currentRecords} />
       </DataBottomContainer>
+      {data && data.length > recordsPerPage && (
+        <Stack mt={"auto"}>
+          <Pagination
+            defaultPage={1}
+            count={Math.ceil(data.length / recordsPerPage)}
+            shape="rounded"
+            page={currentPage}
+            onChange={handleChangePage}
+          />
+        </Stack>
+      )}
     </PageContentContainer>
   );
 }

@@ -19,6 +19,7 @@ import {
   TableRowBodyContainer,
   TableRowHeadContainer,
 } from "@/components/ContainerUI";
+import { Stack, Pagination } from "@mui/material";
 
 interface ServiceRequestColumn {
   id: "id" | "plate" | "name" | "phone" | "time" | "action";
@@ -78,16 +79,22 @@ type TableResultsProps = {
   data: ServiceRequestData[] | null;
   onAcceptRequest: (id: number) => void;
   onRejectRequest: (id: number) => void;
+  onDecreasePage: () => void;
 };
 
 function TableResults({
   data,
   onAcceptRequest,
   onRejectRequest,
+  onDecreasePage,
 }: TableResultsProps) {
+  useEffect(() => {
+    if (data === null) return;
+    if (data.length === 0) onDecreasePage();
+  }, [data]);
   return (
     <>
-      {data && data.length !== 0 ? (
+      {data && data.length > 0 ? (
         <TableContainer>
           <TableHeadContainer>
             <TableRowHeadContainer>
@@ -161,6 +168,28 @@ export default function EmployeeServiceContent({
 }) {
   const [service, setService] = useState(serviceList[0]);
   const [data, setData] = useState<ServiceRequestData[] | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const recordsPerPage = 7;
+  const indexOfLastRecord = currentPage * recordsPerPage;
+  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
+
+  const currentRecords = data
+    ? data.slice(indexOfFirstRecord, indexOfLastRecord)
+    : null;
+
+  const handleChangePage = (
+    event: React.ChangeEvent<unknown>,
+    newPage: number
+  ) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleDecreasePage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
 
   const handleChangeSelect = (e: SelectChangeEvent) => {
     setService(e.target.value);
@@ -216,11 +245,23 @@ export default function EmployeeServiceContent({
       </FormControl>
       <DataBottomContainer>
         <TableResults
-          data={data}
+          data={currentRecords}
           onAcceptRequest={handleAcceptRequest}
           onRejectRequest={handleRejectRequest}
+          onDecreasePage={handleDecreasePage}
         />
       </DataBottomContainer>
+      {data && data.length > recordsPerPage && (
+        <Stack mt={"auto"}>
+          <Pagination
+            defaultPage={1}
+            count={Math.ceil(data.length / recordsPerPage)}
+            shape="rounded"
+            page={currentPage}
+            onChange={handleChangePage}
+          />
+        </Stack>
+      )}
     </PageContentContainer>
   );
 }

@@ -6,13 +6,6 @@ import {
   ServiceRequestData,
   VehicleTypeData,
 } from "./type";
-import DashboardIcon from "@/img/dashboard.png";
-import MapIcon from "@/img/map.png";
-import EmployeeIcon from "@/img/employee.png";
-import ServiceIcon from "@/img/service.png";
-import VehicleTypeIcon from "@/img/vehicle-type.png";
-import HelpIcon from "@/img/help.png";
-import SettingIcon from "@/img/setting.png";
 import { TbChartTreemap, TbLayoutDashboard } from "react-icons/tb";
 import { MdOutlineDesignServices } from "react-icons/md";
 import { BsPeople } from "react-icons/bs";
@@ -185,7 +178,99 @@ const FeedbackRows: FeedbackData[] = [
       "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?",
   },
 ];
-const FeedbackRows2: FeedbackData[] = [];
+const FeedbackRows2: FeedbackData[] = [
+  {
+    id: 1,
+    rate: 3,
+    date: "2024-03-12",
+    content:
+      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?",
+  },
+  {
+    id: 1,
+    rate: 3,
+    date: "2024-03-12",
+    content:
+      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?",
+  },
+  {
+    id: 1,
+    rate: 5,
+    date: "2024-03-12",
+    content:
+      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?",
+  },
+  {
+    id: 1,
+    rate: 3,
+    date: "2024-03-12",
+    content:
+      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?",
+  },
+  {
+    id: 1,
+    rate: 3,
+    date: "2024-03-12",
+    content:
+      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?",
+  },
+  {
+    id: 1,
+    rate: 3,
+    date: "2024-03-12",
+    content:
+      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?",
+  },
+  {
+    id: 1,
+    rate: 3,
+    date: "2024-03-12",
+    content:
+      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?",
+  },
+  {
+    id: 1,
+    rate: 3,
+    date: "2024-03-12",
+    content:
+      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?",
+  },
+  {
+    id: 1,
+    rate: 3,
+    date: "2024-03-12",
+    content:
+      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?",
+  },
+  {
+    id: 1,
+    rate: 3,
+    date: "2024-03-12",
+    content:
+      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?",
+  },
+  {
+    id: 1,
+    rate: 3,
+    date: "2024-03-12",
+    content:
+      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?",
+  },
+  {
+    id: 1,
+    rate: 3,
+    date: "2024-03-12",
+    content:
+      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?",
+  },
+  {
+    id: 1,
+    rate: 3,
+    date: "2024-03-12",
+    content:
+      "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Earum fugit ut laudantium voluptate nihil alias facere sequi, minima nesciunt reprehenderit consectetur rem perspiciatis ipsum explicabo magni, tempore, atque laboriosam recusandae?",
+  },
+];
 const FeedbackRows3: FeedbackData[] = [];
 
 export const mockFeedbackData: {
