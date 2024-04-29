@@ -379,25 +379,25 @@ export const ServiceRows: ServiceData[] = [
 
 export const vehicleTypeRows: VehicleTypeData[] = [
   {
-    id: "12345",
+    id: 12345,
     name: "Motobike",
     bookingFee: 2,
     parkingFee: 4,
   },
   {
-    id: "12346",
+    id: 12346,
     name: "Bikecycle",
     bookingFee: 2,
     parkingFee: 4,
   },
   {
-    id: "12347",
+    id: 12347,
     name: "Car",
     bookingFee: 2,
     parkingFee: 4,
   },
   {
-    id: "12348",
+    id: 12348,
     name: "Truck",
     bookingFee: 2,
     parkingFee: 4,
@@ -517,37 +517,32 @@ export const SmallStatistics = [
 export let SlotList: SlotBlock[] = [
   {
     id: "123",
-    startX: 120,
-    startY: 120,
-    endX: 168,
-    endY: 216,
+    coordinate: {
+      startX: 120,
+      startY: 120,
+      endX: 168,
+      endY: 216,
+    },
+    acceptedVehicleType: 12345,
   },
   {
     id: "124",
-    startX: 168,
-    startY: 120,
-    endX: 216,
-    endY: 216,
+    coordinate: { startX: 168, startY: 120, endX: 216, endY: 216 },
+    acceptedVehicleType: 12345,
   },
   {
     id: "125",
-    startX: 216,
-    startY: 120,
-    endX: 264,
-    endY: 216,
+    coordinate: { startX: 216, startY: 120, endX: 264, endY: 216 },
+    acceptedVehicleType: 12345,
   },
   {
     id: "126",
-    startX: 264,
-    startY: 120,
-    endX: 312,
-    endY: 216,
+    coordinate: { startX: 264, startY: 120, endX: 312, endY: 216 },
+    acceptedVehicleType: 12345,
   },
   {
     id: "127",
-    startX: 312,
-    startY: 120,
-    endX: 360,
-    endY: 216,
+    coordinate: { startX: 312, startY: 120, endX: 360, endY: 216 },
+    acceptedVehicleType: 12345,
   },
 ];

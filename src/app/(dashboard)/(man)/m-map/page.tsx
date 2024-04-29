@@ -6,9 +6,10 @@ import SmallStatisticsContent from "@/components/SmallStatisticsContent";
 import BreadcrumbsComponent from "@/components/BreadcrumbsComponent";
 import { useState } from "react";
 import { SlotBlock, ParkingLotMapEdit } from "@/components/ParkingLotMap";
-import { getSlotList } from "@/lib/actions";
+import { getSlotList, getVehicleTypeListForMap } from "@/lib/actions";
 import toast from "react-hot-toast";
 import { PageContentCotainer2 } from "@/components/ContainerUI";
+import { VehicleTypeData } from "@/lib/type";
 
 function CardsContainer({ children }: { children: React.ReactNode }) {
   return (
@@ -21,6 +22,11 @@ function CardsContainer({ children }: { children: React.ReactNode }) {
 export default function ManagerMap() {
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [data, setData] = useState<SlotBlock[]>([]);
+  const [vehicleList, setVehicleList] = useState<VehicleTypeData[]>([]);
+
+  getVehicleTypeListForMap().then((res) => {
+    setVehicleList(res as VehicleTypeData[]);
+  });
 
   getSlotList().then((value) => {
     if (!value.success) {
@@ -37,7 +43,10 @@ export default function ManagerMap() {
         {!isEdit && (
           <CardsContainer>
             <Card className="h-full w-full">
-              <SmallStatisticsContent name="Total slots" value="120" />
+              <SmallStatisticsContent
+                name="Total slots"
+                value={String(data.length)}
+              />
             </Card>
             <Card className="h-full w-full">
               <SmallStatisticsContent
@@ -61,7 +70,11 @@ export default function ManagerMap() {
             }}
           />
         )}
-        <ParkingLotMapEdit editable={isEdit} dataInit={data} />
+        <ParkingLotMapEdit
+          editable={isEdit}
+          dataInit={data}
+          vehicleList={vehicleList}
+        />
       </PageContentCotainer2>
     </>
   );

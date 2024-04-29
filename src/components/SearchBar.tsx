@@ -6,16 +6,18 @@ import { IoClose, IoSearch } from "react-icons/io5";
 
 export default function SearchBar({
   refForm,
+  reset,
+  setReset,
 }: {
   refForm: RefObject<HTMLFormElement>;
+  reset: boolean;
+  setReset: (val: boolean) => void;
 }) {
-  const [hidden, setHidden] = useState(true);
-
   const handleOnChange = (e: ChangeEvent) => {
     if ((e.target as HTMLInputElement).value === "") {
-      setHidden(true);
+      setReset(true);
     } else {
-      setHidden(false);
+      setReset(false);
     }
   };
 
@@ -32,13 +34,13 @@ export default function SearchBar({
           name="key-search"
           onChange={(e) => handleOnChange(e)}
         ></input>
-        {!hidden && (
+        {!reset && (
           <IoClose
             style={{ width: 16, height: 16, color: "gray" }}
             onClick={() => {
               refForm.current?.reset();
               refForm.current?.requestSubmit();
-              setHidden(true);
+              setReset(true);
             }}
             className="hover:rounded hover:bg-gray-50 hover:fill-black/80"
           />

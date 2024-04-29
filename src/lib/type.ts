@@ -18,7 +18,7 @@ export type EmployeeData = {
 
 export type VehicleTypeData = {
   [key: string]: any;
-  id: string;
+  id: number;
   name: string;
   bookingFee: number;
   parkingFee: number;
