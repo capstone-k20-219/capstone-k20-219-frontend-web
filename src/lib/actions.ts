@@ -87,7 +87,7 @@ export const getVehicleTypeList = async (keySearch: string) => {
     const key = keySearch.toLowerCase();
     const res = vehicleTypeRows.filter((item) => {
       return (
-        item.id.toLowerCase().includes(key) ||
+        String(item.id).toLowerCase().includes(key) ||
         item.name.toLowerCase().includes(key)
       );
     });
@@ -194,3 +194,12 @@ export function formatValueDateString(s: string) {
   let reFormattedDate = s.split("-");
   return reFormattedDate.reverse().join("/");
 }
+
+export const getVehicleTypeListForMap = async () => {
+  try {
+    const res = vehicleTypeRows;
+    return res;
+  } catch (e) {
+    console.log(e);
+  }
+};

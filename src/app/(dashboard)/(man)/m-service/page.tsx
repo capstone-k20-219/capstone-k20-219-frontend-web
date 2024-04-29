@@ -305,6 +305,7 @@ export default function ManagerService() {
   const [updateData, setUpdateData] = useState<ServiceData | null>(null);
   const [data, setData] = useState<ServiceData[] | null>([]);
   const [formState, formAction] = useFormState(validateKeySearch, ""); // search action
+  const [isResetSearch, setIsResetSearch] = useState<boolean>(true);
   const refSearchBar = useRef<HTMLFormElement>(null);
   const refModal = useRef<HTMLDialogElement>(null);
 
@@ -320,6 +321,10 @@ export default function ManagerService() {
   };
 
   const handleData = (id: string, record: ServiceData) => {
+    refSearchBar.current?.reset();
+    refSearchBar.current?.requestSubmit();
+    handleResetState(true);
+
     if (id === "") {
       setData((prev) => {
         if (prev === null) return prev;
@@ -334,6 +339,10 @@ export default function ManagerService() {
         return [...afterDelete, record];
       });
     }
+  };
+
+  const handleResetState = (val: boolean) => {
+    setIsResetSearch(val);
   };
 
   const handleDeleteRecord = (id: string) => {
@@ -363,7 +372,11 @@ export default function ManagerService() {
             action={formAction}
             className="w-1/2 justify-center items-center gap-4 flex text-sm"
           >
-            <SearchBar refForm={refSearchBar} />
+            <SearchBar
+              refForm={refSearchBar}
+              reset={isResetSearch}
+              setReset={handleResetState}
+            />
           </form>
           <Button
             name="Add new service"

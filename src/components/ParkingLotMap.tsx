@@ -4,17 +4,21 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import Card from "./Card";
 import { MdDelete } from "react-icons/md";
 import toast from "react-hot-toast";
-import { getSlotList } from "@/lib/actions";
+import { getSlotList, getVehicleTypeListForMap } from "@/lib/actions";
 import { SlotList } from "@/lib/data";
 import { PageContentContainer } from "./ContainerUI";
+import { VehicleTypeData } from "@/lib/type";
 
 const BLOCK_SIZE = 24; // px
 export type SlotBlock = {
   id: string;
-  startX: number;
-  startY: number;
-  endX: number;
-  endY: number;
+  coordinate: {
+    startX: number;
+    startY: number;
+    endX: number;
+    endY: number;
+  };
+  acceptedVehicleType: number;
 };
 
 function MapBackGround({ size }: { size: number }) {
@@ -45,10 +49,12 @@ function MapBackGround({ size }: { size: number }) {
 function EditableSlot({
   slot,
   editable,
+  acceptedVehicle,
   changeSlotList,
 }: {
   slot: SlotBlock;
   editable: boolean;
+  acceptedVehicle?: VehicleProps;
   changeSlotList: Dispatch<SetStateAction<SlotBlock[]>>;
 }) {
   const [openMenu, setOpenMenu] = useState(false);
@@ -82,12 +88,13 @@ function EditableSlot({
     <div
       ref={refMenu}
       style={{
-        top: slot.startY,
-        left: slot.startX,
-        width: slot.endX - slot.startX,
-        height: slot.endY - slot.startY,
+        top: slot.coordinate.startY,
+        left: slot.coordinate.startX,
+        width: slot.coordinate.endX - slot.coordinate.startX,
+        height: slot.coordinate.endY - slot.coordinate.startY,
+        borderColor: acceptedVehicle ? acceptedVehicle.color : "#c4c4c4",
       }}
-      className="absolute bg-white border border-green-500 shadow-md
+      className="absolute bg-white border shadow-md
           grid place-items-center cursor-pointer text-xs"
       onContextMenu={handleContextMenu}
     >
@@ -101,7 +108,6 @@ function EditableSlot({
           className="absolute bg-white rounded p-2 w-20 shadow-md text-center 
         border border-neutral-500 z-50 text-red-900 flex gap-1 items-center"
           onClick={() => {
-            // console.log("delete");
             changeSlotList((pre) => pre.filter((s) => s.id !== slot.id));
             setOpenMenu(false);
           }}
@@ -117,10 +123,12 @@ function EditableSlot({
 function EditableSlotsDisplay({
   edit = false,
   slots,
+  acceptedVehicleList,
   setSlotList,
 }: {
   edit: boolean;
   slots: SlotBlock[];
+  acceptedVehicleList: VehicleProps[];
   setSlotList: Dispatch<SetStateAction<SlotBlock[]>>;
 }) {
   const [editable, setEditable] = useState(false);
@@ -131,14 +139,20 @@ function EditableSlotsDisplay({
 
   return (
     <>
-      {slots.map((item, index) => (
-        <EditableSlot
-          key={index}
-          slot={{ ...item }}
-          editable={editable}
-          changeSlotList={setSlotList}
-        />
-      ))}
+      {slots.map((item, index) => {
+        const vehicle = acceptedVehicleList.find(
+          (vehicle) => vehicle.id === item.acceptedVehicleType
+        );
+        return (
+          <EditableSlot
+            key={index}
+            slot={{ ...item }}
+            editable={editable}
+            acceptedVehicle={vehicle}
+            changeSlotList={setSlotList}
+          />
+        );
+      })}
     </>
   );
 }
@@ -151,17 +165,38 @@ const initialSlot = {
   endY: 0,
 };
 
+interface VehicleProps {
+  id: number;
+  name: string;
+  color: string;
+}
+
+const initialVehicleProps: VehicleProps = {
+  id: 0,
+  name: "",
+  color: "#c4c4c4",
+};
+
 function ParkingLotMapEdit({
   editable,
   dataInit,
+  vehicleList,
 }: {
   editable: boolean;
   dataInit: SlotBlock[];
+  vehicleList: VehicleTypeData[];
 }) {
   const [slotList, setSlotList] = useState<SlotBlock[]>(dataInit);
   const [startXY, setStartXY] = useState<{ x: number; y: number } | null>(null);
   const [endXY, setEndXY] = useState<{ x: number; y: number } | null>(null);
   const refMap = useRef<HTMLDivElement>(null);
+  const [currentVehicleType, setCurrentVehicleType] =
+    useState<VehicleProps>(initialVehicleProps);
+  const [vehicleColors, setVehicleColors] = useState<VehicleProps[]>([]);
+
+  const handleChangeAcceptedVehicle = (vehicleTypeId: VehicleProps) => {
+    setCurrentVehicleType(vehicleTypeId);
+  };
 
   // Whenever the pointer up (finish drawing new slot), the system will
   // imediately call this  function to add a new slot into the database
@@ -170,6 +205,23 @@ function ParkingLotMapEdit({
       return [...prev, slot];
     });
   };
+
+  useEffect(() => {
+    if (vehicleList.length > 0) {
+      let vehicleColorList = new Array(vehicleList.length);
+      for (let i = 0; i < vehicleColorList.length; i++) {
+        vehicleColorList[i] = {
+          id: vehicleList[i].id,
+          name: vehicleList[i].name,
+          color: `#${Math.floor(Math.random() * 0xffffff)
+            .toString(16)
+            .padStart(6, "0")}`,
+        };
+      }
+      setVehicleColors(vehicleColorList);
+      setCurrentVehicleType(vehicleColorList[0]);
+    }
+  }, [vehicleList]);
 
   useEffect(() => {
     setSlotList(dataInit);
@@ -187,7 +239,6 @@ function ParkingLotMapEdit({
     const onKeyMove = (e: PointerEvent) => {
       if (!isCreate) return;
       e.preventDefault();
-      // console.log("on drawing");
       endX = Math.round(e.offsetX / BLOCK_SIZE) * BLOCK_SIZE;
       endY = Math.round(e.offsetY / BLOCK_SIZE) * BLOCK_SIZE;
       setEndXY({ x: endX, y: endY });
@@ -196,7 +247,6 @@ function ParkingLotMapEdit({
     // start drawing
     const onKeyDown = (e: PointerEvent) => {
       if (e.button !== 0) return;
-      // console.log("start drawing");
       isCreate = true;
       endX = startX = Math.round(e.offsetX / BLOCK_SIZE) * BLOCK_SIZE;
       endY = startY = Math.round(e.offsetY / BLOCK_SIZE) * BLOCK_SIZE;
@@ -207,16 +257,17 @@ function ParkingLotMapEdit({
     // done drawing
     const onKeyUp = (e: PointerEvent) => {
       if (e.button !== 0) return;
-      // console.log("stop drawing");
       isCreate = false;
       if (startX !== endX && startY !== endY) {
-        // console.log("adding new slot");
         handleKeyUp({
           id: "",
-          startX: startX,
-          startY: startY,
-          endX: endX,
-          endY: endY,
+          coordinate: {
+            startX: startX,
+            startY: startY,
+            endX: endX,
+            endY: endY,
+          },
+          acceptedVehicleType: currentVehicleType.id as number,
         } as SlotBlock);
       }
       setStartXY(null);
@@ -224,7 +275,6 @@ function ParkingLotMapEdit({
       startX = startY = endX = endY = 0;
     };
 
-    console.log(refMap.current);
     if (!refMap.current) return;
     const map = refMap.current;
     map.addEventListener("pointerdown", onKeyDown);
@@ -235,11 +285,10 @@ function ParkingLotMapEdit({
       map.removeEventListener("pointermove", onKeyMove);
       map.removeEventListener("pointerup", onKeyUp);
     };
-  }, [editable]);
+  }, [editable, currentVehicleType]);
 
   return (
-    // <PageContentContainer>
-    <div className="h-full w-full">
+    <div className="h-full w-full flex flex-col-reverse md:flex-row gap-3">
       <Card className="w-full h-full p-5 overflow-hidden">
         <div className="w-full h-full border border-neutral-500/50 overflow-auto">
           <div
@@ -251,6 +300,7 @@ function ParkingLotMapEdit({
             <EditableSlotsDisplay
               edit={editable}
               slots={slotList}
+              acceptedVehicleList={vehicleColors}
               setSlotList={setSlotList}
             />
             {/* current drawing */}
@@ -258,11 +308,15 @@ function ParkingLotMapEdit({
               <EditableSlot
                 slot={{
                   id: "",
-                  startX: startXY.x,
-                  startY: startXY.y,
-                  endX: endXY.x,
-                  endY: endXY.y,
+                  coordinate: {
+                    startX: startXY.x,
+                    startY: startXY.y,
+                    endX: endXY.x,
+                    endY: endXY.y,
+                  },
+                  acceptedVehicleType: currentVehicleType?.id as number,
                 }}
+                acceptedVehicle={currentVehicleType!}
                 editable={editable}
                 changeSlotList={setSlotList}
               />
@@ -270,8 +324,36 @@ function ParkingLotMapEdit({
           </div>
         </div>
       </Card>
+      {editable && (
+        <Card className="p-3 md:py-5 w-full md:w-1/5 overflow-hidden">
+          <h4 className="font-semibold mb-1">Vehicle type</h4>
+          <div className="w-full h-full overflow-auto">
+            <div className="flex flex-row md:flex-col gap-1">
+              {vehicleList.map((item, index) => (
+                <div
+                  key={index}
+                  className={`p-1 px-2 rounded hover:bg-slate-200 cursor-pointer
+                flex items-center gap-1 flex-shrink-0 ${
+                  currentVehicleType?.id === item.id ? "bg-slate-200" : ""
+                }`}
+                  onClick={() =>
+                    handleChangeAcceptedVehicle(vehicleColors[index])
+                  }
+                >
+                  <div
+                    className="w-3 h-3 border-[0.5px] border-neutral-300 rounded"
+                    style={{
+                      backgroundColor: vehicleColors[index].color,
+                    }}
+                  ></div>
+                  <div className="line-clamp-1 w-fit">{item.name}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Card>
+      )}
     </div>
-    // </PageContentContainer>
   );
 }
 
@@ -284,10 +366,10 @@ function Slot({ slot }: { slot: SlotBlock }) {
     <div
       ref={refMenu}
       style={{
-        top: slot.startY,
-        left: slot.startX,
-        width: slot.endX - slot.startX,
-        height: slot.endY - slot.startY,
+        top: slot.coordinate.startY,
+        left: slot.coordinate.startX,
+        width: slot.coordinate.endX - slot.coordinate.startX,
+        height: slot.coordinate.endY - slot.coordinate.startY,
       }}
       className="absolute bg-white border border-green-500 shadow-md
           grid place-items-center cursor-pointer text-xs"

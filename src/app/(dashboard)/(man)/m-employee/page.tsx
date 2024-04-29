@@ -301,6 +301,7 @@ export default function ManagerEmployee() {
   const [updateData, setUpdateData] = useState<EmployeeData | null>(null);
   const [data, setData] = useState<EmployeeData[] | null>([]);
   const [formState, formAction] = useFormState(validateKeySearch, ""); // search action
+  const [isResetSearch, setIsResetSearch] = useState<boolean>(true);
   const refSearchBar = useRef<HTMLFormElement>(null);
   const refModal = useRef<HTMLDialogElement>(null);
 
@@ -316,6 +317,10 @@ export default function ManagerEmployee() {
   };
 
   const handleData = (id: string, record: EmployeeData) => {
+    refSearchBar.current?.reset();
+    refSearchBar.current?.requestSubmit();
+    handleResetState(true);
+
     if (id === "") {
       setData((prev) => {
         if (prev === null) return prev;
@@ -330,6 +335,10 @@ export default function ManagerEmployee() {
         return [...afterDelete, record];
       });
     }
+  };
+
+  const handleResetState = (val: boolean) => {
+    setIsResetSearch(val);
   };
 
   const handleDeleteRecord = (id: string) => {
@@ -359,7 +368,11 @@ export default function ManagerEmployee() {
             action={formAction}
             className="w-1/2 justify-center items-center gap-4 flex text-sm"
           >
-            <SearchBar refForm={refSearchBar} />
+            <SearchBar
+              refForm={refSearchBar}
+              reset={isResetSearch}
+              setReset={handleResetState}
+            />
           </form>
           <Button
             name="Add new account"

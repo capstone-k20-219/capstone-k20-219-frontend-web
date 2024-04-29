@@ -161,7 +161,7 @@ function TableResults({
 }
 
 const initialVehicleTypeData: VehicleTypeData = {
-  id: "",
+  id: 0,
   name: "",
   bookingFee: 0,
   parkingFee: 0,
@@ -209,7 +209,7 @@ const AddVehicleTypeForm = forwardRef<
     if (id === "") {
       // add new record
       const record: VehicleTypeData = {
-        id: String(Math.round(Math.random() * 1000)),
+        id: Math.round(Math.random() * 1000),
         name: name,
         bookingFee: bookingFee,
         parkingFee: parkingFee,
@@ -218,7 +218,7 @@ const AddVehicleTypeForm = forwardRef<
     } else {
       // update record
       const record: VehicleTypeData = {
-        id: id,
+        id: Number(id),
         name: name,
         bookingFee: bookingFee,
         parkingFee: parkingFee,
@@ -282,10 +282,10 @@ const AddVehicleTypeForm = forwardRef<
 });
 
 export default function ManagerVehicleType() {
-  const [openModal, setOpenModal] = useState(false);
   const [updateData, setUpdateData] = useState<VehicleTypeData | null>(null);
   const [data, setData] = useState<VehicleTypeData[] | null>([]);
   const [formState, formAction] = useFormState(validateKeySearch, ""); // search action
+  const [isResetSearch, setIsResetSearch] = useState<boolean>(true);
   const refSearchBar = useRef<HTMLFormElement>(null);
   const refModal = useRef<HTMLDialogElement>(null);
 
@@ -301,6 +301,10 @@ export default function ManagerVehicleType() {
   };
 
   const handleData = (id: string, record: VehicleTypeData) => {
+    refSearchBar.current?.reset();
+    refSearchBar.current?.requestSubmit();
+    handleResetState(true);
+
     if (id === "") {
       setData((prev) => {
         if (prev === null) return prev;
@@ -310,18 +314,22 @@ export default function ManagerVehicleType() {
       setData((prev) => {
         if (prev === null) return prev;
         const afterDelete = prev.filter((item) => {
-          return item.id !== id;
+          return item.id !== Number(id);
         });
         return [...afterDelete, record];
       });
     }
   };
 
+  const handleResetState = (val: boolean) => {
+    setIsResetSearch(val);
+  };
+
   const handleDeleteRecord = (id: string) => {
     // call some action to delete in DB
     setData((prev) => {
       if (prev === null) return prev;
-      const newData = prev.filter((item) => item.id !== id);
+      const newData = prev.filter((item) => item.id !== Number(id));
       return newData;
     });
   };
@@ -344,7 +352,11 @@ export default function ManagerVehicleType() {
             action={formAction}
             className="w-1/2 justify-center items-center gap-4 flex text-sm"
           >
-            <SearchBar refForm={refSearchBar} />
+            <SearchBar
+              refForm={refSearchBar}
+              reset={isResetSearch}
+              setReset={handleResetState}
+            />
           </form>
           <Button
             name="Add new vehicle type"
