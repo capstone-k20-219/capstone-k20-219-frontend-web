@@ -313,8 +313,12 @@ export default function ManagerService() {
   const { token } = useAppSelector((state) => state.auth.value);
   const [updateData, setUpdateData] = useState<ServiceData | null>(null);
   const [data, setData] = useState<ServiceData[] | null>([]);
-  const [formState, formAction] = useFormState(validateKeySearch, ""); // search action
-  const [isResetSearch, setIsResetSearch] = useState<boolean>(true);
+  // const [formState, formAction] = useFormState(validateKeySearch, ""); // search action
+  const [prevKeySearch, setPrevKeySearch] = useState("");
+  const [keySearch, setKeySearch] = useState("");
+  // const [isResetSearch, setIsResetSearch] = useState<boolean>(true);
+  const [isSearch, setIsSearch] = useState<boolean>(true);
+  const [isReset, setIsReset] = useState<boolean>(false);
   const refSearchBar = useRef<HTMLFormElement>(null);
   const refModal = useRef<HTMLDialogElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -351,6 +355,8 @@ export default function ManagerService() {
     setUpdateData(data);
   };
 
+  const handleSearch = async (formData: FormData) => {};
+
   const handleData = (id: string, record: ServiceData) => {
     refSearchBar.current?.reset();
     refSearchBar.current?.requestSubmit();
@@ -373,7 +379,12 @@ export default function ManagerService() {
   };
 
   const handleResetState = (val: boolean) => {
-    setIsResetSearch(val);
+    setIsReset(val);
+  };
+
+  const handleResetSearch = () => {
+    refSearchBar.current?.reset();
+    setIsReset(true);
   };
 
   const handleDeleteRecord = (id: string) => {
@@ -385,13 +396,7 @@ export default function ManagerService() {
     });
   };
 
-  useEffect(() => {
-    const fetchServiceList = async () => {
-      const res = await getServiceList(formState);
-      if (res !== null) setData(res);
-    };
-    fetchServiceList();
-  }, [formState]);
+  useEffect(() => {}, []);
 
   return (
     <>
@@ -400,13 +405,15 @@ export default function ManagerService() {
         <ActionTopContainer>
           <form
             ref={refSearchBar}
-            action={formAction}
+            action={handleSearch}
             className="w-1/2 justify-center items-center gap-4 flex text-sm"
           >
             <SearchBar
-              refForm={refSearchBar}
-              reset={isResetSearch}
-              setReset={handleResetState}
+              // refForm={refSearchBar}
+              reset={isReset}
+              handleReset={handleResetState}
+              onReset={handleResetSearch}
+              placeholder={"Enter service/vehicle type ID..."}
             />
           </form>
           <Button

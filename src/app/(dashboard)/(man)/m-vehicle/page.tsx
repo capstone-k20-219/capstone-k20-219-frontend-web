@@ -32,6 +32,7 @@ import toast from "react-hot-toast";
 import {
   sortVehicleTypesById,
   validateFee,
+  validateKeyword,
   validateName,
   validateVehicleTypeID,
 } from "@/lib/helpers";
@@ -373,6 +374,7 @@ const AddVehicleTypeForm = forwardRef<
 export default function ManagerVehicleType() {
   const { token } = useAppSelector((state) => state.auth.value);
   const [updateData, setUpdateData] = useState<VehicleTypeData | null>(null);
+  const [dataStorage, setDataStorage] = useState<VehicleTypeData[] | null>([]);
   const [data, setData] = useState<VehicleTypeData[] | null>([]);
   const [prevKeySearch, setPrevKeySearch] = useState("");
   const [keySearch, setKeySearch] = useState("");
@@ -413,16 +415,26 @@ export default function ManagerVehicleType() {
     setUpdateData(data);
   };
 
-  const handleSearch = async (formData: FormData) => {
+  const handleSearch = (formData: FormData) => {
+    if (!dataStorage) return;
     const keyword: string = formData.get("key-search") as string;
-    const newKeyword = validateVehicleTypeID(keyword);
-    if (!newKeyword.valid && newKeyword.data) {
-      toast.error(newKeyword.message);
-      return;
-    }
-    if ((isReset || newKeyword.data) && prevKeySearch !== newKeyword.data) {
-      setKeySearch(newKeyword.data);
-      setIsSearch(true);
+    const newKeyword = validateKeyword(keyword);
+    if (prevKeySearch !== newKeyword) {
+      setKeySearch(newKeyword);
+      if (newKeyword) {
+        setData(
+          dataStorage.filter((item) => {
+            return (
+              item.id.toLowerCase().includes(newKeyword) ||
+              item.name.toLowerCase().includes(newKeyword)
+            );
+          })
+        );
+      } else {
+        setData(dataStorage);
+      }
+      setIsReset(!newKeyword);
+      setPrevKeySearch(newKeyword);
     }
   };
 
@@ -471,6 +483,7 @@ export default function ManagerVehicleType() {
       } else if (res.status === 500) {
         throw new Error("");
       } else {
+        setDataStorage(sortVehicleTypesById(res.data));
         setData(sortVehicleTypesById(res.data));
       }
     } catch (error) {
@@ -501,7 +514,7 @@ export default function ManagerVehicleType() {
               reset={isReset}
               handleReset={handleResetState}
               onReset={handleResetSearch}
-              placeholder={"Enter vehicle type ID... (3 chars)"}
+              placeholder={"Find by service id or name..."}
             />
           </form>
           <Button

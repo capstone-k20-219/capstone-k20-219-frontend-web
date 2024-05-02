@@ -137,6 +137,12 @@ function sortVehicleTypesById(arr: VehicleTypeData[]): VehicleTypeData[] {
   return arr.sort((a, b) => a.id.localeCompare(b.id));
 }
 
+function validateKeyword(key: string) {
+  const newKey = eliminateSpecialChars(key);
+
+  return newKey.toLowerCase();
+}
+
 export {
   validateEmail,
   validatePhone,
@@ -146,4 +152,5 @@ export {
   validateVehicleTypeID,
   validateFee,
   sortVehicleTypesById,
+  validateKeyword,
 };
