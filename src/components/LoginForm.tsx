@@ -2,62 +2,89 @@
 
 import Button from "@/components/Button";
 import InputComponent from "@/components/InputComponent";
-import { handleLogin } from "@/lib/actions";
-import { logIn } from "@/redux/features/auth-slice";
 import { AppDispatch } from "@/redux/store";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { LoginFormStateType, LoginType, RoleType } from "@/lib/type";
 import { onActive } from "@/redux/features/active-slice";
-import SelectOptionComponent from "./SelectOptionComponent";
-import { useFormState } from "react-dom";
-
-const RoleOption = [
-  {
-    value: "m",
-    name: "Manager",
-  },
-  {
-    value: "e",
-    name: "Employee",
-  },
-];
-
-const initialState: LoginFormStateType = {
-  success: null,
-  data: null,
-};
+import { validateEmail, validatePassword } from "@/lib/helpers";
+import { logIn } from "@/redux/features/auth-slice";
+import { ActiveState, AuthState } from "@/lib/type";
+import { getUserById } from "@/lib/services/users";
+import toast from "react-hot-toast";
+import { authenticate } from "@/lib/services/auth";
 
 export default function LoginForm() {
-  const [formState, formAction] = useFormState(handleLogin, initialState);
+  const [error, setError] = useState("");
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
-  useEffect(() => {
-    if (formState.success && formState.data !== null) {
-      const data = formState.data;
-      dispatch(logIn({ ...(data as LoginType) }));
-      const role = data.role as RoleType;
-      if (role === "m") {
-        dispatch(onActive({ role: role, index: 0, name: "Dashboard" }));
-        router.push(`/${role}-home`);
-      } else {
-        dispatch(onActive({ role: role, index: 0, name: "Map" }));
-        router.push(`/${role}-map`);
+  const handleUserLogin = async (formData: FormData) => {
+    try {
+      setError("");
+
+      const email = formData.get("email") as string;
+      const password = formData.get("password") as string;
+
+      const validEmail = validateEmail(email);
+      if (!validEmail.valid) {
+        setError(validEmail.message);
+        return;
       }
+
+      const validPass = validatePassword(password);
+      if (!validPass.valid) {
+        setError(validPass.message);
+        return;
+      }
+
+      const data = await authenticate(validEmail.data, validPass.data);
+
+      const user = await getUserById(data.access_token);
+
+      const isManager = user.role.includes("manager");
+      const isEmployee = user.role.includes("employee");
+      const role = isManager ? "manager" : isEmployee ? "employee" : null;
+
+      if (role) {
+        dispatch(
+          logIn({
+            token: data.access_token,
+            uid: data.id,
+            refresh_token: data.refresh_token,
+            role: role,
+          } as AuthState)
+        );
+
+        const activeState: ActiveState = {
+          role: role,
+          index: 0,
+          name: isManager ? "Dashboard" : "Map",
+        };
+        dispatch(onActive(activeState));
+
+        if (role === "manager") {
+          router.push("/m-home");
+        } else {
+          router.push("/e-map");
+        }
+      } else {
+        toast.error("You have no right to access this system!");
+      }
+    } catch (error) {
+      console.log(error);
     }
-  }, [formState, dispatch, router]);
+  };
 
   return (
     <form
-      action={formAction}
+      action={handleUserLogin}
       className="flex flex-col ml-px gap-6 w-full items-start"
     >
       <InputComponent
         type="text"
-        name="username"
-        label="Username"
+        name="email"
+        label="Email"
         autoFocus={true}
         required={true}
       />
@@ -67,11 +94,9 @@ export default function LoginForm() {
         label="Password"
         required={true}
       />
-      <SelectOptionComponent label="Role" name="role" options={RoleOption} />
-
-      {formState.success === false && (
+      {error.length > 0 && (
         <div className="text-red-500">
-          <i>The account information is incorrect.</i>
+          <i>{error}</i>
         </div>
       )}
       <Button

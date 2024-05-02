@@ -13,9 +13,10 @@ import MenuItem from "@mui/material/MenuItem";
 import MenuList from "@mui/material/MenuList";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/redux/store";
+import { AppDispatch, useAppSelector } from "@/redux/store";
 import { logOut } from "@/redux/features/auth-slice";
 import { setInitial } from "@/redux/features/active-slice";
+import { userLogOut } from "@/lib/services/auth";
 
 function HeaderTimer() {
   const [date, setDate] = useState("");
@@ -40,6 +41,7 @@ function HeaderTimer() {
 function HeaderMenu() {
   const [open, setOpen] = useState(false);
   const anchorRef = useRef<HTMLButtonElement>(null);
+  const { token } = useAppSelector((state) => state.auth.value);
   const dispatch = useDispatch<AppDispatch>();
   const prevOpen = useRef(open);
 
@@ -57,16 +59,22 @@ function HeaderMenu() {
     setOpen(false);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await userLogOut(token);
     dispatch(logOut());
     dispatch(setInitial());
   };
 
   useEffect(() => {
-    if (prevOpen.current === true) {
+    let ignore = false;
+    if (prevOpen.current === true && !ignore) {
       anchorRef.current!.focus();
     }
     prevOpen.current = open;
+
+    return () => {
+      ignore = true;
+    };
   }, [open]);
 
   return (
@@ -84,7 +92,8 @@ function HeaderMenu() {
           src={User}
           alt="avartar"
           id="user-avartar"
-          loading="lazy"
+          // loading="lazy"
+          priority
           className="w-10 h-10 rounded-full cursor-pointer
               border-[0.5px] border-neutral-400"
         />

@@ -27,6 +27,7 @@ import {
   TableRowHeadContainer,
 } from "@/components/ContainerUI";
 import { Stack, Pagination } from "@mui/material";
+import { useAppSelector } from "@/redux/store";
 
 interface ServiceColumn {
   id: "id" | "name" | "price" | "typ" | "action";
@@ -309,6 +310,7 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
 );
 
 export default function ManagerService() {
+  const { token } = useAppSelector((state) => state.auth.value);
   const [updateData, setUpdateData] = useState<ServiceData | null>(null);
   const [data, setData] = useState<ServiceData[] | null>([]);
   const [formState, formAction] = useFormState(validateKeySearch, ""); // search action

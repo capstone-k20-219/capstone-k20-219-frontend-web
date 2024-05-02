@@ -18,10 +18,10 @@ export type EmployeeData = {
 
 export type VehicleTypeData = {
   [key: string]: any;
-  id: number;
+  id: string;
   name: string;
-  bookingFee: number;
   parkingFee: number;
+  slotBookingFee: number;
 };
 
 export type ServiceData = {
@@ -60,23 +60,17 @@ export type InitialState = {
   value: AuthState;
 };
 
-export type RoleType = "m" | "e" | null;
+export type RoleType = "manager" | "employee" | null;
 
 export type AuthState = {
-  isAuth: boolean;
-  username: string;
+  token: string;
   uid: string;
-  role: RoleType;
-};
-
-export type LoginType = {
-  username: string;
-  id: string;
+  refresh_token: string;
   role: RoleType;
 };
 
 export type ActiveState = {
-  role: null | "m" | "e";
+  role: RoleType | null;
   index: number;
   name: string;
 };

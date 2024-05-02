@@ -1,28 +1,26 @@
 "use client";
 
 import { useAppSelector } from "@/redux/store";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import LoadingRootPage from "../loading";
-import toast from "react-hot-toast";
+import { redirect, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function LoginPageLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [initial, setInitial] = useState(false);
-  const isAuth = useAppSelector((state) => state.auth.value.isAuth);
+  const [init, setInit] = useState(false);
+  const { token } = useAppSelector((state) => state.auth.value);
   const router = useRouter();
+
   useEffect(() => {
-    if (isAuth) {
-      toast("User has been authorized", {
-        icon: "⚠️",
-      });
+    if (token) {
       router.back();
-    } else setInitial(true);
+    } else {
+      setInit(true);
+    }
   }, []);
 
-  if (!initial) return <LoadingRootPage />;
-  return children;
+  if (init) return children;
+  else return null;
 }

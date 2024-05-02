@@ -19,7 +19,7 @@ export default function Login() {
         <div className="flex flex-col ml-px gap-3 w-full items-start">
           <Image
             src={Logo}
-            loading="lazy"
+            priority
             alt="Logo"
             id="logo"
             className="h-[60px] aspect-[178.476/60]"

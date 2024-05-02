@@ -5,19 +5,21 @@ import { ChangeEvent, RefObject, useState } from "react";
 import { IoClose, IoSearch } from "react-icons/io5";
 
 export default function SearchBar({
-  refForm,
   reset,
-  setReset,
+  handleReset,
+  onReset,
+  placeholder = "Search...",
 }: {
-  refForm: RefObject<HTMLFormElement>;
   reset: boolean;
-  setReset: (val: boolean) => void;
+  handleReset: (val: boolean) => void;
+  onReset: () => void;
+  placeholder?: string;
 }) {
-  const handleOnChange = (e: ChangeEvent) => {
-    if ((e.target as HTMLInputElement).value === "") {
-      setReset(true);
-    } else {
-      setReset(false);
+  const handleOnChange = (val: string) => {
+    if (val && reset) {
+      handleReset(false);
+    } else if (!val && !reset) {
+      handleReset(true);
     }
   };
 
@@ -30,17 +32,15 @@ export default function SearchBar({
         <IoSearch style={{ width: 16, height: 16 }} />
         <input
           className="w-full text-neutral-900 font-normal leading-4 outline-none border-none"
-          placeholder="Search..."
+          placeholder={placeholder}
           name="key-search"
-          onChange={(e) => handleOnChange(e)}
+          onChange={(e) => handleOnChange(e.target.value)}
         ></input>
         {!reset && (
           <IoClose
             style={{ width: 16, height: 16, color: "gray" }}
             onClick={() => {
-              refForm.current?.reset();
-              refForm.current?.requestSubmit();
-              setReset(true);
+              onReset();
             }}
             className="hover:rounded hover:bg-gray-50 hover:fill-black/80"
           />

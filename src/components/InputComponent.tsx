@@ -20,7 +20,7 @@ export default function InputComponent({
   disable = false,
   autoFocus = false,
   required = false,
-  min = 0,
+  min,
   onChangeFunction,
 }: InputComponentProps) {
   return (

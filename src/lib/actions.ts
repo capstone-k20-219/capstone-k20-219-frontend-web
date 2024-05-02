@@ -54,6 +54,7 @@ export const validateKeySearch = async (
 ) => {
   const keySearch: string = formData.get("key-search") as string;
   // validate the key in string
+  console.log("Searching:", keySearch);
 
   return keySearch;
 };

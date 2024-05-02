@@ -1,11 +1,11 @@
-import { AuthState, InitialState, LoginType } from "@/lib/type";
+import { AuthState, InitialState } from "@/lib/type";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState = {
   value: {
-    isAuth: false,
-    username: "",
+    token: "",
     uid: "",
+    refresh_token: "",
     role: null,
   } as AuthState,
 } as InitialState;
@@ -17,12 +17,12 @@ export const auth = createSlice({
     logOut: () => {
       return initialState;
     },
-    logIn: (state, action: PayloadAction<LoginType>) => {
+    logIn: (state, action: PayloadAction<AuthState>) => {
       return {
         value: {
-          isAuth: true,
-          username: action.payload.username,
-          uid: action.payload.id, // should generate the id
+          token: action.payload.token,
+          uid: action.payload.uid,
+          refresh_token: action.payload.refresh_token,
           role: action.payload.role,
         },
       };

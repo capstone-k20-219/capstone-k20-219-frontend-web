@@ -34,7 +34,7 @@ export default function Sidebar({
   const [selectedIndex, setSelectedIndex] = useState<number>(index);
   const [currentpage, setCurrentpage] = useState<string>(name);
   const navListItemMain: NavItem[] =
-    role === "m" ? NavListItemMainManager : NavListItemMainEmployee;
+    role === "manager" ? NavListItemMainManager : NavListItemMainEmployee;
 
   const handleListItemClick = (indexActive: number, nameActive: string) => {
     setSelectedIndex(indexActive);
