@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState = {
   value: {
-    role: null,
+    role: "user",
     index: -1,
     name: "",
   } as ActiveState,

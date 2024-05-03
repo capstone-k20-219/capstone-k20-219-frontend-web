@@ -1,4 +1,10 @@
-import { VehicleTypeData } from "./type";
+import {
+  ServiceDBGetType,
+  ServiceData,
+  ServicePrices,
+  UserDBGetType,
+  VehicleTypeData,
+} from "./type";
 
 const eliminateSpecialChars = (input: string) => {
   const map: {
@@ -47,7 +53,25 @@ function validateEmail(email: string) {
 function validatePhone(phone: string) {
   const newPhone = eliminateSpecialChars(phone);
   const phoneRegex = /^\d{10}$/;
-  return newPhone.length > 0 && phoneRegex.test(newPhone);
+  if (newPhone.length === 0) {
+    return {
+      valid: false,
+      message: "Phone number field cannot be empty.",
+      data: newPhone,
+    };
+  }
+  if (!phoneRegex.test(newPhone)) {
+    return {
+      valid: false,
+      message: "Phone number should be in format of 10 digits.",
+      data: newPhone,
+    };
+  }
+  return {
+    valid: true,
+    message: "",
+    data: newPhone,
+  };
 }
 
 function validateName(name: string) {
@@ -99,7 +123,49 @@ function validatePassword(pass: string) {
   };
 }
 
-function validateDob(dob: string) {}
+// check if dob in format of yyyy-mm-dd
+function checkDobFormat(dob: string) {
+  // First check for the pattern
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) {
+    return false;
+  }
+
+  // Parse the date parts to integers
+  const [year, month, day] = dob.split("-").map(Number);
+
+  // Create a new Date object and check if it's valid
+  const date = new Date(year, month - 1, day);
+  return (
+    date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day
+  );
+}
+
+// validate if dob in format of yyyy-mm-dd
+function validateDob(dob: string) {
+  const newDob = eliminateSpecialChars(dob);
+  if (!newDob) {
+    return {
+      valid: false,
+      message: "Date of birth cannot be empty.",
+      data: dob,
+    };
+  }
+  if (checkDobFormat(newDob)) {
+    return {
+      valid: true,
+      message: "",
+      data: newDob,
+    };
+  } else {
+    return {
+      valid: false,
+      message: `Invalid date format: ${newDob}`,
+      data: newDob,
+    };
+  }
+}
 
 function validateVehicleTypeID(vehicleTypeId: string) {
   const newID = eliminateSpecialChars(vehicleTypeId).toUpperCase();
@@ -133,24 +199,97 @@ function validateFee(fee: number) {
   };
 }
 
+function validateKeyword(key: string) {
+  const newKey = eliminateSpecialChars(key);
+  return newKey.toLowerCase();
+}
+
 function sortVehicleTypesById(arr: VehicleTypeData[]): VehicleTypeData[] {
   return arr.sort((a, b) => a.id.localeCompare(b.id));
 }
 
-function validateKeyword(key: string) {
-  const newKey = eliminateSpecialChars(key);
+function sortServiceById(arr: ServiceDBGetType[]): ServiceDBGetType[] {
+  return arr.sort((a, b) => a.id.localeCompare(b.id));
+}
 
-  return newKey.toLowerCase();
+function sortEmployeeById(arr: UserDBGetType[]): UserDBGetType[] {
+  return arr.sort((a, b) => a.id.localeCompare(b.id));
+}
+
+function filterUniqueInfoService(array: ServicePrices[]) {
+  const result: ServicePrices[] = [];
+  const map = new Map();
+  for (const item of array) {
+    if (!map.has(item.typeId)) {
+      map.set(item.typeId, true); // set any value to Map
+      result.push(item);
+    }
+  }
+  return result;
+}
+
+function validatePricesOfService(prices: ServicePrices[]) {
+  const filteredPrices = filterUniqueInfoService(prices);
+  let valid: boolean = true;
+  let message: string = "";
+  for (let index = 0; index < filteredPrices.length; index++) {
+    const validTypeId = validateVehicleTypeID(filteredPrices[index].typeId);
+    if (!validTypeId.valid) {
+      valid = false;
+      message += `Invalid typeId in price ${index + 1}: ${validTypeId.message}`;
+      break;
+    }
+    const validUnitPrice = validateFee(filteredPrices[index].unitPrice);
+    if (!validUnitPrice.valid) {
+      valid = false;
+      message += `Invalid unitPrice in price ${index + 1}: ${
+        validUnitPrice.message
+      }`;
+      break;
+    }
+    filteredPrices[index] = {
+      typeId: validTypeId.data,
+      unitPrice: validUnitPrice.data,
+    };
+  }
+
+  return {
+    valid: valid,
+    message: message,
+    data: filteredPrices,
+  };
+}
+// format like "2024-05-03T14:26:14.592Z" -> dd/mm/yyyy
+function formatValueDateString(s: string) {
+  let reFormattedDate = s.slice(0, 10).split("-");
+  return reFormattedDate.reverse().join("/");
+}
+
+// change date from dd/mm/yyyy -> yyyy-mm-dd for input value
+function formatInputDateString(s: string) {
+  if (checkDobFormat(s)) {
+    return s;
+  }
+  let reFormattedDate = s.split("/");
+  return reFormattedDate.reverse().join("-");
 }
 
 export {
+  eliminateSpecialChars,
   validateEmail,
   validatePhone,
   validateName,
+  validateDob,
   validatePasswordSignup,
   validatePassword,
   validateVehicleTypeID,
   validateFee,
   sortVehicleTypesById,
   validateKeyword,
+  sortServiceById,
+  filterUniqueInfoService,
+  validatePricesOfService,
+  sortEmployeeById,
+  formatValueDateString,
+  formatInputDateString,
 };

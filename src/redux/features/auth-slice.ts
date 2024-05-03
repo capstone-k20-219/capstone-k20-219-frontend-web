@@ -6,7 +6,7 @@ const initialState = {
     token: "",
     uid: "",
     refresh_token: "",
-    role: null,
+    role: "user",
   } as AuthState,
 } as InitialState;
 

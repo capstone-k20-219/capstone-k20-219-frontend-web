@@ -475,9 +475,9 @@ export default function ManagerVehicleType() {
     }
   };
 
-  const handleGetData = async (formState: string) => {
+  const handleGetData = async (keyword: string) => {
     try {
-      const res = await getVehicleTypes(token, formState);
+      const res = await getVehicleTypes(token, keyword);
       if (res.status === 401) {
         // refresh token
       } else if (res.status === 500) {

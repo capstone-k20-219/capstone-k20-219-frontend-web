@@ -4,14 +4,11 @@ import Button from "@/components/Button";
 import SearchBar from "@/components/SearchBar";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import BreadcrumbsComponent from "@/components/BreadcrumbsComponent";
-import { EmployeeData, RoleType } from "@/lib/type";
 import {
-  formatInputDateString,
-  formatValueDateString,
-  getEmployeeList,
-  validateKeySearch,
-} from "@/lib/actions";
-import { useFormState } from "react-dom";
+  UserDBGetType,
+  UserDBPostType,
+  UserPersonalInfoType,
+} from "@/lib/type";
 import NoDataFound from "@/components/NoDataFound";
 import InputComponent from "@/components/InputComponent";
 import ButtonWhite from "@/components/ButtonWhite";
@@ -27,6 +24,26 @@ import {
   TableRowHeadContainer,
 } from "@/components/ContainerUI";
 import { Stack, Pagination } from "@mui/material";
+import { useAppSelector } from "@/redux/store";
+import { MdDelete } from "react-icons/md";
+import {
+  createNewEmployee,
+  deleteEmployeeById,
+  getEmployeeList,
+} from "@/lib/services/users";
+import toast from "react-hot-toast";
+import {
+  eliminateSpecialChars,
+  formatInputDateString,
+  formatValueDateString,
+  sortEmployeeById,
+  validateDob,
+  validateEmail,
+  validateKeyword,
+  validateName,
+  validatePassword,
+  validatePhone,
+} from "@/lib/helpers";
 
 interface EmployeeColumn {
   id: "id" | "name" | "phone" | "email" | "dob" | "action";
@@ -35,6 +52,7 @@ interface EmployeeColumn {
   align?: "center" | "left" | "right" | "justify" | "char" | undefined;
   format?: (value: string) => string;
   paddingLeft?: string;
+  paddingRight?: string;
 }
 
 const columns: readonly EmployeeColumn[] = [
@@ -71,24 +89,20 @@ const columns: readonly EmployeeColumn[] = [
   {
     id: "action",
     label: "Action",
-    minWidth: 150,
-    align: "left",
-    paddingLeft: "12px",
+    minWidth: 80,
+    align: "right",
+    paddingRight: "20px",
   },
 ];
 
 type TableResultsProps = {
-  data: EmployeeData[] | null;
-  onEdit: () => void;
-  onSetupEditData: (data: EmployeeData | null) => void;
+  data: UserDBGetType[] | null;
   onDeleteRecord: (value: any) => void;
   onDecreasePage: () => void;
 };
 
 function TableResults({
   data,
-  onEdit,
-  onSetupEditData,
   onDeleteRecord,
   onDecreasePage,
 }: TableResultsProps) {
@@ -109,6 +123,7 @@ function TableResults({
                   style={{
                     minWidth: column.minWidth,
                     paddingLeft: column.paddingLeft,
+                    paddingRight: column.paddingRight,
                   }}
                 >
                   {column.label}
@@ -138,26 +153,16 @@ function TableResults({
                     <td
                       key={column.id}
                       align={column.align}
-                      style={{ paddingLeft: column.paddingLeft }}
-                      className="flex gap-3 items-center h-full"
+                      style={{ paddingRight: column.paddingRight }}
+                      className=""
                     >
-                      <>
-                        <Button
-                          name="Update"
-                          className="button-action"
-                          onClickFunction={() => {
-                            onSetupEditData(row);
-                            onEdit();
-                          }}
-                        />
-                        <Button
-                          name="Delete"
-                          className="button-action"
-                          onClickFunction={() => {
-                            onDeleteRecord(row.id);
-                          }}
-                        />
-                      </>
+                      <Button
+                        icon={<MdDelete style={{ width: 16, height: 16 }} />}
+                        className="button-action"
+                        onClickFunction={() => {
+                          onDeleteRecord(row.id);
+                        }}
+                      />
                     </td>
                   );
                 })}
@@ -173,24 +178,25 @@ function TableResults({
 }
 
 type AddEmployeeFormProps = {
-  existData: EmployeeData | null;
   onToggleModal: () => void;
-  onExistData: (data: EmployeeData | null) => void;
-  onChangeData: (id: string, data: EmployeeData) => void;
+  onReset: () => void;
 };
 
-const initialEmployeeData: EmployeeData = {
-  id: "",
-  name: "",
+const initialEmployeeData: UserPersonalInfoType = {
   email: "",
-  phone: "",
+  password: "",
+  name: "",
   dob: "",
+  phone: "",
+  image: "",
 };
 
 const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
-  ({ existData, onToggleModal, onExistData, onChangeData }, refModal) => {
-    const [isUpdate, setIsUpdate] = useState(false);
-    const [formData, setFormData] = useState<EmployeeData>(initialEmployeeData);
+  ({ onToggleModal, onReset }, refModal) => {
+    const { token } = useAppSelector((state) => state.auth.value);
+    const [formData, setFormData] =
+      useState<UserPersonalInfoType>(initialEmployeeData);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const handleFormChange = (e: any) => {
       setFormData((prev) => {
@@ -203,52 +209,109 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
 
     const handleCloseModal = () => {
       setFormData(initialEmployeeData);
-      onExistData(null);
       onToggleModal();
-      setIsUpdate(false);
     };
 
-    // mock action
-    const handleFormAction = (formData: FormData) => {
-      const id = formData.get("id") as string;
-      const name = formData.get("name") as string;
-      const phone = formData.get("phone") as string;
-      const email = formData.get("email") as string;
-      const dob = formData.get("dob") as string;
-      // const role = formData.get("role") as RoleType;
+    const handleValidateFormData = (
+      name: string,
+      phone: string,
+      email: string,
+      dob: string,
+      password: string
+    ) => {
+      const validName = validateName(name);
+      if (!validName.valid) {
+        return validName;
+      }
 
-      if (id === "") {
+      const validPhone = validatePhone(phone);
+      if (!validPhone.valid) {
+        return validPhone;
+      }
+
+      const validEmail = validateEmail(email);
+      if (!validEmail.valid) {
+        return validEmail;
+      }
+
+      const validDob = validateDob(dob);
+      if (!validDob.valid) {
+        return validDob;
+      }
+
+      const validPass = validatePassword(password);
+      if (!validPass.valid) {
+        return validPass;
+      }
+
+      return {
+        valid: true,
+        message: "",
+        data: {
+          name: validName.data,
+          phone: validPhone.data,
+          email: validEmail.data,
+          dob: validDob.data,
+          password: validPass.data,
+          image: "",
+        } as UserPersonalInfoType,
+      };
+    };
+
+    const handleFormAction = async (formData: FormData) => {
+      try {
+        setErrorMessage("");
+
+        const name = formData.get("name") as string;
+        const phone = formData.get("phone") as string;
+        const email = formData.get("email") as string;
+        const dob = formData.get("dob") as string;
+        const password = formData.get("password") as string;
+        // const role = formData.get("role") as RoleType;
+
+        const validData = handleValidateFormData(
+          name,
+          phone,
+          email,
+          dob,
+          password
+        );
+
+        if (!validData.valid) {
+          setErrorMessage(validData.message);
+          return;
+        }
+
+        const newData: UserPersonalInfoType =
+          validData.data as UserPersonalInfoType;
         // add new record
-        const record: EmployeeData = {
-          id: String(Math.round(Math.random() * 1000)),
-          name: name,
-          phone: phone,
-          email: email,
-          dob: dob,
-          // role: role,
+        const record: UserDBPostType = {
+          name: newData.name,
+          phone: newData.phone,
+          email: newData.email,
+          dob: newData.dob,
+          password: newData.password,
+          image: "",
+          bankAccount: [],
+          role: ["employee", "user"],
         };
-        onChangeData(id, record);
-      } else {
-        // update record
-        const record: EmployeeData = {
-          id: id,
-          name: name,
-          phone: phone,
-          email: email,
-          dob: dob,
-          // role: role,
-        };
-        onChangeData(id, record);
-      }
-      handleCloseModal();
-    };
 
-    useEffect(() => {
-      if (existData !== null) {
-        setFormData(existData);
-        setIsUpdate(true);
+        const res = await createNewEmployee(token, record);
+        if (res.status === 201) {
+          toast.success("New employee is created successfully.");
+          handleCloseModal();
+          onReset();
+        } else if (res.status === 500) {
+          throw new Error("");
+        } else if (res.status === 401) {
+          //refresh token
+        } else {
+          toast.error("Unknown error!");
+        }
+      } catch (error) {
+        toast.error("Server error!");
       }
-    }, [existData]);
+    };
 
     return (
       <DialogContainer ref={refModal}>
@@ -256,8 +319,6 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
           action={handleFormAction}
           className="w-full h-full flex-col justify-center gap-2.5 flex"
         >
-          <input type="hidden" value={formData.id} name="id" />
-          {/* select option for role (optional) */}
           <InputComponent
             name="name"
             type="text"
@@ -286,6 +347,18 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
             onChangeFunction={handleFormChange}
             label="Date of birth (mm/dd/yyyy)"
           />
+          <InputComponent
+            name="password"
+            type="password"
+            value={formData.password}
+            onChangeFunction={handleFormChange}
+            label="Password"
+          />
+          {errorMessage && (
+            <div className="mt-2.5 gap-4 text-red-500 text-sm">
+              <i>{errorMessage}</i>
+            </div>
+          )}
           <div className="w-full font-bold mt-2.5 flex gap-4">
             <ButtonWhite
               name="Cancel"
@@ -293,7 +366,7 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
               onClickFunction={handleCloseModal}
             />
             <Button
-              name={isUpdate ? "Update" : "Add"}
+              name="Add"
               className="w-full text-sm px-2.5 py-2"
               type="submit"
             />
@@ -305,10 +378,15 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
 );
 
 export default function ManagerEmployee() {
-  const [updateData, setUpdateData] = useState<EmployeeData | null>(null);
-  const [data, setData] = useState<EmployeeData[] | null>([]);
-  const [formState, formAction] = useFormState(validateKeySearch, ""); // search action
-  const [isResetSearch, setIsResetSearch] = useState<boolean>(true);
+  const { token } = useAppSelector((state) => state.auth.value);
+  const [dataStorage, setDataStorage] = useState<UserDBGetType[] | null>([]);
+  const [data, setData] = useState<UserDBGetType[] | null>([]);
+
+  const [prevKeySearch, setPrevKeySearch] = useState("");
+  const [keySearch, setKeySearch] = useState("");
+  const [isSearch, setIsSearch] = useState<boolean>(true);
+  const [isReset, setIsReset] = useState<boolean>(false);
+
   const refSearchBar = useRef<HTMLFormElement>(null);
   const refModal = useRef<HTMLDialogElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -341,51 +419,104 @@ export default function ManagerEmployee() {
       : refModal.current.showModal();
   };
 
-  const handleUpdateData = (data: EmployeeData | null) => {
-    setUpdateData(data);
-  };
-
-  const handleData = (id: string, record: EmployeeData) => {
-    refSearchBar.current?.reset();
-    refSearchBar.current?.requestSubmit();
-    handleResetState(true);
-
-    if (id === "") {
-      setData((prev) => {
-        if (prev === null) return prev;
-        return [...prev, record];
-      });
-    } else {
-      setData((prev) => {
-        if (prev === null) return prev;
-        const afterDelete = prev.filter((item) => {
-          return item.id !== id;
-        });
-        return [...afterDelete, record];
-      });
+  const handleSearch = async (formData: FormData) => {
+    if (!dataStorage) return;
+    const keyword: string = formData.get("key-search") as string;
+    const newKeyword = validateKeyword(keyword);
+    if (prevKeySearch !== newKeyword) {
+      if (newKeyword) {
+        setData(
+          dataStorage.filter((item) => {
+            return (
+              item.id.toLowerCase().includes(newKeyword) ||
+              item.name.toLowerCase().includes(newKeyword) ||
+              item.email.toLowerCase().includes(newKeyword) ||
+              item.phone.includes(newKeyword) ||
+              item.dob.slice(0, 10).includes(newKeyword)
+            );
+          })
+        );
+      } else {
+        setData(dataStorage);
+      }
+      setIsReset(!newKeyword);
+      setPrevKeySearch(newKeyword);
     }
   };
 
   const handleResetState = (val: boolean) => {
-    setIsResetSearch(val);
+    setIsReset(val);
   };
 
-  const handleDeleteRecord = (id: string) => {
+  const handleResetSearch = () => {
+    refSearchBar.current?.reset();
+    setIsReset(true);
+  };
+
+  const handleAfterAdding = () => {
+    handleResetSearch();
+    setKeySearch("");
+    setIsSearch(true);
+  };
+
+  const handleDeleteRecord = async (id: string) => {
     // call some action to delete in DB
-    setData((prev) => {
-      if (prev === null) return prev;
-      const newData = prev.filter((item) => item.id !== id);
-      return newData;
-    });
+    try {
+      console.log("delete record id:", id);
+      const newID = eliminateSpecialChars(id);
+      if (!newID) {
+        toast.error("Cannot delete service with id empty.");
+        return;
+      }
+
+      const res = await deleteEmployeeById(token, newID);
+      if (res.status === 200) {
+        const data = dataStorage ? [...dataStorage] : [];
+        const deletedData = data.filter((item) => item.id !== newID);
+        setDataStorage(deletedData);
+        setData(deletedData);
+        handleResetSearch();
+        setKeySearch("");
+      } else if (res.status === 500) {
+        throw new Error("");
+      } else if (res.data === 401) {
+        // refresh token
+      }
+    } catch (error) {
+      toast.error("Server error!");
+    }
+  };
+
+  const handleGetData = async () => {
+    try {
+      const res = await getEmployeeList(token);
+      if (res.status === 200) {
+        if (res.data) {
+          const newData: UserDBGetType[] = res.data as UserDBGetType[];
+          const sortedData = sortEmployeeById(newData);
+          setDataStorage(sortedData);
+          setData(sortedData);
+        }
+      } else if (res.status === 401) {
+        // refresh token
+      } else if (res.status === 500) {
+        throw new Error("");
+      } else {
+        toast.error("Unknown error!");
+      }
+    } catch (error) {
+      toast.error("Server error!");
+    }
   };
 
   useEffect(() => {
-    const fetchEmployeeList = async () => {
-      const res = await getEmployeeList(formState);
-      if (res !== null) setData(res);
-    };
-    fetchEmployeeList();
-  }, [formState]);
+    if (isSearch) {
+      handleGetData();
+      setIsSearch(false);
+      setIsReset(!keySearch);
+      setPrevKeySearch(keySearch);
+    }
+  }, [isSearch]);
 
   return (
     <>
@@ -394,29 +525,25 @@ export default function ManagerEmployee() {
         <ActionTopContainer>
           <form
             ref={refSearchBar}
-            action={formAction}
+            action={handleSearch}
             className="w-1/2 justify-center items-center gap-4 flex text-sm"
           >
             <SearchBar
-              refForm={refSearchBar}
-              reset={isResetSearch}
-              setReset={handleResetState}
+              reset={isReset}
+              handleReset={handleResetState}
+              onReset={handleResetSearch}
+              placeholder={"Enter keyword..."}
             />
           </form>
           <Button
             name="Add new account"
             className="p-2.5 px-3 leading-4 text-sm"
-            onClickFunction={() => {
-              setUpdateData(null);
-              toggleModal();
-            }}
+            onClickFunction={toggleModal}
           />
         </ActionTopContainer>
         <DataBottomContainer>
           <TableResults
             data={currentRecords}
-            onEdit={toggleModal}
-            onSetupEditData={handleUpdateData}
             onDeleteRecord={handleDeleteRecord}
             onDecreasePage={handleDecreasePage}
           />
@@ -436,9 +563,7 @@ export default function ManagerEmployee() {
       <AddEmployeeForm
         ref={refModal}
         onToggleModal={toggleModal}
-        existData={updateData}
-        onExistData={handleUpdateData}
-        onChangeData={handleData} // temporary strategy
+        onReset={handleAfterAdding}
       />
     </>
   );

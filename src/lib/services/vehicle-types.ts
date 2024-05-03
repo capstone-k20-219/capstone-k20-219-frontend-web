@@ -1,25 +1,4 @@
 import { VehicleTypeData } from "../type";
-/*
-const getAllVehicleTypes = async (token: string) => {
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/vehicle-types`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: "Bearer " + token,
-        },
-      }
-    );
-    
-    console.log(res.status);
-    return res.json();
-  } catch (error) {
-    console.log(error);
-  }
-};
-const getVehicleTypeById = async (token: string, id: string) => {};
-*/
 
 const getVehicleTypes = async (token: string, id?: string) => {
   try {

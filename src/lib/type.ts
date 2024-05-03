@@ -5,7 +5,7 @@ export enum TableType {
   ServiceRequest,
 }
 
-type AdminData = EmployeeData & { role: RoleType };
+export type RoleType = "manager" | "employee" | "user";
 
 export type EmployeeData = {
   [key: string]: any;
@@ -16,6 +16,31 @@ export type EmployeeData = {
   dob: string;
 };
 
+export type UserPersonalInfoType = {
+  email: string;
+  password: string;
+  name: string;
+  dob: string;
+  phone: string;
+  image: string;
+};
+
+export type UserDBGetType = UserPersonalInfoType & {
+  [key: string]: any;
+  createdAt: string;
+  updatedAt: string;
+  id: string;
+};
+
+export type UserListDBGetType = UserDBGetType & {
+  role: RoleType[];
+};
+
+export type UserDBPostType = UserPersonalInfoType & {
+  bankAccount: { id?: number; name: string; accountNo: string }[];
+  role: RoleType[];
+};
+
 export type VehicleTypeData = {
   [key: string]: any;
   id: string;
@@ -24,12 +49,39 @@ export type VehicleTypeData = {
   slotBookingFee: number;
 };
 
+export type ServicePrices = {
+  [key: string]: any;
+  typeId: string;
+  unitPrice: number;
+};
+
+export type ServiceDBPostType = {
+  name: string;
+  prices: ServicePrices[];
+};
+
+export type ServiceDBPutType = {
+  id: string;
+} & ServiceDBPostType;
+
+export type ServiceDBGetType = {
+  id: string;
+  name: string;
+  prices: {
+    type: {
+      id: string;
+      name: string;
+    };
+    unitPrice: number;
+  }[];
+};
+
 export type ServiceData = {
   [key: string]: any;
   id: string;
   name: string;
   price: number;
-  typ: string;
+  type: string;
 };
 
 export type ServiceRequestData = {
@@ -60,8 +112,6 @@ export type InitialState = {
   value: AuthState;
 };
 
-export type RoleType = "manager" | "employee" | null;
-
 export type AuthState = {
   token: string;
   uid: string;
@@ -70,7 +120,7 @@ export type AuthState = {
 };
 
 export type ActiveState = {
-  role: RoleType | null;
+  role: RoleType;
   index: number;
   name: string;
 };

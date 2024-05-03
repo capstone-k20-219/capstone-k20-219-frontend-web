@@ -10,7 +10,7 @@ import { onActive } from "@/redux/features/active-slice";
 import { validateEmail, validatePassword } from "@/lib/helpers";
 import { logIn } from "@/redux/features/auth-slice";
 import { ActiveState, AuthState } from "@/lib/type";
-import { getUserById } from "@/lib/services/users";
+import { getSelfUser } from "@/lib/services/users";
 import toast from "react-hot-toast";
 import { authenticate } from "@/lib/services/auth";
 
@@ -40,7 +40,7 @@ export default function LoginForm() {
 
       const data = await authenticate(validEmail.data, validPass.data);
 
-      const user = await getUserById(data.access_token);
+      const user = await getSelfUser(data.access_token);
 
       const isManager = user.role.includes("manager");
       const isEmployee = user.role.includes("employee");
