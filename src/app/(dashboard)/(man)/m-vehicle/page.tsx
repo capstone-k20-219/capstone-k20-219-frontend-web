@@ -71,7 +71,7 @@ const columns: readonly VehicleTypeColumn[] = [
   },
   {
     id: "parkingFee",
-    label: "Parking fee / day",
+    label: "Parking fee / hour",
     minWidth: 130,
     align: "left",
     format: (value: number) => `$${value}.00`,

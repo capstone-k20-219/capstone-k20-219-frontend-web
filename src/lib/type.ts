@@ -157,8 +157,13 @@ export interface LoginFormStateType {
 }
 
 export type FeedbackData = {
-  id: number | string;
+  createdAt: string;
+  id: string;
   content: string;
-  rate: number;
-  date: string;
+  rating: number;
+  user: {
+    id: string;
+    name: string;
+    image: string;
+  };
 };

@@ -289,7 +289,7 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
           name: newData.name,
           phone: newData.phone,
           email: newData.email,
-          dob: newData.dob,
+          dob: newData.dob + "T08:00:00Z",
           password: newData.password,
           image: "",
           bankAccount: [],

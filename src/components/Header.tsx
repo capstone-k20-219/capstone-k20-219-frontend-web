@@ -23,7 +23,7 @@ function HeaderTimer() {
 
   useEffect(() => {
     const timerInterval = setInterval(
-      () => setDate(new Date().toUTCString()),
+      () => setDate(new Date().toLocaleString()),
       1000
     );
     return () => {

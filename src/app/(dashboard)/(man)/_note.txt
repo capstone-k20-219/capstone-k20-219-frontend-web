@@ -2,7 +2,6 @@
 Employee page: mising
 Dashboard: missing 
 Map: missing
-Feedback: missing
 
 refresh token case : missing
 loading state: missing a lot
@@ -12,4 +11,5 @@ toaster : missing a lot
 Service page
 Vehicle type page: need re-check about data manipulation strategy
 Employee page: done
+Feedback
 

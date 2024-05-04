@@ -126,7 +126,7 @@ function ServiceComponent({
                 <tr key={index}>
                   <CustomTData>{price.type.id}</CustomTData>
                   <CustomTData>{price.type.name}</CustomTData>
-                  <CustomTData>{`$ ${price.unitPrice}.00`}</CustomTData>
+                  <CustomTData>{`$${price.unitPrice}.00`}</CustomTData>
                 </tr>
               );
             })}
@@ -522,8 +522,8 @@ export default function ManagerService() {
       const res = await deleteServiceById(token, newID);
       if (res.status === 200) {
         // handleAfterAdding();
-        const data = dataStorage ? [...dataStorage] : [];
-        const deletedData = data.filter((item) => item.id !== newID);
+        const dataTmp = dataStorage ? [...dataStorage] : [];
+        const deletedData = dataTmp.filter((item) => item.id !== newID);
         setDataStorage(deletedData);
         setData(deletedData);
         handleResetSearch();
