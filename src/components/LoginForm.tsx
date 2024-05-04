@@ -9,7 +9,7 @@ import { useDispatch } from "react-redux";
 import { onActive } from "@/redux/features/active-slice";
 import { validateEmail, validatePassword } from "@/lib/helpers";
 import { logIn } from "@/redux/features/auth-slice";
-import { ActiveState, AuthState } from "@/lib/type";
+import { ActiveState, AuthState, SelfUserDBGetType } from "@/lib/type";
 import { getSelfUser } from "@/lib/services/users";
 import toast from "react-hot-toast";
 import { authenticate } from "@/lib/services/auth";
@@ -42,8 +42,20 @@ export default function LoginForm() {
 
       const user = await getSelfUser(data.access_token);
 
-      const isManager = user.role.includes("manager");
-      const isEmployee = user.role.includes("employee");
+      // if (user.status === 401) {
+      //   //refresh token
+      //   console.log("do refreshing token");
+      //   return;
+      // }
+      // if (user.status !== 200) {
+      //   toast.error("Unknown error");
+      //   return;
+      // }
+
+      const userData: SelfUserDBGetType = user.data as SelfUserDBGetType;
+
+      const isManager = userData.role.includes("manager");
+      const isEmployee = userData.role.includes("employee");
       const role = isManager ? "manager" : isEmployee ? "employee" : null;
 
       if (role) {

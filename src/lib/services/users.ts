@@ -29,9 +29,38 @@ const getSelfUser = async (token: string) => {
         Authorization: "Bearer " + token,
       },
     });
-    return res.json();
+    return {
+      status: res.status,
+      data: await res.json(),
+    };
   } catch (error) {
-    console.log(error);
+    return {
+      status: 500,
+      data: null,
+    };
+  }
+};
+
+const updateSelfUser = async (token: string, user: UserDBPostType) => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+      body: JSON.stringify(user),
+    });
+
+    return {
+      status: res.status,
+      data: await res.json(),
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+    };
   }
 };
 
@@ -108,4 +137,5 @@ export {
   getEmployeeList,
   createNewEmployee,
   deleteEmployeeById,
+  updateSelfUser,
 };

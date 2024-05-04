@@ -36,7 +36,18 @@ export type UserListDBGetType = UserDBGetType & {
   role: RoleType[];
 };
 
-export type UserDBPostType = UserPersonalInfoType & {
+export type UserDBPostType = {
+  email: string;
+  password?: string;
+  name: string;
+  dob: string;
+  phone: string;
+  image: string;
+  bankAccount?: { id?: number; name: string; accountNo: string }[];
+  role?: RoleType[];
+};
+
+export type SelfUserDBGetType = UserDBGetType & {
   bankAccount: { id?: number; name: string; accountNo: string }[];
   role: RoleType[];
 };

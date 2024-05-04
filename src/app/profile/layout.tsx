@@ -9,10 +9,10 @@ export default function ProfileLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const isAuth = useAppSelector((state) => state.auth.value.isAuth);
+  const { token } = useAppSelector((state) => state.auth.value);
   const router = useRouter();
   useEffect(() => {
-    if (!isAuth) router.replace("login");
+    if (!token) router.replace("login");
   });
   return children;
 }

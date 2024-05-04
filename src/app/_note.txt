@@ -1,0 +1,7 @@
+
+Employee Group
+Manager group
+
+--------- Done ----------
+Profile: added skeleton
+Login: mising some thing in call api
