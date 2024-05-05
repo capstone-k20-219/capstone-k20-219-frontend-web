@@ -178,3 +178,17 @@ export type FeedbackData = {
     image: string;
   };
 };
+
+export type Coordinate = {
+  x_start: number;
+  x_end: number;
+  y_start: number;
+  y_end: number;
+};
+
+export type SlotBlock = {
+  id: string;
+  typeId: string; // accepted vehicle
+} & Coordinate;
+
+export const BLOCK_SIZE = 24; // px

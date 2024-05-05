@@ -1,6 +1,7 @@
 import {
+  BLOCK_SIZE,
+  Coordinate,
   ServiceDBGetType,
-  ServiceData,
   ServicePrices,
   UserDBGetType,
   VehicleTypeData,
@@ -274,6 +275,34 @@ function formatInputDateString(s: string) {
   return reFormattedDate.reverse().join("-");
 }
 
+function validateCoordinate(coordinate: Coordinate) {
+  const { x_start, y_start, x_end, y_end } = coordinate;
+  if (x_start < 0 || x_end < 0 || y_end < 0 || y_start < 0) {
+    return {
+      valid: false,
+      message: "Coordinates cannot be negative.",
+      data: null,
+    };
+  }
+
+  if (
+    Math.abs(x_start - x_end) < BLOCK_SIZE ||
+    Math.abs(y_start - y_end) < BLOCK_SIZE
+  ) {
+    return {
+      valid: false,
+      message: `The smallest unit of a slot is ${BLOCK_SIZE}px`,
+      data: null,
+    };
+  }
+
+  return {
+    valid: true,
+    message: "",
+    data: null,
+  };
+}
+
 export {
   eliminateSpecialChars,
   validateEmail,
@@ -292,4 +321,5 @@ export {
   sortEmployeeById,
   formatValueDateString,
   formatInputDateString,
+  validateCoordinate,
 };

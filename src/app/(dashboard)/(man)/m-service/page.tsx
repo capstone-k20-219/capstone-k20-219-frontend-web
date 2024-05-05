@@ -138,7 +138,7 @@ function ServiceComponent({
 }
 
 type TableResultsProps = {
-  data: ServiceDBGetType[] | null;
+  data: ServiceDBGetType[];
   onEdit: () => void;
   onSetupEditData: (data: ServiceDBGetType | null) => void;
   onDeleteRecord: (value: any) => void;
@@ -153,12 +153,11 @@ function TableResults({
   onDecreasePage,
 }: TableResultsProps) {
   useEffect(() => {
-    if (data === null) return;
     if (data.length === 0) onDecreasePage();
   }, [data]);
   return (
     <>
-      {data && data.length > 0 ? (
+      {data.length > 0 ? (
         <div className="flex flex-col gap-3 mt-4 overflow-auto h-full pb-5">
           {data.map((service, index) => (
             <ServiceComponent
@@ -431,8 +430,8 @@ export default function ManagerService() {
   const { token } = useAppSelector((state) => state.auth.value);
   const [optionTypes, setOptionTypes] = useState<OptionType[]>([]);
   const [updateData, setUpdateData] = useState<ServiceDBGetType | null>(null);
-  const [dataStorage, setDataStorage] = useState<ServiceDBGetType[] | null>([]);
-  const [data, setData] = useState<ServiceDBGetType[] | null>([]);
+  const [dataStorage, setDataStorage] = useState<ServiceDBGetType[]>([]);
+  const [data, setData] = useState<ServiceDBGetType[]>([]);
   const [prevKeySearch, setPrevKeySearch] = useState("");
   const [keySearch, setKeySearch] = useState("");
   const [isSearch, setIsSearch] = useState<boolean>(true);
@@ -445,9 +444,7 @@ export default function ManagerService() {
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
 
-  const currentRecords = data
-    ? data.slice(indexOfFirstRecord, indexOfLastRecord)
-    : null;
+  const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
 
   const handleChangePage = (
     event: React.ChangeEvent<unknown>,
@@ -631,7 +628,7 @@ export default function ManagerService() {
             onDecreasePage={handleDecreasePage}
           />
         </DataBottomContainer>
-        {data && data.length > recordsPerPage && (
+        {data.length > recordsPerPage && (
           <Stack mt={"auto"}>
             <Pagination
               defaultPage={1}

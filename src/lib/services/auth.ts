@@ -32,4 +32,28 @@ const userLogOut = async (token: string) => {
   }
 };
 
-export { authenticate, userLogOut };
+const refreshingToken = async (refresh_token: string) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/auth/log-out/all`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          refresh_token: refresh_token,
+        }),
+      }
+    );
+
+    return {
+      status: res.status,
+      data: await res.json(),
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+    };
+  }
+};
+
+export { authenticate, userLogOut, refreshingToken };

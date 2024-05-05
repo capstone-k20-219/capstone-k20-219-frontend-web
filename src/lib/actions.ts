@@ -186,16 +186,6 @@ export const handleLogin = async (
   }
 };
 
-export function formatInputDateString(s: string) {
-  let reFormattedDate = s.split("/");
-  return reFormattedDate.reverse().join("-");
-}
-
-export function formatValueDateString(s: string) {
-  let reFormattedDate = s.split("-");
-  return reFormattedDate.reverse().join("/");
-}
-
 export const getVehicleTypeListForMap = async () => {
   try {
     const res = vehicleTypeRows;

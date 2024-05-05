@@ -1,6 +1,4 @@
 
-Employee page: mising
-Dashboard: missing 
 Map: missing
 
 refresh token case : missing
@@ -12,4 +10,5 @@ Service page
 Vehicle type page: need re-check about data manipulation strategy
 Employee page: done
 Feedback
+Dashboard: missing 
 
