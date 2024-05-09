@@ -8,17 +8,17 @@ import { onActive } from "@/redux/features/active-slice";
 
 export default function ButtonDispatch() {
   const router = useRouter();
-  const { isAuth, role } = useAppSelector((state) => state.auth.value);
+  const { token, role } = useAppSelector((state) => state.auth.value);
   const dispatch = useDispatch<AppDispatch>();
 
   const handleSubmit = () => {
-    if (!isAuth) router.push("/login");
-    else if (role === "m") {
+    if (!token) router.push("/login");
+    else if (role === "manager") {
       dispatch(onActive({ role: role, index: 0, name: "Dashboard" }));
-      router.push(`/${role}-home`);
+      router.push(`/m-home`);
     } else {
       dispatch(onActive({ role: role, index: 0, name: "Map" }));
-      router.push(`/${role}-map`);
+      router.push(`/e-map`);
     }
   };
   return (

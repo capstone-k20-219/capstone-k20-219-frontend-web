@@ -3,11 +3,13 @@
 export default function ButtonWhite({
   type = "button",
   name,
+  icon,
   className,
   onClickFunction,
 }: {
   type?: "button" | "reset" | "submit";
-  name: string;
+  name?: string;
+  icon?: React.ReactNode;
   className?: string;
   onClickFunction?: (value?: any) => void;
 }) {
@@ -18,7 +20,8 @@ export default function ButtonWhite({
       opacity-70 hover:opacity-100 active:scale-95 transition-all ${className}`}
       onClick={onClickFunction}
     >
-      <div className="text-center text-neutral-900">{name}</div>
+      {name && <div className="text-center text-neutral-900">{name}</div>}
+      {icon && <div className="text-center text-neutral-900">{icon}</div>}
     </button>
   );
 }

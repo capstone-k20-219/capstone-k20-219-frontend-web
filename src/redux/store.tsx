@@ -6,14 +6,14 @@ import storage from "redux-persist/lib/storage";
 import { persistReducer } from "redux-persist";
 
 const persistenceConfig = {
-  auth: {
-    key: "auth",
-    version: 1,
-    storage,
-  },
   active: {
     key: "active",
     version: 1,
+    storage,
+  },
+  auth: {
+    key: "auth",
+    version: 2,
     storage,
   },
 };

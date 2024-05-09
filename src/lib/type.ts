@@ -5,7 +5,7 @@ export enum TableType {
   ServiceRequest,
 }
 
-type AdminData = EmployeeData & { role: RoleType };
+export type RoleType = "manager" | "employee" | "user";
 
 export type EmployeeData = {
   [key: string]: any;
@@ -16,12 +16,75 @@ export type EmployeeData = {
   dob: string;
 };
 
+export type UserPersonalInfoType = {
+  email: string;
+  password: string;
+  name: string;
+  dob: string;
+  phone: string;
+  image: string;
+};
+
+export type UserDBGetType = UserPersonalInfoType & {
+  [key: string]: any;
+  createdAt: string;
+  updatedAt: string;
+  id: string;
+};
+
+export type UserListDBGetType = UserDBGetType & {
+  role: RoleType[];
+};
+
+export type UserDBPostType = {
+  email: string;
+  password?: string;
+  name: string;
+  dob: string;
+  phone: string;
+  image: string;
+  bankAccount?: { id?: number; name: string; accountNo: string }[];
+  role?: RoleType[];
+};
+
+export type SelfUserDBGetType = UserDBGetType & {
+  bankAccount: { id?: number; name: string; accountNo: string }[];
+  role: RoleType[];
+};
+
 export type VehicleTypeData = {
   [key: string]: any;
-  id: number;
+  id: string;
   name: string;
-  bookingFee: number;
   parkingFee: number;
+  slotBookingFee: number;
+};
+
+export type ServicePrices = {
+  [key: string]: any;
+  typeId: string;
+  unitPrice: number;
+};
+
+export type ServiceDBPostType = {
+  name: string;
+  prices: ServicePrices[];
+};
+
+export type ServiceDBPutType = {
+  id: string;
+} & ServiceDBPostType;
+
+export type ServiceDBGetType = {
+  id: string;
+  name: string;
+  prices: {
+    type: {
+      id: string;
+      name: string;
+    };
+    unitPrice: number;
+  }[];
 };
 
 export type ServiceData = {
@@ -29,16 +92,7 @@ export type ServiceData = {
   id: string;
   name: string;
   price: number;
-  typ: string;
-};
-
-export type ServiceRequestData = {
-  [key: string]: any;
-  id: number; // booking id
-  name: string; // get from customer id
-  phone: string; //
-  plate: string; // get from vehicle id
-  time: string;
+  type: string;
 };
 
 export type TableData =
@@ -60,23 +114,15 @@ export type InitialState = {
   value: AuthState;
 };
 
-export type RoleType = "m" | "e" | null;
-
 export type AuthState = {
-  isAuth: boolean;
-  username: string;
+  token: string;
   uid: string;
-  role: RoleType;
-};
-
-export type LoginType = {
-  username: string;
-  id: string;
+  refresh_token: string;
   role: RoleType;
 };
 
 export type ActiveState = {
-  role: null | "m" | "e";
+  role: RoleType;
   index: number;
   name: string;
 };
@@ -113,8 +159,106 @@ export interface LoginFormStateType {
 }
 
 export type FeedbackData = {
-  id: number | string;
+  createdAt: string;
+  id: string;
   content: string;
-  rate: number;
-  date: string;
+  rating: number;
+  user: {
+    id: string;
+    name: string;
+    image: string;
+  };
+};
+
+export type Coordinate = {
+  x_start: number;
+  x_end: number;
+  y_start: number;
+  y_end: number;
+};
+
+export type SlotBlock = {
+  id: string;
+  typeId: string; // accepted vehicle
+  // type: { name: string };
+} & Coordinate;
+
+export type SlotBlockDBGetType = {
+  type: { name: string };
+} & SlotBlock;
+
+export const BLOCK_SIZE = 24; // px
+
+export type ParkingTicketDBGetType = {
+  checkOutTime: string;
+  createdAt: string;
+  id: string;
+  isPaid: boolean;
+  parkingCost: number;
+  plateNo: string;
+  slotId: string;
+  updatedAt: string;
+  userId: string;
+};
+
+export type VehicleValue = { name: string; value: number };
+export type ServiceValue = VehicleValue;
+
+export type TrafficDataType = {
+  fromDate: string;
+  toDate: string;
+  dataIn: number[];
+  dataOut: number[];
+};
+
+type ServiceBill = {
+  serviceId: string;
+  name: string;
+  quantity: number;
+  cost: number;
+};
+
+type TicketBaseInfo = {
+  ticketId: string;
+  plateNo: string;
+  checkInTime: string;
+  checkOutTime: string;
+  slotId: string;
+  parkingCost: number;
+};
+
+export type TicketCheckoutDBGetType = TicketBaseInfo & {
+  services: ServiceBill[];
+};
+
+export type TicketCheckInDBGetType = TicketBaseInfo;
+
+export type CheckInInfoType = {
+  slotId: string;
+  info: ParkingTicketDBGetType;
+};
+
+export type WeekRevenueType = {
+  fromDate: string;
+  toDate: string;
+  data: number[];
+};
+
+export type ServiceBookingDBGetType = {
+  [key: string]: any;
+  createdAt: string;
+  id: number; // id booking
+  ticket: {
+    id: string; // id ticket
+    plateNo: string;
+    slotId: string;
+  };
+};
+
+export type ServiceRequestData = {
+  [key: string]: any;
+  id: number; // booking id
+  slotId: string; //
+  plateNo: string;
+  createdAt: string;
 };

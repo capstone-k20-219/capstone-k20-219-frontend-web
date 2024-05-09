@@ -2,6 +2,12 @@
 import React from "react";
 import Card from "@/components/Card";
 import ReactECharts from "echarts-for-react";
+import {
+  ServiceValue,
+  TrafficDataType,
+  VehicleValue,
+  WeekRevenueType,
+} from "@/lib/type";
 
 type ChartProps = {
   option: any;
@@ -24,11 +30,25 @@ function Chart({ option, widthConfig }: ChartProps) {
   );
 }
 
-function ParkingTraffic() {
+function ChartSkeleton({ widthConfig }: { widthConfig: "small" | "big" }) {
+  let widthClass = "";
+  if (widthConfig === "small") {
+    widthClass = "min-w-[400px] md:w-1/5";
+  } else {
+    widthClass = "min-w-[450px] md:w-4/5";
+  }
+  return (
+    <div
+      className={`bg-neutral-200 rounded-[10px] w-full h-full p-5 animate-pulse ${widthClass}`}
+    ></div>
+  );
+}
+
+function ParkingTraffic({ data }: { data: TrafficDataType | null }) {
   const option = {
     title: {
       text: "Parking lot traffic this week",
-      subtext: "22/11/2023 - 22/3/2024",
+      subtext: `${data?.fromDate} - ${data?.toDate}`,
       textStyle: {
         fontWeight: 600,
         fontSize: 16,
@@ -86,7 +106,7 @@ function ParkingTraffic() {
         emphasis: {
           focus: "series",
         },
-        data: [320, 332, 301, 334, 390, 390, 390],
+        data: data?.dataIn,
       },
       {
         name: "Check-out",
@@ -94,19 +114,27 @@ function ParkingTraffic() {
         emphasis: {
           focus: "series",
         },
-        data: [220, 182, 191, 234, 290, 290, 290],
+        data: data?.dataOut,
       },
     ],
   };
 
-  return <Chart option={option} widthConfig="big" />;
+  return (
+    <>
+      {data ? (
+        <Chart option={option} widthConfig="big" />
+      ) : (
+        <ChartSkeleton widthConfig="big" />
+      )}
+    </>
+  );
 }
 
-function InComeAWeek() {
+function InComeAWeek({ data }: { data: WeekRevenueType | null }) {
   const option = {
     title: {
       text: "Revenue this week ($)",
-      subtext: "22/11/2023 - 22/3/2024",
+      subtext: `${data?.fromDate} - ${data?.toDate}`,
       textStyle: {
         fontWeight: 600,
         fontSize: 16,
@@ -140,23 +168,26 @@ function InComeAWeek() {
     series: [
       {
         name: "Revenue",
-        data: [150, 230, 224, 218, 135, 147, 260],
+        data: data?.data,
         type: "line",
       },
     ],
   };
-  return <Chart option={option} widthConfig="big" />;
+  return (
+    <>
+      {data ? (
+        <Chart option={option} widthConfig="big" />
+      ) : (
+        <ChartSkeleton widthConfig="big" />
+      )}
+    </>
+  );
 }
 
-function ServiceRevenueContribution() {
-  const data = {
-    legendData: ["Washing", "Charging", "Maintaining", "Parking"], // legend
-    data: [
-      { value: 3448, name: "Washing" },
-      { value: 1735, name: "Charging" },
-      { value: 280, name: "Maintaining" },
-      { value: 4560, name: "Parking" },
-    ],
+function ServiceRevenueContribution({ data }: { data: ServiceValue[] | null }) {
+  const dataOption = {
+    legendData: data?.map((item) => item.name), // legend
+    data: data ? data : [],
   };
   const option = {
     title: {
@@ -176,7 +207,7 @@ function ServiceRevenueContribution() {
       left: "5%",
       top: "25%",
       bottom: "20%",
-      data: data.legendData,
+      data: dataOption.legendData,
     },
     toolbox: {
       feature: {
@@ -209,24 +240,26 @@ function ServiceRevenueContribution() {
         labelLine: {
           show: false,
         },
-        data: [...data.data],
+        data: [...dataOption.data],
       },
     ],
   };
 
-  return <Chart option={option} widthConfig="small" />;
+  return (
+    <>
+      {data ? (
+        <Chart option={option} widthConfig="small" />
+      ) : (
+        <ChartSkeleton widthConfig="small" />
+      )}
+    </>
+  );
 }
 
-function VehicleTypeDistribution() {
-  const data = {
-    legendData: ["Car", "Bicycle", "Truck", "E-car", "Motorcycle"], // legend
-    data: [
-      { value: 1048, name: "Car" },
-      { value: 735, name: "Bicycle" },
-      { value: 580, name: "Truck" },
-      { value: 580, name: "E-car" },
-      { value: 580, name: "Motorcycle" },
-    ],
+function VehicleTypeDistribution({ data }: { data: VehicleValue[] | null }) {
+  const dataOption = {
+    legendData: data?.map((item) => item.name), // legend
+    data: data ? data : [],
   };
   const option = {
     title: {
@@ -246,7 +279,7 @@ function VehicleTypeDistribution() {
       right: "8%",
       top: "20%",
       bottom: "20%",
-      data: data.legendData,
+      data: dataOption.legendData,
     },
     toolbox: {
       feature: {
@@ -279,12 +312,20 @@ function VehicleTypeDistribution() {
         labelLine: {
           show: false,
         },
-        data: [...data.data],
+        data: [...dataOption.data],
       },
     ],
   };
 
-  return <Chart option={option} widthConfig="small" />;
+  return (
+    <>
+      {data ? (
+        <Chart option={option} widthConfig="small" />
+      ) : (
+        <ChartSkeleton widthConfig="small" />
+      )}
+    </>
+  );
 }
 
 export {
