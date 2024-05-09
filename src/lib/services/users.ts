@@ -15,9 +15,15 @@ const checkingPermission = async (token: string, role: string) => {
         }),
       }
     );
-    return res.json();
+    return {
+      status: res.status,
+      data: await res.json(),
+    };
   } catch (error) {
-    console.log(error);
+    return {
+      status: 500,
+      data: null,
+    };
   }
 };
 

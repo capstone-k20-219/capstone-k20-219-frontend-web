@@ -161,26 +161,3 @@ export const ListNavManager = [
   "Help",
   "Setting",
 ];
-
-export const SmallStatistics = [
-  {
-    name: "Current vehicle",
-    value: "60",
-  },
-  {
-    name: "Current available slot",
-    value: "34",
-  },
-  {
-    name: "Today booking",
-    value: "12",
-  },
-  {
-    name: "Yesterday revenue",
-    value: "$974,99",
-  },
-  {
-    name: "Total service",
-    value: "5",
-  },
-];

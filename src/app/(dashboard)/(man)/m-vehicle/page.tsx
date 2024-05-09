@@ -2,7 +2,7 @@
 
 import Button from "@/components/Button";
 import SearchBar from "@/components/SearchBar";
-import { RefObject, forwardRef, useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import BreadcrumbsComponent from "@/components/BreadcrumbsComponent";
 import { VehicleTypeData } from "@/lib/type";
 import NoDataFound from "@/components/NoDataFound";
@@ -27,15 +27,17 @@ import {
   updateVehicleType,
 } from "@/lib/services/vehicle-types";
 import { useAppSelector } from "@/redux/store";
-import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import {
   sortVehicleTypesById,
+  statusAction,
   validateFee,
   validateKeyword,
   validateName,
   validateVehicleTypeID,
 } from "@/lib/helpers";
+import useToken from "@/lib/hooks/refresh-token";
+import { ResultsTableSkeleton } from "@/components/Skeleton";
 
 interface VehicleTypeColumn {
   id: "id" | "name" | "slotBookingFee" | "parkingFee" | "action";
@@ -87,7 +89,7 @@ const columns: readonly VehicleTypeColumn[] = [
 ];
 
 type TableResultsProps = {
-  data: VehicleTypeData[] | null;
+  data: VehicleTypeData[];
   onEdit: () => void;
   onSetupEditData: (data: VehicleTypeData | null) => void;
   onDeleteRecord: (value: any) => void;
@@ -102,12 +104,11 @@ function TableResults({
   onDecreasePage,
 }: TableResultsProps) {
   useEffect(() => {
-    if (data === null) return;
     if (data.length === 0) onDecreasePage();
   }, [data]);
   return (
     <>
-      {data && data.length > 0 ? (
+      {data.length > 0 ? (
         <TableContainer>
           <TableHeadContainer>
             <TableRowHeadContainer>
@@ -192,8 +193,8 @@ type AddVehicleTypeFormProps = {
   existData: VehicleTypeData | null;
   onToggleModal: () => void;
   onExistData: (data: VehicleTypeData | null) => void;
-  refSearchBar: RefObject<HTMLFormElement>;
-  onReset: () => void;
+  onAddData: (data: VehicleTypeData) => void;
+  onUpdateData: (data: VehicleTypeData) => void;
 };
 
 const AddVehicleTypeForm = forwardRef<
@@ -201,15 +202,15 @@ const AddVehicleTypeForm = forwardRef<
   AddVehicleTypeFormProps
 >(
   (
-    { existData, onToggleModal, onExistData, refSearchBar, onReset },
+    { existData, onToggleModal, onExistData, onAddData, onUpdateData },
     refModal
   ) => {
-    const { token } = useAppSelector((state) => state.auth.value);
+    const { refreshToken, token } = useToken();
+
     const [isUpdate, setIsUpdate] = useState(false);
     const [formData, setFormData] = useState<VehicleTypeData>(
       initialVehicleTypeData
     );
-    const router = useRouter();
     const [errorMessage, setErrorMessage] = useState("");
 
     const handleFormChange = (e: any) => {
@@ -263,6 +264,64 @@ const AddVehicleTypeForm = forwardRef<
       };
     };
 
+    const handleCreateType = async (token: string, record: VehicleTypeData) => {
+      try {
+        let isUnauthorized = false;
+        let newToken = token;
+        do {
+          if (isUnauthorized) {
+            const isRefreshed = await refreshToken();
+            if (!isRefreshed.valid) return;
+            newToken = isRefreshed.access_token;
+            isUnauthorized = false;
+          }
+          const res = await createVehicleType(newToken, record);
+          if (res.status === 201) {
+            toast.success("New vehicle type is created successfully.");
+            handleCloseModal();
+            onAddData(record);
+            return;
+          } else if (res.status === 401) {
+            isUnauthorized = true;
+          } else {
+            statusAction(res.status);
+            return;
+          }
+        } while (true);
+      } catch (error) {
+        toast.error("Server error!");
+      }
+    };
+
+    const handleUpdateType = async (token: string, record: VehicleTypeData) => {
+      try {
+        let isUnauthorized = false;
+        let newToken = token;
+        do {
+          if (isUnauthorized) {
+            const isRefreshed = await refreshToken();
+            if (!isRefreshed.valid) return;
+            newToken = isRefreshed.access_token;
+            isUnauthorized = false;
+          }
+          const res = await updateVehicleType(newToken, record);
+          if (res.status === 200) {
+            toast.success("Vehicle type is updated successfully.");
+            handleCloseModal();
+            onUpdateData(record);
+            return;
+          } else if (res.status === 401) {
+            isUnauthorized = true;
+          } else {
+            statusAction(res.status);
+            return;
+          }
+        } while (true);
+      } catch (error) {
+        toast.error("Server error!");
+      }
+    };
+
     const handleFormAction = async (formData: FormData) => {
       try {
         setErrorMessage("");
@@ -285,22 +344,12 @@ const AddVehicleTypeForm = forwardRef<
           slotBookingFee: (result.data as VehicleTypeData).slotBookingFee,
         };
 
-        let res;
         if (!existData) {
           // add new record
-          res = await createVehicleType(token, record);
+          await handleCreateType(token, record);
         } else {
           // update record
-          res = await updateVehicleType(token, record);
-        }
-
-        if (res.status === 201 || res.status === 200) {
-          handleCloseModal();
-          onReset();
-        } else if (res.status === 500) {
-          throw new Error("");
-        } else if (res.data === 401) {
-          // refresh token
+          await handleUpdateType(token, record);
         }
       } catch (error) {
         toast.error("Server error!");
@@ -372,14 +421,16 @@ const AddVehicleTypeForm = forwardRef<
 );
 
 export default function ManagerVehicleType() {
-  const { token } = useAppSelector((state) => state.auth.value);
+  const { refreshToken, token } = useToken();
+
   const [updateData, setUpdateData] = useState<VehicleTypeData | null>(null);
-  const [dataStorage, setDataStorage] = useState<VehicleTypeData[] | null>([]);
-  const [data, setData] = useState<VehicleTypeData[] | null>([]);
+  const [dataStorage, setDataStorage] = useState<VehicleTypeData[] | null>(
+    null
+  );
+  const [data, setData] = useState<VehicleTypeData[]>([]);
+
   const [prevKeySearch, setPrevKeySearch] = useState("");
-  const [keySearch, setKeySearch] = useState("");
-  const [isSearch, setIsSearch] = useState<boolean>(true);
-  const [isReset, setIsReset] = useState<boolean>(false);
+  const [isReset, setIsReset] = useState<boolean>(true);
   const refSearchBar = useRef<HTMLFormElement>(null);
   const refModal = useRef<HTMLDialogElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -388,8 +439,7 @@ export default function ManagerVehicleType() {
   const indexOfLastRecord: number = currentPage * recordsPerPage;
   const indexOfFirstRecord: number = indexOfLastRecord - recordsPerPage;
 
-  const currentRecords =
-    data !== null ? data.slice(indexOfFirstRecord, indexOfLastRecord) : null;
+  const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
 
   const handleChangePage = (
     event: React.ChangeEvent<unknown>,
@@ -420,7 +470,6 @@ export default function ManagerVehicleType() {
     const keyword: string = formData.get("key-search") as string;
     const newKeyword = validateKeyword(keyword);
     if (prevKeySearch !== newKeyword) {
-      setKeySearch(newKeyword);
       if (newKeyword) {
         setData(
           dataStorage.filter((item) => {
@@ -447,10 +496,20 @@ export default function ManagerVehicleType() {
     setIsReset(true);
   };
 
-  const handleAfterAdding = () => {
+  const handleAfterAdding = (data: VehicleTypeData) => {
     handleResetSearch();
-    setKeySearch("");
-    setIsSearch(true);
+    const dataTmp = dataStorage ? [...dataStorage, data] : [data];
+    setDataStorage(dataTmp);
+    setData(dataTmp);
+  };
+
+  const handleAfterUpdating = (data: VehicleTypeData) => {
+    handleResetSearch();
+    const dataTmp = dataStorage
+      ? [...dataStorage.filter((item) => item.id !== data.id), data]
+      : [data];
+    setDataStorage(dataTmp);
+    setData(dataTmp);
   };
 
   const handleDeleteRecord = async (id: string) => {
@@ -461,44 +520,67 @@ export default function ManagerVehicleType() {
         return;
       }
 
-      const res = await deleteVehicleType(token, newID.data);
-
-      if (res.status === 200) {
-        handleAfterAdding();
-      } else if (res.status === 500) {
-        throw new Error("");
-      } else if (res.data === 401) {
-        // refresh token
-      }
+      let isUnauthorized = false;
+      let newToken = token;
+      do {
+        if (isUnauthorized) {
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
+        }
+        const res = await deleteVehicleType(newToken, newID.data);
+        if (res.status === 200) {
+          const dataTmp = dataStorage ? [...dataStorage] : [];
+          const deletedData = dataTmp.filter((item) => item.id !== newID.data);
+          setDataStorage(deletedData);
+          setData(deletedData);
+          handleResetSearch();
+          toast.success("Vehicle type is deleted!");
+          return;
+        } else if (res.status === 401) {
+          isUnauthorized = true;
+        } else {
+          statusAction(res.status);
+          return;
+        }
+      } while (true);
     } catch (error) {
       toast.error("Server error!");
     }
   };
 
-  const handleGetData = async (keyword: string) => {
+  const handleGetData = async () => {
     try {
-      const res = await getVehicleTypes(token, keyword);
-      if (res.status === 401) {
-        // refresh token
-      } else if (res.status === 500) {
-        throw new Error("");
-      } else {
-        setDataStorage(sortVehicleTypesById(res.data));
-        setData(sortVehicleTypesById(res.data));
-      }
+      let isUnauthorized = false;
+      let newToken = token;
+      do {
+        if (isUnauthorized) {
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
+        }
+        const res = await getVehicleTypes(newToken);
+        if (res.status === 200) {
+          setDataStorage(sortVehicleTypesById(res.data));
+          setData(sortVehicleTypesById(res.data));
+          return;
+        } else if (res.status === 401) {
+          isUnauthorized = true;
+        } else {
+          statusAction(res.status);
+          return;
+        }
+      } while (true);
     } catch (error) {
       toast.error("Server error!");
     }
   };
 
   useEffect(() => {
-    if (isSearch) {
-      handleGetData(keySearch);
-      setIsSearch(false);
-      setIsReset(!keySearch);
-      setPrevKeySearch(keySearch);
-    }
-  }, [isSearch]);
+    handleGetData();
+  }, []);
 
   return (
     <>
@@ -527,15 +609,19 @@ export default function ManagerVehicleType() {
           />
         </ActionTopContainer>
         <DataBottomContainer>
-          <TableResults
-            data={currentRecords}
-            onEdit={toggleModal}
-            onSetupEditData={handleUpdateData}
-            onDeleteRecord={handleDeleteRecord}
-            onDecreasePage={handleDecreasePage}
-          />
+          {dataStorage ? (
+            <TableResults
+              data={currentRecords}
+              onEdit={toggleModal}
+              onSetupEditData={handleUpdateData}
+              onDeleteRecord={handleDeleteRecord}
+              onDecreasePage={handleDecreasePage}
+            />
+          ) : (
+            <ResultsTableSkeleton />
+          )}
         </DataBottomContainer>
-        {data && data.length > recordsPerPage && (
+        {data.length > recordsPerPage && (
           <Stack mt={"auto"}>
             <Pagination
               defaultPage={1}
@@ -549,8 +635,8 @@ export default function ManagerVehicleType() {
       </PageContentContainer>
       <AddVehicleTypeForm
         ref={refModal}
-        refSearchBar={refSearchBar}
-        onReset={handleAfterAdding}
+        onAddData={handleAfterAdding}
+        onUpdateData={handleAfterUpdating}
         onToggleModal={toggleModal}
         existData={updateData}
         onExistData={handleUpdateData}

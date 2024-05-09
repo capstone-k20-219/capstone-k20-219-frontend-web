@@ -37,6 +37,7 @@ import {
   formatInputDateString,
   formatValueDateString,
   sortEmployeeById,
+  statusAction,
   validateDob,
   validateEmail,
   validateKeyword,
@@ -44,6 +45,8 @@ import {
   validatePassword,
   validatePhone,
 } from "@/lib/helpers";
+import useToken from "@/lib/hooks/refresh-token";
+import { ResultsTableSkeleton } from "@/components/Skeleton";
 
 interface EmployeeColumn {
   id: "id" | "name" | "phone" | "email" | "dob" | "action";
@@ -96,7 +99,7 @@ const columns: readonly EmployeeColumn[] = [
 ];
 
 type TableResultsProps = {
-  data: UserDBGetType[] | null;
+  data: UserDBGetType[];
   onDeleteRecord: (value: any) => void;
   onDecreasePage: () => void;
 };
@@ -107,12 +110,11 @@ function TableResults({
   onDecreasePage,
 }: TableResultsProps) {
   useEffect(() => {
-    if (data === null) return;
     if (data.length === 0) onDecreasePage();
   }, [data]);
   return (
     <>
-      {data && data.length > 0 ? (
+      {data.length > 0 ? (
         <TableContainer>
           <TableHeadContainer>
             <TableRowHeadContainer>
@@ -193,7 +195,7 @@ const initialEmployeeData: UserPersonalInfoType = {
 
 const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
   ({ onToggleModal, onReset }, refModal) => {
-    const { token } = useAppSelector((state) => state.auth.value);
+    const { refreshToken, token } = useToken();
     const [formData, setFormData] =
       useState<UserPersonalInfoType>(initialEmployeeData);
     const [errorMessage, setErrorMessage] = useState("");
@@ -296,18 +298,28 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
           role: ["employee", "user"],
         };
 
-        const res = await createNewEmployee(token, record);
-        if (res.status === 201) {
-          toast.success("New employee is created successfully.");
-          handleCloseModal();
-          onReset();
-        } else if (res.status === 500) {
-          throw new Error("");
-        } else if (res.status === 401) {
-          //refresh token
-        } else {
-          toast.error("Unknown error!");
-        }
+        let isUnauthorized = false;
+        let newToken = token;
+        do {
+          if (isUnauthorized) {
+            const isRefreshed = await refreshToken();
+            if (!isRefreshed.valid) return;
+            newToken = isRefreshed.access_token;
+            isUnauthorized = false;
+          }
+          const res = await createNewEmployee(newToken, record);
+          if (res.status === 201) {
+            toast.success("New employee is created successfully.");
+            handleCloseModal();
+            onReset();
+            return;
+          } else if (res.status === 401) {
+            isUnauthorized = true;
+          } else {
+            statusAction(res.status);
+            return;
+          }
+        } while (true);
       } catch (error) {
         toast.error("Server error!");
       }
@@ -378,14 +390,14 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
 );
 
 export default function ManagerEmployee() {
-  const { token } = useAppSelector((state) => state.auth.value);
-  const [dataStorage, setDataStorage] = useState<UserDBGetType[] | null>([]);
-  const [data, setData] = useState<UserDBGetType[] | null>([]);
+  const { refreshToken, token } = useToken();
+
+  const [dataStorage, setDataStorage] = useState<UserDBGetType[] | null>(null);
+  const [data, setData] = useState<UserDBGetType[]>([]);
 
   const [prevKeySearch, setPrevKeySearch] = useState("");
-  const [keySearch, setKeySearch] = useState("");
   const [isSearch, setIsSearch] = useState<boolean>(true);
-  const [isReset, setIsReset] = useState<boolean>(false);
+  const [isReset, setIsReset] = useState<boolean>(true);
 
   const refSearchBar = useRef<HTMLFormElement>(null);
   const refModal = useRef<HTMLDialogElement>(null);
@@ -395,9 +407,7 @@ export default function ManagerEmployee() {
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
 
-  const currentRecords = data
-    ? data.slice(indexOfFirstRecord, indexOfLastRecord)
-    : null;
+  const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
 
   const handleChangePage = (
     event: React.ChangeEvent<unknown>,
@@ -455,33 +465,42 @@ export default function ManagerEmployee() {
 
   const handleAfterAdding = () => {
     handleResetSearch();
-    setKeySearch("");
     setIsSearch(true);
   };
 
   const handleDeleteRecord = async (id: string) => {
-    // call some action to delete in DB
     try {
-      console.log("delete record id:", id);
       const newID = eliminateSpecialChars(id);
       if (!newID) {
         toast.error("Cannot delete service with id empty.");
         return;
       }
 
-      const res = await deleteEmployeeById(token, newID);
-      if (res.status === 200) {
-        const data = dataStorage ? [...dataStorage] : [];
-        const deletedData = data.filter((item) => item.id !== newID);
-        setDataStorage(deletedData);
-        setData(deletedData);
-        handleResetSearch();
-        setKeySearch("");
-      } else if (res.status === 500) {
-        throw new Error("");
-      } else if (res.data === 401) {
-        // refresh token
-      }
+      let isUnauthorized = false;
+      let newToken = token;
+      do {
+        if (isUnauthorized) {
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
+        }
+        const res = await deleteEmployeeById(newToken, newID);
+        if (res.status === 200) {
+          const data = dataStorage ? [...dataStorage] : [];
+          const deletedData = data.filter((item) => item.id !== newID);
+          setDataStorage(deletedData);
+          setData(deletedData);
+          handleResetSearch();
+          toast.success("Employee is deleted!");
+          return;
+        } else if (res.status === 401) {
+          isUnauthorized = true;
+        } else {
+          statusAction(res.status);
+          return;
+        }
+      } while (true);
     } catch (error) {
       toast.error("Server error!");
     }
@@ -489,21 +508,29 @@ export default function ManagerEmployee() {
 
   const handleGetData = async () => {
     try {
-      const res = await getEmployeeList(token);
-      if (res.status === 200) {
-        if (res.data) {
+      let isUnauthorized = false;
+      let newToken = token;
+      do {
+        if (isUnauthorized) {
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
+        }
+        const res = await getEmployeeList(newToken);
+        if (res.status === 200) {
           const newData: UserDBGetType[] = res.data as UserDBGetType[];
           const sortedData = sortEmployeeById(newData);
           setDataStorage(sortedData);
           setData(sortedData);
+          return;
+        } else if (res.status === 401) {
+          isUnauthorized = true;
+        } else {
+          statusAction(res.status);
+          return;
         }
-      } else if (res.status === 401) {
-        // refresh token
-      } else if (res.status === 500) {
-        throw new Error("");
-      } else {
-        toast.error("Unknown error!");
-      }
+      } while (true);
     } catch (error) {
       toast.error("Server error!");
     }
@@ -513,8 +540,6 @@ export default function ManagerEmployee() {
     if (isSearch) {
       handleGetData();
       setIsSearch(false);
-      setIsReset(!keySearch);
-      setPrevKeySearch(keySearch);
     }
   }, [isSearch]);
 
@@ -542,13 +567,17 @@ export default function ManagerEmployee() {
           />
         </ActionTopContainer>
         <DataBottomContainer>
-          <TableResults
-            data={currentRecords}
-            onDeleteRecord={handleDeleteRecord}
-            onDecreasePage={handleDecreasePage}
-          />
+          {dataStorage ? (
+            <TableResults
+              data={currentRecords}
+              onDeleteRecord={handleDeleteRecord}
+              onDecreasePage={handleDecreasePage}
+            />
+          ) : (
+            <ResultsTableSkeleton />
+          )}
         </DataBottomContainer>
-        {data && data.length > recordsPerPage && (
+        {data.length > recordsPerPage && (
           <Stack mt={"auto"}>
             <Pagination
               defaultPage={1}

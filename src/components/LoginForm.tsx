@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { onActive } from "@/redux/features/active-slice";
-import { validateEmail, validatePassword } from "@/lib/helpers";
+import { statusAction, validateEmail, validatePassword } from "@/lib/helpers";
 import { logIn } from "@/redux/features/auth-slice";
 import { ActiveState, AuthState, SelfUserDBGetType } from "@/lib/type";
 import { getSelfUser } from "@/lib/services/users";
@@ -42,15 +42,10 @@ export default function LoginForm() {
 
       const user = await getSelfUser(data.access_token);
 
-      // if (user.status === 401) {
-      //   //refresh token
-      //   console.log("do refreshing token");
-      //   return;
-      // }
-      // if (user.status !== 200) {
-      //   toast.error("Unknown error");
-      //   return;
-      // }
+      if (user.status !== 200) {
+        statusAction(user.status);
+        return;
+      }
 
       const userData: SelfUserDBGetType = user.data as SelfUserDBGetType;
 
@@ -84,7 +79,7 @@ export default function LoginForm() {
         toast.error("You have no right to access this system!");
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Server error when login!");
     }
   };
 

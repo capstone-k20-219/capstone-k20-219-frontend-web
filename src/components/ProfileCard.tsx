@@ -4,18 +4,22 @@ import { useEffect, useState } from "react";
 import InputComponent from "./InputComponent";
 import Button from "./Button";
 import { SelfUserDBGetType, UserDBPostType } from "@/lib/type";
-import { useAppSelector } from "@/redux/store";
 import toast from "react-hot-toast";
 import { getSelfUser, updateSelfUser } from "@/lib/services/users";
 import Card from "./Card";
 import ReturnBackIcon from "./ReturnBackIcon";
 import UserAvatar from "./UserAvatar";
-import { validateDob, validateEmail, validatePhone } from "@/lib/helpers";
+import {
+  statusAction,
+  validateDob,
+  validateEmail,
+  validatePhone,
+} from "@/lib/helpers";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { imageDB } from "@/lib/config/firebase.config";
 import { v4 } from "uuid";
-import { DiVim } from "react-icons/di";
 import { ProfileSkeleton } from "./Skeleton";
+import useToken from "@/lib/hooks/refresh-token";
 
 interface ProfileUpdateInfoFormProps {
   profile: SelfUserDBGetType;
@@ -28,13 +32,14 @@ interface SubInfoProps {
 }
 
 function ProfileUpdateInfoForm({ profile }: ProfileUpdateInfoFormProps) {
-  const { token } = useAppSelector((state) => state.auth.value);
+  const { refreshToken, token } = useToken();
   const [userProfile, setUserProfile] = useState<SelfUserDBGetType>(profile);
   const [errorMessage, setErrorMessage] = useState("");
   const [imageSrc, setImageSrc] = useState<string>(profile.image);
   const [imageFile, setImageFile] = useState<
     Blob | ArrayBuffer | Uint8Array | null
   >(null);
+  const [isLoading, setIsLoading] = useState("Update");
 
   const handleFormChange = (e: any) => {
     setUserProfile((prev) => {
@@ -83,8 +88,6 @@ function ProfileUpdateInfoForm({ profile }: ProfileUpdateInfoFormProps) {
 
   const handleSubmitChange = async (formData: FormData) => {
     try {
-      setErrorMessage("");
-
       const email = formData.get("email") as string;
       const phone = formData.get("phone") as string;
       const dob = formData.get("dob") as string;
@@ -103,6 +106,7 @@ function ProfileUpdateInfoForm({ profile }: ProfileUpdateInfoFormProps) {
         await uploadBytes(imgRef, imageFile);
         const resFb = await getDownloadURL(ref(imageDB, imgDir));
         newUrlImg = resFb;
+        setImageFile(null);
       }
       //--------------
 
@@ -115,16 +119,28 @@ function ProfileUpdateInfoForm({ profile }: ProfileUpdateInfoFormProps) {
         name: userProfile.name,
         image: newUrlImg,
       };
-      const res = await updateSelfUser(token, record);
-      if (res.status === 200) {
-        toast.success("Information successfully updated.");
-      } else if (res.status === 401) {
-        // refresh token
-      } else if (res.status === 500) {
-        throw new Error("");
-      } else {
-        toast.error("Unknown error!");
-      }
+
+      let isUnauthorized = false;
+      let newToken = token;
+      do {
+        if (isUnauthorized) {
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
+        }
+        const res = await updateSelfUser(newToken, record);
+        if (res.status === 200) {
+          setIsLoading("Update");
+          toast.success("Information successfully updated.");
+          return;
+        } else if (res.status === 401) {
+          isUnauthorized = true;
+        } else {
+          statusAction(res.status);
+          return;
+        }
+      } while (true);
     } catch (error) {
       toast.error("Server error!");
     }
@@ -184,8 +200,12 @@ function ProfileUpdateInfoForm({ profile }: ProfileUpdateInfoFormProps) {
         )}
         <Button
           type="submit"
-          name="Update"
+          name={isLoading}
           className="col-span-2 px-6 py-2 font-semibold text-sm h-fit self-end"
+          onClickFunction={() => {
+            setIsLoading("Updating...");
+            setErrorMessage("");
+          }}
         />
       </form>
     </div>
@@ -193,23 +213,33 @@ function ProfileUpdateInfoForm({ profile }: ProfileUpdateInfoFormProps) {
 }
 
 export default function ProfileCard() {
-  const { token } = useAppSelector((state) => state.auth.value);
+  const { refreshToken, token } = useToken();
   const [profile, setProfile] = useState<SelfUserDBGetType | null>(null);
 
   const handleGetData = async () => {
     try {
-      const res = await getSelfUser(token);
-      if (res.status === 200) {
-        if (res.data) {
-          setProfile(res.data);
+      let isUnauthorized = false;
+      let newToken = token;
+      do {
+        if (isUnauthorized) {
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
         }
-      } else if (res.status === 401) {
-        // refresh token
-      } else if (res.status === 500) {
-        throw new Error("");
-      } else {
-        toast.error("Unknown error!");
-      }
+        const res = await getSelfUser(newToken);
+        if (res.status === 200) {
+          if (res.data) {
+            setProfile(res.data);
+          }
+          return;
+        } else if (res.status === 401) {
+          isUnauthorized = true;
+        } else {
+          statusAction(res.status);
+          return;
+        }
+      } while (true);
     } catch (error) {
       toast.error("Server error!");
     }

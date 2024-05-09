@@ -5,7 +5,6 @@ import Logo2 from "@/img/logo.png";
 import Image from "next/image";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { NavItem } from "@/lib/type";
 import {
@@ -14,9 +13,19 @@ import {
   NavListItemSecondary,
 } from "@/lib/data";
 import { FiMenu } from "react-icons/fi";
-import { AppDispatch, useAppSelector } from "@/redux/store";
-import { useDispatch } from "react-redux";
-import { onActive } from "@/redux/features/active-slice";
+import { useAppSelector } from "@/redux/store";
+import { useState } from "react";
+
+function Tooltip({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="bg-neutral-900 bg-opacity-70 p-2 py-1.5 absolute top-1/2 left-[105%] -translate-y-1/2 opacity-100
+    rounded shadow-md min-w-[80px] text-center border border-neutral-200 text-white"
+    >
+      {children}
+    </div>
+  );
+}
 
 export default function Sidebar({
   open,
@@ -29,17 +38,12 @@ export default function Sidebar({
   setOpen: (state?: boolean) => void;
   setWidthSidebar: (state?: boolean) => void;
 }) {
-  const { role, index, name } = useAppSelector((state) => state.active.value);
-  const dispatch = useDispatch<AppDispatch>();
-  const [selectedIndex, setSelectedIndex] = useState<number>(index);
-  const [currentpage, setCurrentpage] = useState<string>(name);
+  const { role } = useAppSelector((state) => state.auth.value);
   const navListItemMain: NavItem[] =
     role === "manager" ? NavListItemMainManager : NavListItemMainEmployee;
-
-  const handleListItemClick = (indexActive: number, nameActive: string) => {
-    setSelectedIndex(indexActive);
-    setCurrentpage(nameActive);
-  };
+  const [openTooltip, setOpenTooltip] = useState<boolean[]>(
+    new Array(navListItemMain.length + NavListItemSecondary.length).fill(false)
+  );
 
   const handleMenuButton = () => {
     if (window.innerWidth < 768) {
@@ -50,16 +54,17 @@ export default function Sidebar({
     }
   };
 
-  useEffect(() => {
-    let ignore = false;
-    if (selectedIndex !== index && !ignore) {
-      dispatch(onActive({ role, index: selectedIndex, name: currentpage }));
-    }
+  const handleOpenTooltip = (index: number) => {
+    const oldArr = [...openTooltip];
+    oldArr[index] = true;
+    setOpenTooltip(oldArr);
+  };
 
-    return () => {
-      ignore = true;
-    };
-  }, [selectedIndex, currentpage, index, role, dispatch]);
+  const handleCloseTooltip = (index: number) => {
+    const oldArr = [...openTooltip];
+    oldArr[index] = false;
+    setOpenTooltip(oldArr);
+  };
 
   return (
     <div
@@ -84,26 +89,18 @@ export default function Sidebar({
       <div className="w-full text-neutral-500 text-sm">
         <List component="nav" aria-label="main">
           {navListItemMain.map((item, indexItem) => {
-            const isSelected = indexItem === selectedIndex;
             return (
-              <ListItemButton
-                key={indexItem}
-                selected={isSelected}
-                className={isSelected ? "opacity-100" : "opacity-70"}
-              >
-                <div
-                  className={`w-1 h-3/5 bg-white absolute left-0 top-1/2 -translate-y-1/2 ${
-                    isSelected ? "block indicator" : "hidden"
-                  }`}
-                />
+              <ListItemButton key={"nav" + indexItem} className="relative">
                 <Link
                   href={item.link}
-                  onClick={() => handleListItemClick(indexItem, item.name)}
-                  className="w-full flex gap-2 text-white items-center"
+                  className="w-full flex gap-2 text-white items-center opacity-70"
+                  onMouseOver={() => handleOpenTooltip(indexItem)}
+                  onMouseLeave={() => handleCloseTooltip(indexItem)}
                 >
                   <span>{item.icon}</span>
                   {toggleWdith && <p>{item.name}</p>}
                 </Link>
+                {openTooltip[indexItem] && <Tooltip>{item.name}</Tooltip>}
               </ListItemButton>
             );
           })}
@@ -111,13 +108,18 @@ export default function Sidebar({
         <div className="w-4/5 border-b border-b-neutral-500 m-auto"></div>
         <List component="nav" aria-label="secondary">
           {NavListItemSecondary.map((item, indexItem) => {
+            const newIndex = indexItem + navListItemMain.length;
             return (
-              <ListItemButton key={indexItem + 5} className="opacity-70">
-                <div className="w-1 h-3/5 bg-white absolute left-0 top-1/2 -translate-y-1/2 hidden" />
-                <div className="w-full flex gap-3 text-white">
+              <ListItemButton key={"nav" + newIndex}>
+                <div
+                  className="w-full flex gap-2 text-white opacity-70"
+                  onMouseOver={() => handleOpenTooltip(newIndex)}
+                  onMouseLeave={() => handleCloseTooltip(newIndex)}
+                >
                   <span>{item.icon}</span>
                   {toggleWdith && <p>{item.name}</p>}
                 </div>
+                {openTooltip[newIndex] && <Tooltip>{item.name}</Tooltip>}
               </ListItemButton>
             );
           })}

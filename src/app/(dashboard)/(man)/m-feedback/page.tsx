@@ -27,7 +27,12 @@ import {
 } from "@/lib/services/feedback";
 import Button from "@/components/Button";
 import { MdDelete } from "react-icons/md";
-import { eliminateSpecialChars } from "@/lib/helpers";
+import { eliminateSpecialChars, statusAction } from "@/lib/helpers";
+import useToken from "@/lib/hooks/refresh-token";
+import {
+  FeedbackBoardSkeleton,
+  ResultsFeedbackSkeleton,
+} from "@/components/Skeleton";
 
 type FeedbackListProps = {
   data: FeedbackData[];
@@ -37,7 +42,7 @@ type FeedbackListProps = {
 function FeedbackList({ data, onDeleteFeedback }: FeedbackListProps) {
   return (
     <>
-      {data && data.length !== 0 ? (
+      {data.length ? (
         <div className="w-full h-fit gap-4 pb-2 flex flex-col">
           {data.map((item, index) => {
             return (
@@ -76,11 +81,12 @@ function FeedbackList({ data, onDeleteFeedback }: FeedbackListProps) {
 }
 
 function ManagerFeedbackContent({ service }: { service: string }) {
-  const { token } = useAppSelector((state) => state.auth.value);
+  const { refreshToken, token } = useToken();
+  const [dataStorage, setDataStorage] = useState<FeedbackData[] | null>(null);
   const [data, setData] = useState<FeedbackData[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const recordsPerPage = 9;
+  const recordsPerPage = 5;
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
 
@@ -107,16 +113,29 @@ function ManagerFeedbackContent({ service }: { service: string }) {
         return;
       }
 
-      const res = await deleteFeedbackById(token, newID);
-      if (res.status === 200) {
-        const dataTmp = [...data];
-        const deletedData = data.filter((item) => item.id !== newID);
-        setData(deletedData);
-      } else if (res.status === 500) {
-        throw new Error("");
-      } else if (res.data === 401) {
-        // refresh token
-      }
+      let isUnauthorized = false;
+      let newToken = token;
+      do {
+        if (isUnauthorized) {
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
+        }
+        const res = await deleteFeedbackById(newToken, newID);
+        if (res.status === 200) {
+          // const dataTmp = [...data];
+          const deletedData = data.filter((item) => item.id !== newID);
+          setDataStorage(deletedData);
+          setData(deletedData);
+          return;
+        } else if (res.status === 401) {
+          isUnauthorized = true;
+        } else {
+          statusAction(res.status);
+          return;
+        }
+      } while (true);
     } catch (error) {
       toast.error("Server error!");
     }
@@ -124,19 +143,28 @@ function ManagerFeedbackContent({ service }: { service: string }) {
 
   const handleGetFeedback = async (serviceId: string) => {
     try {
-      const res = await getFeedbackByService(token, serviceId);
-      if (res.status === 200) {
-        if (res.data) {
-          const newData: FeedbackData[] = res.data as FeedbackData[];
-          setData(newData);
+      let isUnauthorized = false;
+      let newToken = token;
+      do {
+        if (isUnauthorized) {
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
         }
-      } else if (res.status === 401) {
-        // refresh token
-      } else if (res.status === 500) {
-        throw new Error("");
-      } else {
-        toast.error("Unknown error!");
-      }
+        const res = await getFeedbackByService(newToken, serviceId);
+        if (res.status === 200) {
+          const newData: FeedbackData[] = res.data as FeedbackData[];
+          setDataStorage(newData);
+          setData(newData);
+          return;
+        } else if (res.status === 401) {
+          isUnauthorized = true;
+        } else {
+          statusAction(res.status);
+          return;
+        }
+      } while (true);
     } catch (error) {
       toast.error("Server error!");
     }
@@ -144,6 +172,7 @@ function ManagerFeedbackContent({ service }: { service: string }) {
 
   useEffect(() => {
     if (service) {
+      setDataStorage(null);
       handleGetFeedback(service);
       setCurrentPage(1);
     }
@@ -151,40 +180,46 @@ function ManagerFeedbackContent({ service }: { service: string }) {
 
   return (
     <>
-      <DataBottomContainer className="overflow-auto">
-        <div className="w-full flex gap-4 text-lg font-semibold items-center mb-4">
-          <div>Results({data.length})</div>
-          <Rating
-            name="half-rating-read"
-            defaultValue={1.5}
-            precision={0.5}
-            value={averageRating()}
-            readOnly
-          />
-        </div>
-        <FeedbackList
-          data={currentRecords}
-          onDeleteFeedback={handleDeleteFeedback}
-        />
-      </DataBottomContainer>
-      {data.length > recordsPerPage && (
-        <Stack mt={"auto"}>
-          <Pagination
-            defaultPage={1}
-            count={Math.ceil(data.length / recordsPerPage)}
-            shape="rounded"
-            page={currentPage}
-            onChange={handleChangePage}
-          />
-        </Stack>
+      {dataStorage ? (
+        <>
+          <DataBottomContainer className="overflow-auto">
+            <div className="w-full flex gap-4 text-lg font-semibold items-center mb-4">
+              <div>Results({data.length})</div>
+              <Rating
+                name="half-rating-read"
+                defaultValue={1.5}
+                precision={0.5}
+                value={averageRating()}
+                readOnly
+              />
+            </div>
+            <FeedbackList
+              data={currentRecords}
+              onDeleteFeedback={handleDeleteFeedback}
+            />
+          </DataBottomContainer>
+          {data.length > recordsPerPage && (
+            <Stack mt={"auto"}>
+              <Pagination
+                defaultPage={1}
+                count={Math.ceil(data.length / recordsPerPage)}
+                shape="rounded"
+                page={currentPage}
+                onChange={handleChangePage}
+              />
+            </Stack>
+          )}
+        </>
+      ) : (
+        <ResultsFeedbackSkeleton />
       )}
     </>
   );
 }
 
-export default function EmployeeService() {
-  const { token } = useAppSelector((state) => state.auth.value);
-  const [serviceList, setServiceList] = useState<OptionType[]>([]);
+export default function EmployeeFeedback() {
+  const { refreshToken, token } = useToken();
+  const [serviceList, setServiceList] = useState<OptionType[] | null>(null);
   const [serviceFilter, setServiceFilter] = useState("");
 
   const handleChangeSelect = (e: SelectChangeEvent) => {
@@ -193,9 +228,17 @@ export default function EmployeeService() {
 
   const handleGetData = async () => {
     try {
-      const res = await getAllServices(token);
-      if (res.status === 200) {
-        if (res.data) {
+      let isUnauthorized = false;
+      let newToken = token;
+      do {
+        if (isUnauthorized) {
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
+        }
+        const res = await getAllServices(newToken);
+        if (res.status === 200) {
           const newData: ServiceDBGetType[] = res.data as ServiceDBGetType[];
           setServiceList(
             newData.map((item) => ({
@@ -203,15 +246,15 @@ export default function EmployeeService() {
               name: item.name,
             }))
           );
-          setServiceFilter(newData[0].id);
+          setServiceFilter(newData.length ? newData[0].id : "");
+          return;
+        } else if (res.status === 401) {
+          isUnauthorized = true;
+        } else {
+          statusAction(res.status);
+          return;
         }
-      } else if (res.status === 401) {
-        // refresh token
-      } else if (res.status === 500) {
-        throw new Error("");
-      } else {
-        toast.error("Unknown error!");
-      }
+      } while (true);
     } catch (error) {
       toast.error("Server error!");
     }
@@ -225,36 +268,42 @@ export default function EmployeeService() {
     <>
       <BreadcrumbsComponent dir={["Feedback Management"]} />
       {serviceList ? (
-        <PageContentContainer>
-          <FormControl
-            sx={{ m: 0, minWidth: 120 }}
-            size="small"
-            className="w-full"
-          >
-            <InputLabel id="demo-select-small-label">Service</InputLabel>
-            <Select
-              labelId="demo-select-small-label"
-              id="demo-select-small"
-              value={serviceFilter}
-              label="Service"
-              name="service-name"
-              onChange={handleChangeSelect}
+        serviceList.length ? (
+          <PageContentContainer>
+            <FormControl
+              sx={{ m: 0, minWidth: 120 }}
+              size="small"
+              className="w-full"
             >
-              {serviceList.map((item, index) => (
-                <MenuItem key={index} value={item.value}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <ManagerFeedbackContent service={serviceFilter} />
-        </PageContentContainer>
+              <InputLabel id="demo-select-small-label">Service</InputLabel>
+              <Select
+                labelId="demo-select-small-label"
+                id="demo-select-small"
+                value={serviceFilter}
+                label="Service"
+                name="service-name"
+                onChange={handleChangeSelect}
+              >
+                {serviceList.map((item, index) => (
+                  <MenuItem key={index} value={item.value}>
+                    {item.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <ManagerFeedbackContent service={serviceFilter} />
+          </PageContentContainer>
+        ) : (
+          <PageContentCotainer3>
+            <Card className="w-full flex item-center justify-center p-10 text-xl text-neutral-700">
+              <h1>The parking lot recently provide no service!</h1>
+            </Card>
+          </PageContentCotainer3>
+        )
       ) : (
-        <PageContentCotainer3>
-          <Card className="w-full flex item-center justify-center p-10 text-xl text-neutral-700">
-            <h1>The parking lot recently provide no service!</h1>
-          </Card>
-        </PageContentCotainer3>
+        <PageContentContainer>
+          <FeedbackBoardSkeleton />
+        </PageContentContainer>
       )}
     </>
   );

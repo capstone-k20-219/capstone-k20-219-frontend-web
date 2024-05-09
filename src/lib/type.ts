@@ -95,15 +95,6 @@ export type ServiceData = {
   type: string;
 };
 
-export type ServiceRequestData = {
-  [key: string]: any;
-  id: number; // booking id
-  name: string; // get from customer id
-  phone: string; //
-  plate: string; // get from vehicle id
-  time: string;
-};
-
 export type TableData =
   | EmployeeData[]
   | VehicleTypeData[]
@@ -189,6 +180,85 @@ export type Coordinate = {
 export type SlotBlock = {
   id: string;
   typeId: string; // accepted vehicle
+  // type: { name: string };
 } & Coordinate;
 
+export type SlotBlockDBGetType = {
+  type: { name: string };
+} & SlotBlock;
+
 export const BLOCK_SIZE = 24; // px
+
+export type ParkingTicketDBGetType = {
+  checkOutTime: string;
+  createdAt: string;
+  id: string;
+  isPaid: boolean;
+  parkingCost: number;
+  plateNo: string;
+  slotId: string;
+  updatedAt: string;
+  userId: string;
+};
+
+export type VehicleValue = { name: string; value: number };
+export type ServiceValue = VehicleValue;
+
+export type TrafficDataType = {
+  fromDate: string;
+  toDate: string;
+  dataIn: number[];
+  dataOut: number[];
+};
+
+type ServiceBill = {
+  serviceId: string;
+  name: string;
+  quantity: number;
+  cost: number;
+};
+
+type TicketBaseInfo = {
+  ticketId: string;
+  plateNo: string;
+  checkInTime: string;
+  checkOutTime: string;
+  slotId: string;
+  parkingCost: number;
+};
+
+export type TicketCheckoutDBGetType = TicketBaseInfo & {
+  services: ServiceBill[];
+};
+
+export type TicketCheckInDBGetType = TicketBaseInfo;
+
+export type CheckInInfoType = {
+  slotId: string;
+  info: ParkingTicketDBGetType;
+};
+
+export type WeekRevenueType = {
+  fromDate: string;
+  toDate: string;
+  data: number[];
+};
+
+export type ServiceBookingDBGetType = {
+  [key: string]: any;
+  createdAt: string;
+  id: number; // id booking
+  ticket: {
+    id: string; // id ticket
+    plateNo: string;
+    slotId: string;
+  };
+};
+
+export type ServiceRequestData = {
+  [key: string]: any;
+  id: number; // booking id
+  slotId: string; //
+  plateNo: string;
+  createdAt: string;
+};

@@ -1,7 +1,7 @@
 
-Employee Group
-Manager group
+Employee group : missing firebase realtime checkin, checkout functions
 
 --------- Done ----------
-Profile: added skeleton
-Login: mising some thing in call api
+Manager group
+Profile: 
+Login: 

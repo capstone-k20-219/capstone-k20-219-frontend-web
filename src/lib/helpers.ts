@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import {
   BLOCK_SIZE,
   Coordinate,
@@ -95,7 +96,7 @@ function validatePasswordSignup(pass: string, confirmPass: string) {
   const newPass = eliminateSpecialChars(pass);
   const newConfirmPass = eliminateSpecialChars(confirmPass);
 
-  return newPass === newConfirmPass && newPass.length > 8;
+  return newPass === newConfirmPass;
 }
 
 function validatePassword(pass: string) {
@@ -275,6 +276,14 @@ function formatInputDateString(s: string) {
   return reFormattedDate.reverse().join("-");
 }
 
+function formatCreatedTime(datetime: string) {
+  const newTime = new Date(datetime);
+  newTime.setHours(newTime.getHours() + 7);
+  const date = formatValueDateString(newTime.toISOString());
+  const time = newTime.toISOString().slice(11, 19);
+  return date + " " + time;
+}
+
 function validateCoordinate(coordinate: Coordinate) {
   const { x_start, y_start, x_end, y_end } = coordinate;
   if (x_start < 0 || x_end < 0 || y_end < 0 || y_start < 0) {
@@ -303,23 +312,68 @@ function validateCoordinate(coordinate: Coordinate) {
   };
 }
 
+function statusAction(status: number, action?: string) {
+  switch (status) {
+    case 500:
+      toast.error("Server error!");
+      return;
+    case 403:
+      toast.error("Bad request!");
+      return;
+    case 404:
+      toast.error("Not found!");
+      return;
+    default:
+      toast.error("Unknown error!");
+      return;
+  }
+}
+
+function getWeekRange() {
+  const now = new Date();
+  const nowTime = now.toISOString().slice(0, 10);
+  const nowDate = now.getDate();
+  const nowDay = now.getDay();
+
+  const first = nowDay ? nowDate - nowDay + 1 : nowDate - 6;
+  const last = first + 7;
+
+  const dayArrray: string[] = [];
+
+  const firstDay = new Date(new Date().setDate(first))
+    .toISOString()
+    .slice(0, 10);
+
+  dayArrray.push(firstDay);
+  for (let i = first + 1; i < last; i++) {
+    dayArrray.push(new Date(new Date().setDate(i)).toISOString().slice(0, 10));
+  }
+
+  const lastDay = new Date(new Date().setDate(last)).toISOString().slice(0, 10);
+
+  return { firstDay, lastDay, dayArrray, nowTime };
+}
+
 export {
   eliminateSpecialChars,
+  validateDob,
+  validateFee,
+  validateName,
   validateEmail,
   validatePhone,
-  validateName,
-  validateDob,
-  validatePasswordSignup,
-  validatePassword,
-  validateVehicleTypeID,
-  validateFee,
-  sortVehicleTypesById,
   validateKeyword,
-  sortServiceById,
-  filterUniqueInfoService,
+  validatePassword,
+  validateCoordinate,
+  sortVehicleTypesById,
+  validateVehicleTypeID,
+  validatePasswordSignup,
   validatePricesOfService,
+  sortServiceById,
   sortEmployeeById,
   formatValueDateString,
   formatInputDateString,
-  validateCoordinate,
+  filterUniqueInfoService,
+  statusAction,
+  getWeekRange,
+  formatCreatedTime,
 };

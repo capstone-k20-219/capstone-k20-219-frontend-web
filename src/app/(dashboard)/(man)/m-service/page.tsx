@@ -34,6 +34,7 @@ import toast from "react-hot-toast";
 import {
   eliminateSpecialChars,
   sortServiceById,
+  statusAction,
   validateKeyword,
   validateName,
   validatePricesOfService,
@@ -41,6 +42,8 @@ import {
 import { MdDelete } from "react-icons/md";
 import { CiCirclePlus } from "react-icons/ci";
 import { getVehicleTypes } from "@/lib/services/vehicle-types";
+import useToken from "@/lib/hooks/refresh-token";
+import { ResultsServiceSkeleton } from "@/components/Skeleton";
 
 type ServiceComponentProps = {
   data: ServiceDBGetType;
@@ -195,18 +198,19 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
     { existData, onToggleModal, optionTypes, onExistData, onReset },
     refModal
   ) => {
-    const { token } = useAppSelector((state) => state.auth.value);
+    const { refreshToken, token } = useToken();
     const initialServiceInfo: ServiceInfo = {
       id: "",
       name: "",
     };
-    const initialPrices: ServicePrices = {
-      typeId: "",
-      unitPrice: 0,
-    };
     const [isUpdate, setIsUpdate] = useState(false);
     const [info, setInfo] = useState<ServiceInfo>(initialServiceInfo);
-    const [prices, setPrices] = useState<ServicePrices[]>([]);
+    const [prices, setPrices] = useState<ServicePrices[]>([
+      {
+        typeId: optionTypes.length ? optionTypes[0].value : "",
+        unitPrice: 0,
+      },
+    ]);
     const [errorMessage, setErrorMessage] = useState("");
 
     const handlePricesChange = (index: number, e: any) => {
@@ -219,7 +223,7 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
       setPrices((prev) => [
         ...prev,
         {
-          typeId: optionTypes[0].value,
+          typeId: optionTypes.length ? optionTypes[0].value : "",
           unitPrice: 0,
         },
       ]);
@@ -242,7 +246,7 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
     const handleCloseModal = () => {
       setPrices([
         {
-          typeId: optionTypes[0].value,
+          typeId: optionTypes.length ? optionTypes[0].value : "",
           unitPrice: 0,
         },
       ]);
@@ -281,6 +285,70 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
       };
     };
 
+    const handleCreateService = async (
+      token: string,
+      record: ServiceDBPostType
+    ) => {
+      try {
+        let isUnauthorized = false;
+        let newToken = token;
+        do {
+          if (isUnauthorized) {
+            const isRefreshed = await refreshToken();
+            if (!isRefreshed.valid) return;
+            newToken = isRefreshed.access_token;
+            isUnauthorized = false;
+          }
+          const res = await createService(newToken, record);
+          if (res.status === 201) {
+            toast.success("New service is created successfully.");
+            handleCloseModal();
+            onReset();
+            return;
+          } else if (res.status === 401) {
+            isUnauthorized = true;
+          } else {
+            statusAction(res.status);
+            return;
+          }
+        } while (true);
+      } catch (error) {
+        toast.error("Server error!");
+      }
+    };
+
+    const handleUpdateService = async (
+      token: string,
+      record: ServiceDBPutType
+    ) => {
+      try {
+        let isUnauthorized = false;
+        let newToken = token;
+        do {
+          if (isUnauthorized) {
+            const isRefreshed = await refreshToken();
+            if (!isRefreshed.valid) return;
+            newToken = isRefreshed.access_token;
+            isUnauthorized = false;
+          }
+          const res = await updateService(newToken, record);
+          if (res.status === 200) {
+            toast.success("Service is updated successfully.");
+            handleCloseModal();
+            onReset();
+            return;
+          } else if (res.status === 401) {
+            isUnauthorized = true;
+          } else {
+            statusAction(res.status);
+            return;
+          }
+        } while (true);
+      } catch (error) {
+        toast.error("Server error!");
+      }
+    };
+
     const handleFormAction = async (formData: FormData) => {
       try {
         setErrorMessage("");
@@ -295,45 +363,21 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
         }
 
         const data: ServiceDBPutType = validData.data as ServiceDBPutType;
-        let res;
         if (data.id === "") {
           // add new record
           const record: ServiceDBPostType = {
             name: data.name,
             prices: data.prices,
           };
-          res = await createService(token, record);
+          await handleCreateService(token, record);
         } else {
           // update record
-          res = await updateService(token, data);
-        }
-
-        if (res.status === 201 || res.status === 200) {
-          // refresh path
-          handleCloseModal();
-          onReset();
-        } else if (res.status === 401) {
-          //refresh token
-        } else if (res.status === 500) {
-          throw new Error("");
-        } else {
-          toast.error("Unknown error!");
+          await handleUpdateService(token, data);
         }
       } catch (error) {
         toast.error("Server error!");
       }
     };
-
-    useEffect(() => {
-      if (optionTypes && optionTypes.length > 0) {
-        setPrices([
-          {
-            typeId: optionTypes[0].value,
-            unitPrice: 0,
-          },
-        ]);
-      }
-    }, [optionTypes]);
 
     useEffect(() => {
       if (existData) {
@@ -427,15 +471,19 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
 );
 
 export default function ManagerService() {
-  const { token } = useAppSelector((state) => state.auth.value);
-  const [optionTypes, setOptionTypes] = useState<OptionType[]>([]);
+  const { refreshToken, token } = useToken();
+
+  const [optionTypes, setOptionTypes] = useState<OptionType[] | null>(null);
   const [updateData, setUpdateData] = useState<ServiceDBGetType | null>(null);
-  const [dataStorage, setDataStorage] = useState<ServiceDBGetType[]>([]);
+
+  const [dataStorage, setDataStorage] = useState<ServiceDBGetType[] | null>(
+    null
+  );
   const [data, setData] = useState<ServiceDBGetType[]>([]);
+
   const [prevKeySearch, setPrevKeySearch] = useState("");
-  const [keySearch, setKeySearch] = useState("");
   const [isSearch, setIsSearch] = useState<boolean>(true);
-  const [isReset, setIsReset] = useState<boolean>(false);
+  const [isReset, setIsReset] = useState<boolean>(true);
   const refSearchBar = useRef<HTMLFormElement>(null);
   const refModal = useRef<HTMLDialogElement>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -503,12 +551,10 @@ export default function ManagerService() {
 
   const handleAfterAdding = () => {
     handleResetSearch();
-    setKeySearch("");
     setIsSearch(true);
   };
 
   const handleDeleteRecord = async (id: string) => {
-    // call some action to delete in DB
     try {
       const newID = eliminateSpecialChars(id);
       if (!newID) {
@@ -516,20 +562,31 @@ export default function ManagerService() {
         return;
       }
 
-      const res = await deleteServiceById(token, newID);
-      if (res.status === 200) {
-        // handleAfterAdding();
-        const dataTmp = dataStorage ? [...dataStorage] : [];
-        const deletedData = dataTmp.filter((item) => item.id !== newID);
-        setDataStorage(deletedData);
-        setData(deletedData);
-        handleResetSearch();
-        setKeySearch("");
-      } else if (res.status === 500) {
-        throw new Error("");
-      } else if (res.data === 401) {
-        // refresh token
-      }
+      let isUnauthorized = false;
+      let newToken = token;
+      do {
+        if (isUnauthorized) {
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
+        }
+        const res = await deleteServiceById(newToken, newID);
+        if (res.status === 200) {
+          const dataTmp = dataStorage ? [...dataStorage] : [];
+          const deletedData = dataTmp.filter((item) => item.id !== newID);
+          setDataStorage(deletedData);
+          setData(deletedData);
+          handleResetSearch();
+          toast.success("Service is deleted!");
+          return;
+        } else if (res.status === 401) {
+          isUnauthorized = true;
+        } else {
+          statusAction(res.status);
+          return;
+        }
+      } while (true);
     } catch (error) {
       toast.error("Server error!");
     }
@@ -537,20 +594,32 @@ export default function ManagerService() {
 
   const handleGetVehicleTypeOptions = async () => {
     try {
-      const res = await getVehicleTypes(token);
-      if (res.status === 401) {
-        // refresh token
-      } else if (res.status === 500) {
-        throw new Error("");
-      } else {
-        const optionData: VehicleTypeData[] = res.data;
-        setOptionTypes(
-          optionData.map((item) => ({
-            value: item.id,
-            name: item.name,
-          }))
-        );
-      }
+      let isUnauthorized = false;
+      let newToken = token;
+      do {
+        if (isUnauthorized) {
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
+        }
+        const res = await getVehicleTypes(newToken);
+        if (res.status === 200) {
+          const optionData: VehicleTypeData[] = res.data;
+          setOptionTypes(
+            optionData.map((item) => ({
+              value: item.id,
+              name: item.name,
+            }))
+          );
+          return;
+        } else if (res.status === 401) {
+          isUnauthorized = true;
+        } else {
+          statusAction(res.status);
+          return;
+        }
+      } while (true);
     } catch (error) {
       toast.error("Server error!");
     }
@@ -558,23 +627,29 @@ export default function ManagerService() {
 
   const handleGetData = async () => {
     try {
-      const res = await getAllServices(token);
-      if (res.status === 200) {
-        // console.log("data from DB:", res.data);
-        if (res.data) {
+      let isUnauthorized = false;
+      let newToken = token;
+      do {
+        if (isUnauthorized) {
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
+        }
+        const res = await getAllServices(newToken);
+        if (res.status === 200) {
           const newData: ServiceDBGetType[] = res.data as ServiceDBGetType[];
-          // console.log(newData);
           const sortedData = sortServiceById(newData);
           setDataStorage(sortedData);
           setData(sortedData);
+          return;
+        } else if (res.status === 401) {
+          isUnauthorized = true;
+        } else {
+          statusAction(res.status);
+          return;
         }
-      } else if (res.status === 401) {
-        // refresh token
-      } else if (res.status === 500) {
-        throw new Error("");
-      } else {
-        toast.error("Unknown error!");
-      }
+      } while (true);
     } catch (error) {
       toast.error("Server error!");
     }
@@ -588,8 +663,6 @@ export default function ManagerService() {
     if (isSearch) {
       handleGetData();
       setIsSearch(false);
-      setIsReset(!keySearch);
-      setPrevKeySearch(keySearch);
     }
   }, [isSearch]);
 
@@ -620,13 +693,17 @@ export default function ManagerService() {
           />
         </ActionTopContainer>
         <DataBottomContainer className="overflow-hidden">
-          <TableResults
-            data={currentRecords}
-            onEdit={toggleModal}
-            onSetupEditData={handleUpdateData}
-            onDeleteRecord={handleDeleteRecord}
-            onDecreasePage={handleDecreasePage}
-          />
+          {dataStorage ? (
+            <TableResults
+              data={currentRecords}
+              onEdit={toggleModal}
+              onSetupEditData={handleUpdateData}
+              onDeleteRecord={handleDeleteRecord}
+              onDecreasePage={handleDecreasePage}
+            />
+          ) : (
+            <ResultsServiceSkeleton />
+          )}
         </DataBottomContainer>
         {data.length > recordsPerPage && (
           <Stack mt={"auto"}>
@@ -640,14 +717,16 @@ export default function ManagerService() {
           </Stack>
         )}
       </PageContentContainer>
-      <AddServiceForm
-        ref={refModal}
-        onReset={handleAfterAdding}
-        onToggleModal={toggleModal}
-        existData={updateData}
-        optionTypes={optionTypes}
-        onExistData={handleUpdateData}
-      />
+      {optionTypes && (
+        <AddServiceForm
+          ref={refModal}
+          onReset={handleAfterAdding}
+          onToggleModal={toggleModal}
+          existData={updateData}
+          optionTypes={optionTypes}
+          onExistData={handleUpdateData}
+        />
+      )}
     </>
   );
 }

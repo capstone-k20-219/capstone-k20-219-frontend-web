@@ -4,45 +4,36 @@ import Button from "@/components/Button";
 import Card from "@/components/Card";
 import SmallStatisticsContent from "@/components/SmallStatisticsContent";
 import BreadcrumbsComponent from "@/components/BreadcrumbsComponent";
-import {
-  Dispatch,
-  SetStateAction,
-  forwardRef,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { getSlotList, getVehicleTypeListForMap } from "@/lib/actions";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import {
   DialogContainer,
   PageContentCotainer2,
 } from "@/components/ContainerUI";
-import { BLOCK_SIZE, SlotBlock, VehicleTypeData } from "@/lib/type";
+import {
+  BLOCK_SIZE,
+  SlotBlock,
+  SlotBlockDBGetType,
+  VehicleTypeData,
+} from "@/lib/type";
 import { getVehicleTypes } from "@/lib/services/vehicle-types";
-import { AppDispatch, useAppSelector } from "@/redux/store";
 import { MdDelete } from "react-icons/md";
 import { MapBackGround } from "@/components/ParkingLotMap";
 import { getParkingSlotList, updateDBMap } from "@/lib/services/parking-slots";
 import InputComponent from "@/components/InputComponent";
 import ButtonWhite from "@/components/ButtonWhite";
-import { validateCoordinate, validateVehicleTypeID } from "@/lib/helpers";
-import { refreshingToken, userLogOut } from "@/lib/services/auth";
-import { useDispatch } from "react-redux";
-import { logIn, logOut } from "@/redux/features/auth-slice";
-import { setInitial } from "@/redux/features/active-slice";
+import {
+  statusAction,
+  validateCoordinate,
+  validateVehicleTypeID,
+} from "@/lib/helpers";
+import useToken from "@/lib/hooks/refresh-token";
+import { MapPageSkeleton } from "@/components/Skeleton";
 
 type EditableSlotProps = {
   slot: SlotBlock;
   editable: boolean;
-  typeColor: string;
-  onDeleteSlot: (id: string) => void;
-};
-
-type EditableSlotDisplayProps = {
-  edit: boolean;
-  slots: SlotBlock[];
-  typeList: VehicleProps[];
+  typeColor: VehicleProps | null | undefined;
   onDeleteSlot: (id: string) => void;
 };
 
@@ -51,7 +42,6 @@ type EditableParkingLotMapProps = {
   slotList: SlotBlock[];
   vehicleList: VehicleProps[];
   onDeleteSlot: (id: string) => void;
-  onAddNewSlot: (slot: SlotBlock) => void;
   onSetNewSlot: (slot: SlotBlock) => void;
   onOpenModal: () => void;
 };
@@ -67,10 +57,6 @@ const initialVehicleProps: VehicleProps = {
   name: "",
   color: "#c4c4c4",
 };
-
-function MapPageSkeleton() {
-  return <div>map page skeleton</div>;
-}
 
 function EditableSlot({
   slot,
@@ -113,7 +99,7 @@ function EditableSlot({
         left: slot.x_start,
         width: slot.x_end - slot.x_start,
         height: slot.y_end - slot.y_start,
-        borderColor: typeColor ? typeColor : "#c4c4c4",
+        borderColor: typeColor ? typeColor.color : "#c4c4c4",
       }}
       className="absolute bg-white border shadow-md
           grid place-items-center cursor-pointer text-xs"
@@ -126,50 +112,33 @@ function EditableSlot({
             top: menuPos.y,
             left: menuPos.x,
           }}
-          className="absolute bg-white rounded p-2 w-20 shadow-md text-center 
-        border border-neutral-500 z-50 text-red-900 flex gap-1 items-center"
+          className="absolute bg-white rounded min-w-[100px] shadow-md p-1 
+        border border-neutral-500 z-50"
           onClick={() => {
             onDeleteSlot(slot.id);
             setOpenMenu(false);
           }}
         >
-          <MdDelete style={{ color: "red", width: 16, height: 16 }} />
-          <span>Delete</span>
+          <div className="text-neutral-900 p-1">
+            <div className="font-semibold">{slot.id}</div>
+            {typeColor && (
+              <span className="font-light text-[10px]">
+                {slot.typeId} - {typeColor.name}
+              </span>
+            )}
+          </div>
+          <div
+            className="flex gap-1 items-center text-red-500 p-1 
+          rounded hover:bg-red-500 hover:text-white"
+          >
+            <MdDelete style={{ width: 16, height: 16 }} />
+            <span>Delete</span>
+          </div>
         </div>
       )}
     </div>
   );
 }
-
-// function EditableSlotsDisplay({
-//   edit = false,
-//   slots,
-//   typeList,
-//   onDeleteSlot,
-// }: EditableSlotDisplayProps) {
-//   const [editable, setEditable] = useState(false);
-
-//   useEffect(() => {
-//     setEditable(edit);
-//   }, [edit]);
-
-//   return (
-//     <>
-//       {slots.map((item, index) => {
-//         const vehicle = typeList.find((vehicle) => vehicle.id === item.typeId);
-//         return (
-//           <EditableSlot
-//             key={index}
-//             slot={{ ...item }}
-//             editable={editable}
-//             typeColor={vehicle ? vehicle.color : ""}
-//             onDeleteSlot={onDeleteSlot}
-//           />
-//         );
-//       })}
-//     </>
-//   );
-// }
 
 type SlotInfoModalProps = {
   slot: SlotBlock | null;
@@ -194,7 +163,7 @@ const SlotInfoModal = forwardRef<HTMLDialogElement, SlotInfoModalProps>(
 
     const handleFormAction = (formData: FormData) => {
       const id = formData.get("id") as string;
-      console.log(id);
+      // console.log(id);
       if (slot) {
         onAddNewSlot({
           id: id,
@@ -257,12 +226,9 @@ function EditableParkingLotMap({
   slotList,
   vehicleList,
   onDeleteSlot,
-  onAddNewSlot,
   onSetNewSlot,
   onOpenModal,
 }: EditableParkingLotMapProps) {
-  const [vehicleColors, setVehicleColors] =
-    useState<VehicleProps[]>(vehicleList);
   const [currentType, setCurrentType] = useState<VehicleProps | null>(
     vehicleList ? vehicleList[0] : null
   );
@@ -276,7 +242,6 @@ function EditableParkingLotMap({
   };
 
   const handleValidateSlotData = (slot: SlotBlock) => {
-    // validate typeId
     const validTypeId = validateVehicleTypeID(slot.typeId);
     if (!validTypeId.valid) {
       return validTypeId;
@@ -306,7 +271,7 @@ function EditableParkingLotMap({
   After done, new slot will be added to local array until manager click on Save button.
   */
   const handleKeyUp = (slot: SlotBlock) => {
-    console.log(slot);
+    // console.log(slot);
     // validate typeId, coordinates
     const validSlot = handleValidateSlotData(slot);
     if (!validSlot.valid) {
@@ -390,7 +355,7 @@ function EditableParkingLotMap({
             <MapBackGround size={1800} />
             {/*slot list generating*/}
             {slotList.map((item, index) => {
-              const vehicle = vehicleColors.find(
+              const vehicle = vehicleList.find(
                 (vehicle) => vehicle.id === item.typeId
               );
               return (
@@ -398,7 +363,7 @@ function EditableParkingLotMap({
                   key={item.typeId + index + item.id}
                   slot={{ ...item }}
                   editable={editable}
-                  typeColor={vehicle ? vehicle.color : ""}
+                  typeColor={vehicle}
                   onDeleteSlot={onDeleteSlot}
                 />
               );
@@ -414,7 +379,7 @@ function EditableParkingLotMap({
                   y_end: endXY.y,
                   typeId: currentType ? currentType.id : "",
                 }}
-                typeColor={currentType ? currentType.color : ""}
+                typeColor={currentType}
                 editable={editable}
                 onDeleteSlot={onDeleteSlot}
               />
@@ -426,7 +391,7 @@ function EditableParkingLotMap({
         <Card className="p-3 md:py-5 w-full md:w-1/5 overflow-hidden">
           <h4 className="font-semibold mb-1">Vehicle type</h4>
           <div className="w-full h-full overflow-auto">
-            {vehicleColors.length && currentType ? (
+            {vehicleList.length && currentType ? (
               <div className="flex flex-row md:flex-col gap-1">
                 {vehicleList.map((item, index) => (
                   <div
@@ -436,13 +401,13 @@ function EditableParkingLotMap({
                   currentType.id === item.id ? "bg-slate-200" : ""
                 }`}
                     onClick={() =>
-                      handleChangeAcceptedVehicle(vehicleColors[index])
+                      handleChangeAcceptedVehicle(vehicleList[index])
                     }
                   >
                     <div
                       className="w-3 h-3 border-[0.5px] border-neutral-300 rounded"
                       style={{
-                        backgroundColor: vehicleColors[index].color,
+                        backgroundColor: vehicleList[index].color,
                       }}
                     ></div>
                     <div className="line-clamp-1 w-fit">{item.name}</div>
@@ -460,10 +425,7 @@ function EditableParkingLotMap({
 }
 
 export default function ManagerMap() {
-  const { token, refresh_token, uid, role } = useAppSelector(
-    (state) => state.auth.value
-  );
-  const dispatch = useDispatch<AppDispatch>();
+  const { refreshToken, token } = useToken();
 
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [data, setData] = useState<SlotBlock[] | null>(null);
@@ -499,39 +461,28 @@ export default function ManagerMap() {
 
   const handleSaveMap = async () => {
     try {
-      console.log(data);
       if (!data) {
         setIsEdit(false);
         return;
       }
       let isUnauthorized = false;
+      let newToken = token;
       do {
         if (isUnauthorized) {
-          const resRefreshToken = await refreshingToken(refresh_token);
-          if (resRefreshToken.status === 401) {
-            dispatch(logOut());
-            dispatch(setInitial());
-            return;
-          }
-          dispatch(
-            logIn({
-              token: resRefreshToken.data.access_token,
-              uid: uid,
-              refresh_token: refresh_token,
-              role: role,
-            })
-          );
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
         }
-        const res = await updateDBMap(token, data);
+        const res = await updateDBMap(newToken, data);
         if (res.status === 200) {
           setIsEdit(false);
+          toast.success("Map is updated successfully.");
           return;
-        } else if (res.status === 500) {
-          throw new Error("");
         } else if (res.status === 401) {
           isUnauthorized = true;
         } else {
-          toast.error("Unknown error");
+          statusAction(res.status);
           return;
         }
       } while (true);
@@ -542,25 +493,35 @@ export default function ManagerMap() {
 
   const handleGetVehicleTypeOptions = async () => {
     try {
-      const res = await getVehicleTypes(token);
-      if (res.status === 401) {
-        // refresh token
-      } else if (res.status === 500) {
-        throw new Error("");
-      } else if (res.status === 200) {
-        const optionData: VehicleTypeData[] = res.data;
-        setVehicleList(
-          optionData.map((item) => ({
+      let isUnauthorized = false;
+      let newToken = token;
+      do {
+        if (isUnauthorized) {
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
+        }
+        const res = await getVehicleTypes(newToken);
+        if (res.status === 200) {
+          const optionData: VehicleTypeData[] = res.data;
+          const typeListData = optionData.map((item) => ({
             id: item.id,
             name: item.name,
             color: `#${Math.floor(Math.random() * 0xffffff)
               .toString(16)
               .padStart(6, "0")}`,
-          }))
-        );
-      } else {
-        toast.error("Unknown error!");
-      }
+          }));
+          // console.log(typeListData);
+          setVehicleList(typeListData);
+          return;
+        } else if (res.status === 401) {
+          isUnauthorized = true;
+        } else {
+          statusAction(res.status);
+          return;
+        }
+      } while (true);
     } catch (error) {
       toast.error("Server error!");
     }
@@ -568,17 +529,36 @@ export default function ManagerMap() {
 
   const handleGetSlotList = async () => {
     try {
-      const res = await getParkingSlotList(token);
-      if (res.status === 401) {
-        // refresh token
-      } else if (res.status === 500) {
-        throw new Error("");
-      } else if (res.status === 200) {
-        const newData: SlotBlock[] = res.data;
-        setData(newData);
-      } else {
-        toast.error("Unknown error!");
-      }
+      let isUnauthorized = false;
+      let newToken = token;
+      do {
+        if (isUnauthorized) {
+          const isRefreshed = await refreshToken();
+          if (!isRefreshed.valid) return;
+          newToken = isRefreshed.access_token;
+          isUnauthorized = false;
+        }
+        const res = await getParkingSlotList(newToken);
+        if (res.status === 200) {
+          const newData: SlotBlockDBGetType[] = res.data;
+          const filteredData: SlotBlock[] = newData.map((item) => ({
+            id: item.id,
+            typeId: item.typeId,
+            x_start: item.x_start,
+            x_end: item.x_end,
+            y_start: item.y_start,
+            y_end: item.y_end,
+          }));
+          // console.log(filteredData);
+          setData(filteredData);
+          return;
+        } else if (res.status === 401) {
+          isUnauthorized = true;
+        } else {
+          statusAction(res.status);
+          return;
+        }
+      } while (true);
     } catch (error) {
       toast.error("Server error!");
     }
@@ -622,7 +602,6 @@ export default function ManagerMap() {
               slotList={data}
               vehicleList={vehicleList}
               onDeleteSlot={handleDeleteSlot}
-              onAddNewSlot={handleAddNewSlot}
               onSetNewSlot={handleSetNewSlot}
               onOpenModal={toggleModal}
             />
