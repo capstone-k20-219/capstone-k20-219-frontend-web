@@ -1,7 +1,0 @@
-
-Employee group : missing firebase realtime checkin, checkout functions
-
---------- Done ----------
-Manager group
-Profile: 
-Login: 
