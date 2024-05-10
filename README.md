@@ -20,9 +20,9 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 
 ## Learn More
 
-- Status: Ongoing - This application currently lacks of back-end server.
+- Status: Finished - This application have not been deployed yet.
 - To access to the website, please use those account to login:
 ```bash
-  { username: Manager, password: manager123 }
-  { username: Employee, password: employee123 }
+  { username: manager123@gmail.com, password: manager123 }
+  { username: employee1@gmail.com, password: employee123 }
 ```
