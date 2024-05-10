@@ -47,6 +47,7 @@ import {
 } from "@/lib/helpers";
 import useToken from "@/lib/hooks/refresh-token";
 import { ResultsTableSkeleton } from "@/components/Skeleton";
+import usePagination from "@/lib/hooks/pagination";
 
 interface EmployeeColumn {
   id: "id" | "name" | "phone" | "email" | "dob" | "action";
@@ -389,6 +390,8 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
   }
 );
 
+AddEmployeeForm.displayName = "AddEmployeeForm";
+
 export default function ManagerEmployee() {
   const { refreshToken, token } = useToken();
 
@@ -401,26 +404,14 @@ export default function ManagerEmployee() {
 
   const refSearchBar = useRef<HTMLFormElement>(null);
   const refModal = useRef<HTMLDialogElement>(null);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const recordsPerPage = 7;
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-
-  const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
-
-  const handleChangePage = (
-    event: React.ChangeEvent<unknown>,
-    newPage: number
-  ) => {
-    setCurrentPage(newPage);
-  };
-
-  const handleDecreasePage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    }
-  };
+  const {
+    currentPage,
+    currentRecords,
+    recordsPerPage,
+    handleChangePage,
+    handleDecreasePage,
+  } = usePagination<UserDBGetType>({ data: data, pageSize: 7 });
 
   const toggleModal = () => {
     if (!refModal?.current) return;

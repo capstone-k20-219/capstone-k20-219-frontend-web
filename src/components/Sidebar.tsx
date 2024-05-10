@@ -78,6 +78,7 @@ export default function Sidebar({
           src={toggleWdith ? Logo : Logo2}
           alt="Logo"
           id="logo"
+          priority
           className={`aspect-[${toggleWdith ? "116.49/36" : "43.49/36"}]`}
         />
         <FiMenu

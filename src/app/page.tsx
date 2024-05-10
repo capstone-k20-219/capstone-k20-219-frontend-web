@@ -42,7 +42,8 @@ export default function Page() {
           <SiNextdotjs />
           <HiAcademicCap />
         </div>
-        <span>@ All rights reserved 2024. VNU - HCMUT.</span>
+        <span>@ All rights reserved 2024. VNU - HCMUT. MDT-330.</span>
+        <span>Author: Nguyen Viet Hoa, Pham Chau Thanh, Pham Huu Duc.</span>
       </div>
     </div>
   );

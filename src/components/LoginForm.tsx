@@ -6,10 +6,9 @@ import { AppDispatch } from "@/redux/store";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { onActive } from "@/redux/features/active-slice";
 import { statusAction, validateEmail, validatePassword } from "@/lib/helpers";
 import { logIn } from "@/redux/features/auth-slice";
-import { ActiveState, AuthState, SelfUserDBGetType } from "@/lib/type";
+import { AuthState, SelfUserDBGetType } from "@/lib/type";
 import { getSelfUser } from "@/lib/services/users";
 import toast from "react-hot-toast";
 import { authenticate } from "@/lib/services/auth";
@@ -40,7 +39,12 @@ export default function LoginForm() {
 
       const data = await authenticate(validEmail.data, validPass.data);
 
-      const user = await getSelfUser(data.access_token);
+      if (data.status === 401) {
+        setError("Incorrect password or email!");
+        return;
+      }
+
+      const user = await getSelfUser(data.data.access_token);
 
       if (user.status !== 200) {
         statusAction(user.status);
@@ -56,25 +60,19 @@ export default function LoginForm() {
       if (role) {
         dispatch(
           logIn({
-            token: data.access_token,
-            uid: data.id,
-            refresh_token: data.refresh_token,
+            token: data.data.access_token,
+            uid: data.data.id,
+            refresh_token: data.data.refresh_token,
             role: role,
           } as AuthState)
         );
-
-        const activeState: ActiveState = {
-          role: role,
-          index: 0,
-          name: isManager ? "Dashboard" : "Map",
-        };
-        dispatch(onActive(activeState));
 
         if (role === "manager") {
           router.push("/m-home");
         } else {
           router.push("/e-map");
         }
+        toast.success("Logging in successfully.");
       } else {
         toast.error("You have no right to access this system!");
       }

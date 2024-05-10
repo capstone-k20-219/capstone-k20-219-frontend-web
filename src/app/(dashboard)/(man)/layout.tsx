@@ -49,7 +49,7 @@ export default function ManagerLayout({
       }
     };
     checkRole();
-  }, []);
+  }, [router, token]);
 
   if (allow) return <>{children}</>;
   return null;

@@ -1,4 +1,12 @@
-function LoadingIcon({ size, ringSize }: { size: number; ringSize: number }) {
+import React from "react";
+
+export default function LoadingIcon({
+  size,
+  ringSize,
+}: {
+  size: number;
+  ringSize: number;
+}) {
   return (
     <div
       className="rounded-full border-white border-opacity-50
@@ -7,4 +15,3 @@ function LoadingIcon({ size, ringSize }: { size: number; ringSize: number }) {
     ></div>
   );
 }
-export default LoadingIcon;

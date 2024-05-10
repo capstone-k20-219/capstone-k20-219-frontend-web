@@ -101,7 +101,7 @@ function ProfileUpdateInfoForm({ profile }: ProfileUpdateInfoFormProps) {
       let newUrlImg = userProfile.image;
       // upload img to firebase
       if (imageFile) {
-        const imgDir = `test_img_files/${v4()}`;
+        const imgDir = `test_img_files/${userProfile.id}/image`;
         const imgRef = ref(imageDB, imgDir);
         await uploadBytes(imgRef, imageFile);
         const resFb = await getDownloadURL(ref(imageDB, imgDir));

@@ -49,7 +49,7 @@ export default function EmployeeLayout({
       }
     };
     checkRole();
-  }, []);
+  }, [router, token]);
 
   if (allow) return <>{children}</>;
   return null;

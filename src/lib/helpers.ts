@@ -1,12 +1,12 @@
 import toast from "react-hot-toast";
 import {
-  BLOCK_SIZE,
   Coordinate,
   ServiceDBGetType,
   ServicePrices,
   UserDBGetType,
   VehicleTypeData,
 } from "./type";
+import { BLOCK_SIZE } from "./data";
 
 const eliminateSpecialChars = (input: string) => {
   const map: {
@@ -321,6 +321,7 @@ function statusAction(status: number, action?: string) {
       toast.error("Bad request!");
       return;
     case 404:
+    case 400:
       toast.error("Not found!");
       return;
     default:
@@ -354,6 +355,10 @@ function getWeekRange() {
   return { firstDay, lastDay, dayArrray, nowTime };
 }
 
+function formatMoney(money: number) {
+  return "$" + money.toFixed(2);
+}
+
 export {
   eliminateSpecialChars,
   validateDob,
@@ -376,4 +381,5 @@ export {
   statusAction,
   getWeekRange,
   formatCreatedTime,
+  formatMoney,
 };

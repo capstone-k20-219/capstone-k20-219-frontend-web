@@ -10,12 +10,7 @@ import {
   DialogContainer,
   PageContentCotainer2,
 } from "@/components/ContainerUI";
-import {
-  BLOCK_SIZE,
-  SlotBlock,
-  SlotBlockDBGetType,
-  VehicleTypeData,
-} from "@/lib/type";
+import { SlotBlock, SlotBlockDBGetType, VehicleTypeData } from "@/lib/type";
 import { getVehicleTypes } from "@/lib/services/vehicle-types";
 import { MdDelete } from "react-icons/md";
 import { MapBackGround } from "@/components/ParkingLotMap";
@@ -29,6 +24,7 @@ import {
 } from "@/lib/helpers";
 import useToken from "@/lib/hooks/refresh-token";
 import { MapPageSkeleton } from "@/components/Skeleton";
+import { BLOCK_SIZE, MAP_SIZE } from "@/lib/data";
 
 type EditableSlotProps = {
   slot: SlotBlock;
@@ -120,7 +116,7 @@ function EditableSlot({
           }}
         >
           <div className="text-neutral-900 p-1">
-            <div className="font-semibold">{slot.id}</div>
+            <div className="font-semibold uppercase">{slot.id}</div>
             {typeColor && (
               <span className="font-light text-[10px]">
                 {slot.typeId} - {typeColor.name}
@@ -166,7 +162,7 @@ const SlotInfoModal = forwardRef<HTMLDialogElement, SlotInfoModalProps>(
       // console.log(id);
       if (slot) {
         onAddNewSlot({
-          id: id,
+          id: id.toUpperCase(),
           typeId: slot.typeId,
           x_start: slot.x_start,
           x_end: slot.x_end,
@@ -190,6 +186,7 @@ const SlotInfoModal = forwardRef<HTMLDialogElement, SlotInfoModalProps>(
               type="text"
               value={slotId}
               label="Slot ID"
+              autoFocus
               onChangeFunction={(e) => setSlotId(e.target.value)}
             />
             {errorMessage && (
@@ -215,6 +212,8 @@ const SlotInfoModal = forwardRef<HTMLDialogElement, SlotInfoModalProps>(
     );
   }
 );
+
+SlotInfoModal.displayName = "SlotInfoModal";
 
 type Coordinate = {
   x: number;
@@ -350,9 +349,10 @@ function EditableParkingLotMap({
         <div className="w-full h-full border border-neutral-500/50 overflow-auto">
           <div
             ref={refMap}
-            className="min-w-full min-h-full w-[1800px] h-[1800px] relative text-neutral-500 font-semibold"
+            style={{ width: MAP_SIZE, height: MAP_SIZE }}
+            className="min-w-full min-h-full relative text-neutral-500 font-semibold"
           >
-            <MapBackGround size={1800} />
+            <MapBackGround size={MAP_SIZE} />
             {/*slot list generating*/}
             {slotList.map((item, index) => {
               const vehicle = vehicleList.find(

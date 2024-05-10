@@ -99,6 +99,8 @@ const DialogContainer = forwardRef<HTMLDialogElement, ChildrenProps>(
   }
 );
 
+DialogContainer.displayName = "DialogContainer";
+
 /*==============================================================*/
 
 export {

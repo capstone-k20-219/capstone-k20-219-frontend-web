@@ -10,9 +10,15 @@ const authenticate = async (email: string, password: string) => {
         password: password,
       }),
     });
-    return res.json();
+    return {
+      status: res.status,
+      data: await res.json(),
+    };
   } catch (error) {
-    console.log(error);
+    return {
+      status: 500,
+      data: null,
+    };
   }
 };
 

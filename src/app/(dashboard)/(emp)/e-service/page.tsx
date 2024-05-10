@@ -44,6 +44,7 @@ import {
 } from "@/components/Skeleton";
 import InputComponent from "@/components/InputComponent";
 import ButtonWhite from "@/components/ButtonWhite";
+import usePagination from "@/lib/hooks/pagination";
 
 interface ServiceRequestColumn {
   id: "id" | "plateNo" | "slotId" | "createdAt" | "action";
@@ -290,6 +291,8 @@ const AcceptBookingModal = forwardRef<
   );
 });
 
+AcceptBookingModal.displayName = "AcceptBookingModal";
+
 export default function EmployeeService() {
   const { refreshToken, token } = useToken();
   const [serviceList, setServiceList] = useState<OptionType[] | null>(null);
@@ -301,26 +304,15 @@ export default function EmployeeService() {
     null
   );
   const [data, setData] = useState<ServiceRequestData[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const recordsPerPage = 7;
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-
-  const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
-
-  const handleChangePage = (
-    event: React.ChangeEvent<unknown>,
-    newPage: number
-  ) => {
-    setCurrentPage(newPage);
-  };
-
-  const handleDecreasePage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    }
-  };
+  const {
+    currentPage,
+    currentRecords,
+    recordsPerPage,
+    handleChangePage,
+    handleDecreasePage,
+    setCurrentPage,
+  } = usePagination<ServiceRequestData>({ data: data, pageSize: 7 });
 
   const handleChangeSelect = (e: SelectChangeEvent) => {
     setServiceFilter(e.target.value);
@@ -337,6 +329,8 @@ export default function EmployeeService() {
     const newData = dataStorage
       ? dataStorage.filter((item) => item.id !== id)
       : [];
+    const pageData = currentRecords.filter((item) => item.id !== id);
+    if (!pageData.length) handleDecreasePage();
     setDataStorage(newData);
     setData(newData);
   };

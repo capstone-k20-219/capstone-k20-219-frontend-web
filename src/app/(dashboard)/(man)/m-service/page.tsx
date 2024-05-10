@@ -44,6 +44,7 @@ import { CiCirclePlus } from "react-icons/ci";
 import { getVehicleTypes } from "@/lib/services/vehicle-types";
 import useToken from "@/lib/hooks/refresh-token";
 import { ResultsServiceSkeleton } from "@/components/Skeleton";
+import usePagination from "@/lib/hooks/pagination";
 
 type ServiceComponentProps = {
   data: ServiceDBGetType;
@@ -470,6 +471,8 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
   }
 );
 
+AddServiceForm.displayName = "AddServiceForm";
+
 export default function ManagerService() {
   const { refreshToken, token } = useToken();
 
@@ -486,26 +489,14 @@ export default function ManagerService() {
   const [isReset, setIsReset] = useState<boolean>(true);
   const refSearchBar = useRef<HTMLFormElement>(null);
   const refModal = useRef<HTMLDialogElement>(null);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const recordsPerPage = 5;
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-
-  const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
-
-  const handleChangePage = (
-    event: React.ChangeEvent<unknown>,
-    newPage: number
-  ) => {
-    setCurrentPage(newPage);
-  };
-
-  const handleDecreasePage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    }
-  };
+  const {
+    currentPage,
+    currentRecords,
+    recordsPerPage,
+    handleChangePage,
+    handleDecreasePage,
+  } = usePagination<ServiceDBGetType>({ data: data, pageSize: 5 });
 
   const toggleModal = () => {
     if (!refModal?.current) return;

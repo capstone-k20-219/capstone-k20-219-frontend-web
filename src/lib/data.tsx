@@ -1,89 +1,10 @@
-import { NavItem, ServiceRequestData } from "./type";
+import { NavItem } from "./type";
 import { TbChartTreemap, TbLayoutDashboard } from "react-icons/tb";
 import { MdOutlineDesignServices } from "react-icons/md";
 import { BsPeople } from "react-icons/bs";
 import { IoCarSport, IoSettingsOutline } from "react-icons/io5";
 import { IoMdHelpCircleOutline } from "react-icons/io";
 import { VscFeedback } from "react-icons/vsc";
-
-export const temporaryLoginInfo = [
-  {
-    id: "jbfaue89869",
-    username: "Manager",
-    password: "manager123",
-    role: "m",
-  },
-  {
-    id: "lkbhlkblbliua86",
-    username: "Employee",
-    password: "employee123",
-    role: "e",
-  },
-];
-
-const ServiceRequestRows: ServiceRequestData[] = [
-  {
-    id: 1,
-    plate: "HP234-23.444",
-    phone: "0983786674",
-    name: "Nguyen Huu Duc",
-    time: "12:30 29/10/2023",
-  },
-  {
-    id: 2,
-    plate: "HP234-23.444",
-    phone: "0983786674",
-    name: "Nguyen Huu Duc",
-    time: "12:30 29/10/2023",
-  },
-  {
-    id: 3,
-    plate: "HP234-23.444",
-    phone: "0983786674",
-    name: "Nguyen Huu Duc",
-    time: "12:30 29/10/2023",
-  },
-  {
-    id: 4,
-    plate: "HP234-23.444",
-    phone: "0983786674",
-    name: "Nguyen Huu Duc",
-    time: "12:30 29/10/2023",
-  },
-];
-const ServiceRequestRows2: ServiceRequestData[] = [
-  {
-    id: 1,
-    plate: "HP234-23.444",
-    phone: "0983786674",
-    name: "Nguyen Huu Duc",
-    time: "12:30 29/10/2023",
-  },
-  {
-    id: 2,
-    plate: "HP234-23.444",
-    phone: "0983786674",
-    name: "Nguyen Huu Duc",
-    time: "12:30 29/10/2023",
-  },
-];
-const ServiceRequestRows3: ServiceRequestData[] = [
-  {
-    id: 1,
-    plate: "HP234-23.444",
-    phone: "0983786674",
-    name: "Nguyen Huu Duc",
-    time: "12:30 29/10/2023",
-  },
-];
-
-export const mockServiceRequestData: {
-  [key: string]: any;
-} = {
-  washing: ServiceRequestRows,
-  charging: ServiceRequestRows2,
-  maintaining: ServiceRequestRows3,
-};
 
 const styleIcon = {
   width: 24,
@@ -161,3 +82,7 @@ export const ListNavManager = [
   "Help",
   "Setting",
 ];
+
+export const BLOCK_SIZE = 24; // px
+
+export const MAP_SIZE = 4800; // 4800px == 200 block

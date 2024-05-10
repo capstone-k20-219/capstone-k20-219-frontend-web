@@ -4,7 +4,6 @@ import { AppDispatch, useAppSelector } from "@/redux/store";
 import { refreshingToken } from "../services/auth";
 import { useDispatch } from "react-redux";
 import { logIn, logOut } from "@/redux/features/auth-slice";
-import { setInitial } from "@/redux/features/active-slice";
 
 const useToken = () => {
   const { uid, refresh_token, role, token } = useAppSelector(
@@ -33,7 +32,6 @@ const useToken = () => {
       }
     } catch (error) {
       dispatch(logOut());
-      dispatch(setInitial());
       return {
         valid: false,
         access_token: "",

@@ -25,6 +25,7 @@ import {
   WeekRevenueType,
 } from "@/lib/type";
 import {
+  formatMoney,
   formatValueDateString,
   getWeekRange,
   statusAction,
@@ -66,10 +67,6 @@ function ChartSetInnerContainer({ children }: { children: React.ReactNode }) {
   );
 }
 
-function formatMoneyCurrency(money: number) {
-  return "$" + money.toFixed(2);
-}
-
 export default function ManagerHome() {
   const { refreshToken, token } = useToken();
 
@@ -91,13 +88,6 @@ export default function ManagerHome() {
     VehicleValue[] | null
   >(null);
   const [trafficData, setTrafficData] = useState<TrafficDataType | null>(null);
-
-  // const checkDateRange = () => {
-  //   const { firstDay, lastDay, dayArrray, nowTime } = getWeekRange();
-  //   console.log("This week start from", firstDay, "to", lastDay);
-  //   console.log("Day array", dayArrray);
-  //   console.log("Today", nowTime);
-  // };
 
   const handleGetCurrentVehicle = async () => {
     try {
@@ -463,7 +453,7 @@ export default function ManagerHome() {
           <Card className="w-full h-full">
             <SmallStatisticsContent
               name="Today revenue"
-              value={formatMoneyCurrency(currentRevenue)}
+              value={formatMoney(currentRevenue)}
             />
           </Card>
           <Card className="w-full h-full">

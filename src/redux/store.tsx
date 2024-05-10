@@ -1,16 +1,10 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import authReducer from "./features/auth-slice";
-import activeReducer from "./features/active-slice";
 import { TypedUseSelectorHook, useSelector } from "react-redux";
 import storage from "redux-persist/lib/storage";
 import { persistReducer } from "redux-persist";
 
 const persistenceConfig = {
-  active: {
-    key: "active",
-    version: 1,
-    storage,
-  },
   auth: {
     key: "auth",
     version: 2,
@@ -20,7 +14,6 @@ const persistenceConfig = {
 
 const persistedReducer: any = combineReducers({
   auth: persistReducer(persistenceConfig["auth"], authReducer),
-  active: persistReducer(persistenceConfig["active"], activeReducer),
 });
 
 export const store = configureStore({

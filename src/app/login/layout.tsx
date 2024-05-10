@@ -19,7 +19,7 @@ export default function LoginPageLayout({
     } else {
       setInit(true);
     }
-  }, []);
+  }, [token, router]);
 
   if (init) return children;
   else return null;

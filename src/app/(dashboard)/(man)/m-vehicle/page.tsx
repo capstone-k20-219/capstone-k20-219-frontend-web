@@ -26,9 +26,9 @@ import {
   getVehicleTypes,
   updateVehicleType,
 } from "@/lib/services/vehicle-types";
-import { useAppSelector } from "@/redux/store";
 import toast from "react-hot-toast";
 import {
+  formatMoney,
   sortVehicleTypesById,
   statusAction,
   validateFee,
@@ -38,6 +38,7 @@ import {
 } from "@/lib/helpers";
 import useToken from "@/lib/hooks/refresh-token";
 import { ResultsTableSkeleton } from "@/components/Skeleton";
+import usePagination from "@/lib/hooks/pagination";
 
 interface VehicleTypeColumn {
   id: "id" | "name" | "slotBookingFee" | "parkingFee" | "action";
@@ -68,7 +69,7 @@ const columns: readonly VehicleTypeColumn[] = [
     label: "Booking fee",
     minWidth: 130,
     align: "left",
-    format: (value: number) => `$${value}.00`,
+    format: (val: number) => formatMoney(val),
     paddingLeft: "12px",
   },
   {
@@ -76,7 +77,7 @@ const columns: readonly VehicleTypeColumn[] = [
     label: "Parking fee / hour",
     minWidth: 130,
     align: "left",
-    format: (value: number) => `$${value}.00`,
+    format: (val: number) => formatMoney(val),
     paddingLeft: "12px",
   },
   {
@@ -420,6 +421,8 @@ const AddVehicleTypeForm = forwardRef<
   }
 );
 
+AddVehicleTypeForm.displayName = "AddVehicleTypeForm";
+
 export default function ManagerVehicleType() {
   const { refreshToken, token } = useToken();
 
@@ -433,26 +436,14 @@ export default function ManagerVehicleType() {
   const [isReset, setIsReset] = useState<boolean>(true);
   const refSearchBar = useRef<HTMLFormElement>(null);
   const refModal = useRef<HTMLDialogElement>(null);
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const recordsPerPage = 7;
-  const indexOfLastRecord: number = currentPage * recordsPerPage;
-  const indexOfFirstRecord: number = indexOfLastRecord - recordsPerPage;
-
-  const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
-
-  const handleChangePage = (
-    event: React.ChangeEvent<unknown>,
-    newPage: number
-  ) => {
-    setCurrentPage(newPage);
-  };
-
-  const handleDecreasePage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    }
-  };
+  const {
+    currentPage,
+    currentRecords,
+    recordsPerPage,
+    handleChangePage,
+    handleDecreasePage,
+  } = usePagination<VehicleTypeData>({ data: data, pageSize: 7 });
 
   const toggleModal = () => {
     if (!refModal?.current) return;

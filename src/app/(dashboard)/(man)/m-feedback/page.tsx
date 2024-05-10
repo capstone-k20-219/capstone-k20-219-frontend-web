@@ -33,6 +33,7 @@ import {
   FeedbackBoardSkeleton,
   ResultsFeedbackSkeleton,
 } from "@/components/Skeleton";
+import usePagination from "@/lib/hooks/pagination";
 
 type FeedbackListProps = {
   data: FeedbackData[];
@@ -82,21 +83,16 @@ function FeedbackList({ data, onDeleteFeedback }: FeedbackListProps) {
 
 function ManagerFeedbackContent({ service }: { service: string }) {
   const { refreshToken, token } = useToken();
-  const [dataStorage, setDataStorage] = useState<FeedbackData[] | null>(null);
-  const [data, setData] = useState<FeedbackData[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [data, setData] = useState<FeedbackData[] | null>(null);
 
-  const recordsPerPage = 5;
-  const indexOfLastRecord = currentPage * recordsPerPage;
-  const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
-
-  const currentRecords = data.slice(indexOfFirstRecord, indexOfLastRecord);
-  const handleChangePage = (
-    event: React.ChangeEvent<unknown>,
-    newPage: number
-  ) => {
-    setCurrentPage(newPage);
-  };
+  const {
+    currentPage,
+    currentRecords,
+    recordsPerPage,
+    setCurrentPage,
+    handleChangePage,
+    handleDecreasePage,
+  } = usePagination<FeedbackData>({ data: data, pageSize: 4 });
 
   const averageRating = () => {
     if (data === null) return 0;
@@ -125,8 +121,13 @@ function ManagerFeedbackContent({ service }: { service: string }) {
         const res = await deleteFeedbackById(newToken, newID);
         if (res.status === 200) {
           // const dataTmp = [...data];
-          const deletedData = data.filter((item) => item.id !== newID);
-          setDataStorage(deletedData);
+          const deletedData = data
+            ? data.filter((item) => item.id !== newID)
+            : null;
+          const deletedDatav2 = currentRecords.filter(
+            (item) => item.id !== newID
+          );
+          if (!deletedDatav2.length) handleDecreasePage();
           setData(deletedData);
           return;
         } else if (res.status === 401) {
@@ -155,7 +156,6 @@ function ManagerFeedbackContent({ service }: { service: string }) {
         const res = await getFeedbackByService(newToken, serviceId);
         if (res.status === 200) {
           const newData: FeedbackData[] = res.data as FeedbackData[];
-          setDataStorage(newData);
           setData(newData);
           return;
         } else if (res.status === 401) {
@@ -172,7 +172,7 @@ function ManagerFeedbackContent({ service }: { service: string }) {
 
   useEffect(() => {
     if (service) {
-      setDataStorage(null);
+      setData(null);
       handleGetFeedback(service);
       setCurrentPage(1);
     }
@@ -180,7 +180,7 @@ function ManagerFeedbackContent({ service }: { service: string }) {
 
   return (
     <>
-      {dataStorage ? (
+      {data ? (
         <>
           <DataBottomContainer className="overflow-auto">
             <div className="w-full flex gap-4 text-lg font-semibold items-center mb-4">

@@ -15,15 +15,15 @@ import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { AppDispatch, useAppSelector } from "@/redux/store";
 import { logOut } from "@/redux/features/auth-slice";
-import { setInitial } from "@/redux/features/active-slice";
 import { userLogOut } from "@/lib/services/auth";
+import { formatCreatedTime } from "@/lib/helpers";
 
 function HeaderTimer() {
   const [date, setDate] = useState("");
 
   useEffect(() => {
     const timerInterval = setInterval(
-      () => setDate(new Date().toLocaleString()),
+      () => setDate(formatCreatedTime(new Date().toISOString())),
       1000
     );
     return () => {
@@ -62,7 +62,6 @@ function HeaderMenu() {
   const handleLogout = async () => {
     await userLogOut(token);
     dispatch(logOut());
-    dispatch(setInitial());
   };
 
   useEffect(() => {
@@ -92,7 +91,6 @@ function HeaderMenu() {
           src={User}
           alt="avartar"
           id="user-avartar"
-          // loading="lazy"
           priority
           className="w-10 h-10 rounded-full cursor-pointer
               border-[0.5px] border-neutral-400"

@@ -180,14 +180,11 @@ export type Coordinate = {
 export type SlotBlock = {
   id: string;
   typeId: string; // accepted vehicle
-  // type: { name: string };
 } & Coordinate;
 
 export type SlotBlockDBGetType = {
   type: { name: string };
 } & SlotBlock;
-
-export const BLOCK_SIZE = 24; // px
 
 export type ParkingTicketDBGetType = {
   checkOutTime: string;
@@ -261,4 +258,10 @@ export type ServiceRequestData = {
   slotId: string; //
   plateNo: string;
   createdAt: string;
+};
+
+export type ScanDataType = {
+  plateNumberIn: string;
+  plateNumberOut: string;
+  qrCode: string;
 };

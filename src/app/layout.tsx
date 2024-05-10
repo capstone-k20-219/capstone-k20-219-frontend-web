@@ -16,8 +16,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // let persistor = persistStore(store);
-
   return (
     <html lang="en">
       <body
