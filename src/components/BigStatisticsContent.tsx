@@ -14,6 +14,12 @@ type ChartProps = {
   widthConfig: "small" | "big";
 };
 
+type Chartv2Props = {
+  label: string;
+  content: string;
+  widthConfig: "small" | "big";
+};
+
 function Chart({ option, widthConfig }: ChartProps) {
   let widthClass = "";
   if (widthConfig === "small") {
@@ -30,6 +36,23 @@ function Chart({ option, widthConfig }: ChartProps) {
   );
 }
 
+function Chartv2({ label, content, widthConfig }: Chartv2Props) {
+  let widthClass = "";
+  if (widthConfig === "small") {
+    widthClass = "min-w-[400px] md:w-1/5";
+  } else {
+    widthClass = "min-w-[450px] md:w-4/5";
+  }
+  return (
+    <Card
+      className={`w-full h-full p-5 flex flex-col gap-6 items-center ${widthClass} text-center`}
+    >
+      <div className="font-bold text-[16px]">{label}</div>
+      <span>{content}</span>
+    </Card>
+  );
+}
+
 function ChartSkeleton({ widthConfig }: { widthConfig: "small" | "big" }) {
   let widthClass = "";
   if (widthConfig === "small") {
@@ -39,7 +62,7 @@ function ChartSkeleton({ widthConfig }: { widthConfig: "small" | "big" }) {
   }
   return (
     <div
-      className={`bg-neutral-200 rounded-[10px] w-full h-full p-5 animate-pulse ${widthClass}`}
+      className={`bg-neutral-200 min-h-[20rem] md:max-h-[342px] rounded-[10px] w-full h-full p-5 animate-pulse ${widthClass}`}
     ></div>
   );
 }
@@ -204,7 +227,7 @@ function ServiceRevenueContribution({ data }: { data: ServiceValue[] | null }) {
     legend: {
       type: "scroll",
       orient: "vertical",
-      left: "5%",
+      left: "1%",
       top: "25%",
       bottom: "20%",
       data: dataOption.legendData,
@@ -219,7 +242,7 @@ function ServiceRevenueContribution({ data }: { data: ServiceValue[] | null }) {
         name: "Access From",
         type: "pie",
         radius: ["40%", "70%"],
-        center: ["70%", "55%"],
+        center: ["71%", "55%"],
         avoidLabelOverlap: false,
         itemStyle: {
           borderRadius: 10,
@@ -233,7 +256,7 @@ function ServiceRevenueContribution({ data }: { data: ServiceValue[] | null }) {
         emphasis: {
           label: {
             show: true,
-            fontSize: 40,
+            fontSize: 20,
             fontWeight: "bold",
           },
         },
@@ -248,7 +271,15 @@ function ServiceRevenueContribution({ data }: { data: ServiceValue[] | null }) {
   return (
     <>
       {data ? (
-        <Chart option={option} widthConfig="small" />
+        data.length ? (
+          <Chart option={option} widthConfig="small" />
+        ) : (
+          <Chartv2
+            label={option.title.text}
+            content="No service is currently provided."
+            widthConfig="small"
+          />
+        )
       ) : (
         <ChartSkeleton widthConfig="small" />
       )}
@@ -305,7 +336,7 @@ function VehicleTypeDistribution({ data }: { data: VehicleValue[] | null }) {
         emphasis: {
           label: {
             show: true,
-            fontSize: 40,
+            fontSize: 20,
             fontWeight: "bold",
           },
         },
@@ -320,7 +351,15 @@ function VehicleTypeDistribution({ data }: { data: VehicleValue[] | null }) {
   return (
     <>
       {data ? (
-        <Chart option={option} widthConfig="small" />
+        data.length ? (
+          <Chart option={option} widthConfig="small" />
+        ) : (
+          <Chartv2
+            label={option.title.text}
+            content="No vehicle type is currently accepted in the parking lot."
+            widthConfig="small"
+          />
+        )
       ) : (
         <ChartSkeleton widthConfig="small" />
       )}

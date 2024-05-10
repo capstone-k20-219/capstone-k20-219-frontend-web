@@ -23,7 +23,6 @@ import {
   DataBottomContainer,
 } from "@/components/ContainerUI";
 import { Stack, Pagination } from "@mui/material";
-import { useAppSelector } from "@/redux/store";
 import {
   createService,
   deleteServiceById,
@@ -45,6 +44,7 @@ import { getVehicleTypes } from "@/lib/services/vehicle-types";
 import useToken from "@/lib/hooks/refresh-token";
 import { ResultsServiceSkeleton } from "@/components/Skeleton";
 import usePagination from "@/lib/hooks/pagination";
+import { AiOutlineLoading } from "react-icons/ai";
 
 type ServiceComponentProps = {
   data: ServiceDBGetType;
@@ -213,6 +213,8 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
       },
     ]);
     const [errorMessage, setErrorMessage] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const refForm = useRef<HTMLFormElement>(null);
 
     const handlePricesChange = (index: number, e: any) => {
       let data = [...prices];
@@ -245,6 +247,7 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
     };
 
     const handleCloseModal = () => {
+      setIsLoading(false);
       setPrices([
         {
           typeId: optionTypes.length ? optionTypes[0].value : "",
@@ -302,7 +305,7 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
           }
           const res = await createService(newToken, record);
           if (res.status === 201) {
-            toast.success("New service is created successfully.");
+            toast.success("New service is created.");
             handleCloseModal();
             onReset();
             return;
@@ -310,10 +313,12 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
             isUnauthorized = true;
           } else {
             statusAction(res.status);
+            setIsLoading(false);
             return;
           }
         } while (true);
       } catch (error) {
+        setIsLoading(false);
         toast.error("Server error!");
       }
     };
@@ -334,7 +339,7 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
           }
           const res = await updateService(newToken, record);
           if (res.status === 200) {
-            toast.success("Service is updated successfully.");
+            toast.success("Service is updated.");
             handleCloseModal();
             onReset();
             return;
@@ -342,23 +347,24 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
             isUnauthorized = true;
           } else {
             statusAction(res.status);
+            setIsLoading(false);
             return;
           }
         } while (true);
       } catch (error) {
+        setIsLoading(false);
         toast.error("Server error!");
       }
     };
 
     const handleFormAction = async (formData: FormData) => {
       try {
-        setErrorMessage("");
-
         const id = formData.get("id") as string;
         const name = formData.get("name") as string;
 
         const validData = handleValidateFormData(id, name, prices);
         if (!validData.valid) {
+          setIsLoading(false);
           setErrorMessage(validData.message);
           return;
         }
@@ -376,6 +382,7 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
           await handleUpdateService(token, data);
         }
       } catch (error) {
+        setIsLoading(false);
         toast.error("Server error!");
       }
     };
@@ -399,6 +406,7 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
     return (
       <DialogContainer ref={refModal}>
         <form
+          ref={refForm}
           action={handleFormAction}
           className="w-full h-full flex-col justify-center gap-2.5 flex"
         >
@@ -459,11 +467,28 @@ const AddServiceForm = forwardRef<HTMLDialogElement, AddServiceFormProps>(
               className="w-full text-sm px-2.5 py-2"
               onClickFunction={handleCloseModal}
             />
-            <Button
-              name={isUpdate ? "Update" : "Add"}
-              className="w-full text-sm px-2.5 py-2"
-              type="submit"
-            />
+            {!isLoading && (
+              <Button
+                name={isUpdate ? "Update" : "Add"}
+                className="w-full text-sm px-2.5 py-2"
+                onClickFunction={() => {
+                  setIsLoading(true);
+                  setErrorMessage("");
+                  refForm.current?.requestSubmit();
+                }}
+              />
+            )}
+            {isLoading && (
+              <Button
+                name={isUpdate ? "Update" : "Add"}
+                icon={
+                  <div className="animate-spin">
+                    <AiOutlineLoading />
+                  </div>
+                }
+                className="w-full text-sm px-2.5 py-2"
+              />
+            )}
           </div>
         </form>
       </DialogContainer>

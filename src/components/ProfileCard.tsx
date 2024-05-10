@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import InputComponent from "./InputComponent";
 import Button from "./Button";
 import { SelfUserDBGetType, UserDBPostType } from "@/lib/type";
@@ -20,6 +20,7 @@ import { imageDB } from "@/lib/config/firebase.config";
 import { v4 } from "uuid";
 import { ProfileSkeleton } from "./Skeleton";
 import useToken from "@/lib/hooks/refresh-token";
+import { AiOutlineLoading } from "react-icons/ai";
 
 interface ProfileUpdateInfoFormProps {
   profile: SelfUserDBGetType;
@@ -39,7 +40,8 @@ function ProfileUpdateInfoForm({ profile }: ProfileUpdateInfoFormProps) {
   const [imageFile, setImageFile] = useState<
     Blob | ArrayBuffer | Uint8Array | null
   >(null);
-  const [isLoading, setIsLoading] = useState("Update");
+  const [isLoading, setIsLoading] = useState(false);
+  const refForm = useRef<HTMLFormElement>(null);
 
   const handleFormChange = (e: any) => {
     setUserProfile((prev) => {
@@ -94,6 +96,7 @@ function ProfileUpdateInfoForm({ profile }: ProfileUpdateInfoFormProps) {
 
       const validData = handleValidateFormData(email, phone, dob);
       if (!validData.valid) {
+        setIsLoading(false);
         setErrorMessage(validData.message);
         return;
       }
@@ -131,17 +134,19 @@ function ProfileUpdateInfoForm({ profile }: ProfileUpdateInfoFormProps) {
         }
         const res = await updateSelfUser(newToken, record);
         if (res.status === 200) {
-          setIsLoading("Update");
+          setIsLoading(false);
           toast.success("Information successfully updated.");
           return;
         } else if (res.status === 401) {
           isUnauthorized = true;
         } else {
           statusAction(res.status);
+          setIsLoading(false);
           return;
         }
       } while (true);
     } catch (error) {
+      setIsLoading(false);
       toast.error("Server error!");
     }
   };
@@ -162,6 +167,7 @@ function ProfileUpdateInfoForm({ profile }: ProfileUpdateInfoFormProps) {
         </div>
       </div>
       <form
+        ref={refForm}
         action={handleSubmitChange}
         className="w-full gap-2 gap-y-6 grid grid-cols-2 sm:gap-4"
       >
@@ -198,15 +204,30 @@ function ProfileUpdateInfoForm({ profile }: ProfileUpdateInfoFormProps) {
             <i>{errorMessage}</i>
           </div>
         )}
-        <Button
-          type="submit"
-          name={isLoading}
-          className="col-span-2 px-6 py-2 font-semibold text-sm h-fit self-end"
-          onClickFunction={() => {
-            setIsLoading("Updating...");
-            setErrorMessage("");
-          }}
-        />
+        {!isLoading && (
+          <Button
+            type="submit"
+            name={"Save"}
+            className="col-span-2 px-6 py-2 font-semibold text-sm h-fit self-end"
+            onClickFunction={() => {
+              setIsLoading(true);
+              setErrorMessage("");
+              refForm.current?.requestSubmit();
+            }}
+          />
+        )}
+        {isLoading && (
+          <Button
+            type="submit"
+            name={"Save"}
+            icon={
+              <div className="animate-spin">
+                <AiOutlineLoading />
+              </div>
+            }
+            className="col-span-2 px-6 py-2 font-semibold text-sm h-fit self-end"
+          />
+        )}
       </form>
     </div>
   );

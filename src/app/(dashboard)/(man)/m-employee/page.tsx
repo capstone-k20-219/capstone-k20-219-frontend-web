@@ -48,6 +48,7 @@ import {
 import useToken from "@/lib/hooks/refresh-token";
 import { ResultsTableSkeleton } from "@/components/Skeleton";
 import usePagination from "@/lib/hooks/pagination";
+import { AiOutlineLoading } from "react-icons/ai";
 
 interface EmployeeColumn {
   id: "id" | "name" | "phone" | "email" | "dob" | "action";
@@ -200,6 +201,8 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
     const [formData, setFormData] =
       useState<UserPersonalInfoType>(initialEmployeeData);
     const [errorMessage, setErrorMessage] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const refForm = useRef<HTMLFormElement>(null);
 
     const handleFormChange = (e: any) => {
       setFormData((prev) => {
@@ -211,6 +214,7 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
     };
 
     const handleCloseModal = () => {
+      setIsLoading(false);
       setFormData(initialEmployeeData);
       onToggleModal();
     };
@@ -263,8 +267,6 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
 
     const handleFormAction = async (formData: FormData) => {
       try {
-        setErrorMessage("");
-
         const name = formData.get("name") as string;
         const phone = formData.get("phone") as string;
         const email = formData.get("email") as string;
@@ -281,6 +283,7 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
         );
 
         if (!validData.valid) {
+          setIsLoading(false);
           setErrorMessage(validData.message);
           return;
         }
@@ -310,7 +313,7 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
           }
           const res = await createNewEmployee(newToken, record);
           if (res.status === 201) {
-            toast.success("New employee is created successfully.");
+            toast.success("New employee is created.");
             handleCloseModal();
             onReset();
             return;
@@ -318,10 +321,12 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
             isUnauthorized = true;
           } else {
             statusAction(res.status);
+            setIsLoading(false);
             return;
           }
         } while (true);
       } catch (error) {
+        setIsLoading(false);
         toast.error("Server error!");
       }
     };
@@ -329,6 +334,7 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
     return (
       <DialogContainer ref={refModal}>
         <form
+          ref={refForm}
           action={handleFormAction}
           className="w-full h-full flex-col justify-center gap-2.5 flex"
         >
@@ -378,11 +384,29 @@ const AddEmployeeForm = forwardRef<HTMLDialogElement, AddEmployeeFormProps>(
               className="w-full text-sm px-2.5 py-2"
               onClickFunction={handleCloseModal}
             />
-            <Button
-              name="Add"
-              className="w-full text-sm px-2.5 py-2"
-              type="submit"
-            />
+            {!isLoading && (
+              <Button
+                name="Add"
+                className="w-full text-sm px-2.5 py-2"
+                type="submit"
+                onClickFunction={() => {
+                  setIsLoading(true);
+                  setErrorMessage("");
+                  refForm.current?.requestSubmit();
+                }}
+              />
+            )}
+            {isLoading && (
+              <Button
+                name="Add"
+                icon={
+                  <div className="animate-spin">
+                    <AiOutlineLoading />
+                  </div>
+                }
+                className="w-full text-sm px-2.5 py-2"
+              />
+            )}
           </div>
         </form>
       </DialogContainer>

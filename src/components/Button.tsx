@@ -15,7 +15,7 @@ export default function Button({
     <button
       type={type}
       className={`bg-neutral-900 rounded-md justify-center items-center flex 
-      hover:bg-neutral-800 active:scale-95 transition-all ${className}`}
+      hover:bg-neutral-800 active:scale-95 transition-all gap-2 ${className}`}
       onClick={onClickFunction}
     >
       {name && <div className="text-center text-white">{name}</div>}

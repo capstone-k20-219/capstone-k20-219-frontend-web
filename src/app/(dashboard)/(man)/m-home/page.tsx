@@ -42,6 +42,7 @@ import Button from "@/components/Button";
 import { getVehicleTypes } from "@/lib/services/vehicle-types";
 import { getVehiclesByType } from "@/lib/services/vehicles";
 import useToken from "@/lib/hooks/refresh-token";
+import { AiOutlineLoading } from "react-icons/ai";
 
 function CardsContainer({ children }: { children: React.ReactNode }) {
   return (
@@ -61,7 +62,7 @@ function ChartSetOuterContainer({ children }: { children: React.ReactNode }) {
 
 function ChartSetInnerContainer({ children }: { children: React.ReactNode }) {
   return (
-    <div className="w-full min-h-[20rem] md:max-h-[342px] items-center gap-3 flex flex-col md:flex-row">
+    <div className="w-full items-center gap-3 flex flex-col md:flex-row">
       {children}
     </div>
   );

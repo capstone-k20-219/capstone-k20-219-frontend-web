@@ -39,6 +39,7 @@ import {
 import useToken from "@/lib/hooks/refresh-token";
 import { ResultsTableSkeleton } from "@/components/Skeleton";
 import usePagination from "@/lib/hooks/pagination";
+import { AiOutlineLoading } from "react-icons/ai";
 
 interface VehicleTypeColumn {
   id: "id" | "name" | "slotBookingFee" | "parkingFee" | "action";
@@ -213,6 +214,8 @@ const AddVehicleTypeForm = forwardRef<
       initialVehicleTypeData
     );
     const [errorMessage, setErrorMessage] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const refForm = useRef<HTMLFormElement>(null);
 
     const handleFormChange = (e: any) => {
       setFormData((prev) => {
@@ -224,6 +227,7 @@ const AddVehicleTypeForm = forwardRef<
     };
 
     const handleCloseModal = () => {
+      setIsLoading(false);
       setFormData(initialVehicleTypeData);
       onExistData(null);
       onToggleModal();
@@ -278,7 +282,7 @@ const AddVehicleTypeForm = forwardRef<
           }
           const res = await createVehicleType(newToken, record);
           if (res.status === 201) {
-            toast.success("New vehicle type is created successfully.");
+            toast.success("New vehicle type is created.");
             handleCloseModal();
             onAddData(record);
             return;
@@ -286,10 +290,12 @@ const AddVehicleTypeForm = forwardRef<
             isUnauthorized = true;
           } else {
             statusAction(res.status);
+            setIsLoading(false);
             return;
           }
         } while (true);
       } catch (error) {
+        setIsLoading(false);
         toast.error("Server error!");
       }
     };
@@ -315,18 +321,18 @@ const AddVehicleTypeForm = forwardRef<
             isUnauthorized = true;
           } else {
             statusAction(res.status);
+            setIsLoading(false);
             return;
           }
         } while (true);
       } catch (error) {
+        setIsLoading(false);
         toast.error("Server error!");
       }
     };
 
     const handleFormAction = async (formData: FormData) => {
       try {
-        setErrorMessage("");
-
         const id = formData.get("id") as string; // 3 characters
         const name = formData.get("name") as string;
         const bookingFee = Number(formData.get("slotBookingFee"));
@@ -334,6 +340,7 @@ const AddVehicleTypeForm = forwardRef<
 
         let result = handleValidateFormData(id, name, bookingFee, parkingFee);
         if (!result.valid) {
+          setIsLoading(false);
           setErrorMessage(result.message);
           return;
         }
@@ -353,6 +360,7 @@ const AddVehicleTypeForm = forwardRef<
           await handleUpdateType(token, record);
         }
       } catch (error) {
+        setIsLoading(false);
         toast.error("Server error!");
       }
     };
@@ -367,6 +375,7 @@ const AddVehicleTypeForm = forwardRef<
     return (
       <DialogContainer ref={refModal}>
         <form
+          ref={refForm}
           action={handleFormAction}
           className="w-full h-full flex-col justify-center gap-2.5 flex"
         >
@@ -395,7 +404,7 @@ const AddVehicleTypeForm = forwardRef<
             name="parkingFee"
             type="number"
             value={String(formData.parkingFee)}
-            label="Parking fee / day ($)"
+            label="Parking fee / hour ($)"
             onChangeFunction={handleFormChange}
           />
           {errorMessage && (
@@ -409,11 +418,28 @@ const AddVehicleTypeForm = forwardRef<
               className="w-full text-sm px-2.5 py-2"
               onClickFunction={handleCloseModal}
             />
-            <Button
-              name={isUpdate ? "Update" : "Add"}
-              className="w-full text-sm px-2.5 py-2"
-              type="submit"
-            />
+            {!isLoading && (
+              <Button
+                name={isUpdate ? "Update" : "Add"}
+                className="w-full text-sm px-2.5 py-2"
+                onClickFunction={() => {
+                  setIsLoading(true);
+                  setErrorMessage("");
+                  refForm.current?.requestSubmit();
+                }}
+              />
+            )}
+            {isLoading && (
+              <Button
+                name={isUpdate ? "Update" : "Add"}
+                icon={
+                  <div className="animate-spin">
+                    <AiOutlineLoading />
+                  </div>
+                }
+                className="w-full text-sm px-2.5 py-2"
+              />
+            )}
           </div>
         </form>
       </DialogContainer>
