@@ -111,7 +111,6 @@ function ProfileUpdateInfoForm({ profile }: ProfileUpdateInfoFormProps) {
         newUrlImg = resFb;
         setImageFile(null);
       }
-      //--------------
 
       const newData: SubInfoProps = validData.data as SubInfoProps;
 
