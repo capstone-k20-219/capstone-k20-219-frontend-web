@@ -159,25 +159,23 @@ function TableResults({
                         paddingLeft: column.paddingLeft,
                         paddingRight: column.paddingRight,
                       }}
-                      className="flex gap-3 items-center h-full"
+                      className="flex gap-3 items-center h-full justify-end"
                     >
-                      <>
-                        <Button
-                          name="Update"
-                          className="button-action"
-                          onClickFunction={() => {
-                            onSetupEditData(row);
-                            onEdit();
-                          }}
-                        />
-                        <Button
-                          name="Delete"
-                          className="button-action"
-                          onClickFunction={() => {
-                            onDeleteRecord(row.id);
-                          }}
-                        />
-                      </>
+                      <Button
+                        name="Update"
+                        className="button-action"
+                        onClickFunction={() => {
+                          onSetupEditData(row);
+                          onEdit();
+                        }}
+                      />
+                      <Button
+                        name="Delete"
+                        className="button-action"
+                        onClickFunction={() => {
+                          onDeleteRecord(row.id);
+                        }}
+                      />
                     </td>
                   );
                 })}
