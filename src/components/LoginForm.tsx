@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import React, { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { statusAction, validateEmail, validatePassword } from "@/lib/helpers";
-import { logIn } from "@/redux/features/auth-slice";
+import { logIn, logOut } from "@/redux/features/auth-slice";
 import { AuthState, SelfUserDBGetType } from "@/lib/type";
 import { getSelfUser } from "@/lib/services/users";
 import toast from "react-hot-toast";
@@ -82,6 +82,7 @@ export default function LoginForm() {
       } else {
         setIsLoading(false);
         toast.error("You have no right to access this system!");
+        dispatch(logOut());
       }
     } catch (error) {
       setIsLoading(false);

@@ -10,12 +10,16 @@ export default function LoginPageLayout({
   children: React.ReactNode;
 }) {
   const [init, setInit] = useState(false);
-  const { token } = useAppSelector((state) => state.auth.value);
+  const { token, role } = useAppSelector((state) => state.auth.value);
   const router = useRouter();
 
   useEffect(() => {
     if (token) {
-      router.back();
+      if (role === "manager") {
+        router.replace("/m-home");
+      } else if (role === "employee") {
+        router.replace("/e-map");
+      }
     } else {
       setInit(true);
     }
