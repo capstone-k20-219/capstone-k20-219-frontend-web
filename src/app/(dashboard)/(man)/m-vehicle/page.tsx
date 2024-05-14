@@ -48,6 +48,7 @@ interface VehicleTypeColumn {
   align?: "center" | "left" | "right" | "justify" | "char" | undefined;
   format?: (value: number) => string;
   paddingLeft?: string;
+  paddingRight?: string;
 }
 
 const columns: readonly VehicleTypeColumn[] = [
@@ -85,8 +86,8 @@ const columns: readonly VehicleTypeColumn[] = [
     id: "action",
     label: "Action",
     minWidth: 170,
-    align: "left",
-    paddingLeft: "12px",
+    align: "right",
+    paddingRight: "20px",
   },
 ];
 
@@ -121,6 +122,7 @@ function TableResults({
                   style={{
                     minWidth: column.minWidth,
                     paddingLeft: column.paddingLeft,
+                    paddingRight: column.paddingRight,
                   }}
                 >
                   {column.label}
@@ -137,7 +139,10 @@ function TableResults({
                     <td
                       key={column.id}
                       align={column.align}
-                      style={{ paddingLeft: column.paddingLeft }}
+                      style={{
+                        paddingLeft: column.paddingLeft,
+                        paddingRight: column.paddingRight,
+                      }}
                     >
                       {column.format && typeof value === "number"
                         ? column.format(value)
@@ -150,7 +155,10 @@ function TableResults({
                     <td
                       key={column.id}
                       align={column.align}
-                      style={{ paddingLeft: column.paddingLeft }}
+                      style={{
+                        paddingLeft: column.paddingLeft,
+                        paddingRight: column.paddingRight,
+                      }}
                       className="flex gap-3 items-center h-full"
                     >
                       <>
