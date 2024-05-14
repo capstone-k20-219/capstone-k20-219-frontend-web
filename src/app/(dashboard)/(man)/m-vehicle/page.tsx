@@ -619,7 +619,7 @@ export default function ManagerVehicleType() {
               reset={isReset}
               handleReset={handleResetState}
               onReset={handleResetSearch}
-              placeholder={"Find by service id or name..."}
+              placeholder={"Find by vehicle type id or name..."}
             />
           </form>
           <Button
