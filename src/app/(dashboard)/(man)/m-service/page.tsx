@@ -696,7 +696,7 @@ export default function ManagerService() {
               reset={isReset}
               handleReset={handleResetState}
               onReset={handleResetSearch}
-              placeholder={"Enter service Id or vehicle type ..."}
+              placeholder={"Enter service Id or name ..."}
             />
           </form>
           <Button
