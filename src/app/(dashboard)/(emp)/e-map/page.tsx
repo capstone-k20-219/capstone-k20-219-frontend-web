@@ -40,12 +40,6 @@ type SlotProps = {
   ticket: ParkingTicketDBGetType | undefined;
 };
 
-type VehicleProps = {
-  id: string;
-  name: string;
-  color: string;
-};
-
 function Slot({ slot, ticket }: SlotProps) {
   const [openMenu, setOpenMenu] = useState(false);
   const refMenu = useRef<HTMLDivElement | null>(null);
@@ -166,6 +160,11 @@ const CheckoutModal = forwardRef<HTMLDialogElement, CheckoutModalProps>(
       onClose();
     };
 
+    const handleUpdateCheckoutStatus = () => {
+      const dbRef2 = ref(realtimeDB, "checkOutStatus");
+      set(dbRef2, true);
+    };
+
     const handleConfirmBill = async (ticketId: string) => {
       try {
         let isUnauthorized = false;
@@ -213,6 +212,7 @@ const CheckoutModal = forwardRef<HTMLDialogElement, CheckoutModalProps>(
           }
           const res = await checkOut(newToken, newId, newPlate);
           if (res.status === 201 || res.status === 200) {
+            handleUpdateCheckoutStatus();
             const resData: TicketCheckoutDBGetType = res.data;
             setBill(resData);
             return;
@@ -331,6 +331,11 @@ const CheckinModal = forwardRef<HTMLDialogElement, CheckinModalProps>(
       onClose();
     };
 
+    const handleUpdateCheckinStateFb = () => {
+      const dbRef2 = ref(realtimeDB, "checkInStatus");
+      set(dbRef2, true);
+    };
+
     const handleCheckIn = async () => {
       try {
         // validate plateNo
@@ -349,6 +354,7 @@ const CheckinModal = forwardRef<HTMLDialogElement, CheckinModalProps>(
           if (res.status === 201 || res.status === 200) {
             // resetScannerData();
             toast.success("Checking in successfully!");
+            handleUpdateCheckinStateFb();
             onReloadCheckinList();
             handleCloseModal();
             return;
