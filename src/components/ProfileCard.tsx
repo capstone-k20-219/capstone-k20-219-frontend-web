@@ -17,7 +17,6 @@ import {
 } from "@/lib/helpers";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { imageDB } from "@/lib/config/firebase.config";
-import { v4 } from "uuid";
 import { ProfileSkeleton } from "./Skeleton";
 import useToken from "@/lib/hooks/refresh-token";
 import { AiOutlineLoading } from "react-icons/ai";

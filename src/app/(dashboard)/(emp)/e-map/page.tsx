@@ -179,13 +179,14 @@ const CheckoutModal = forwardRef<HTMLDialogElement, CheckoutModalProps>(
           }
           const res = await updateBill(newToken, ticketId);
           if (res.status === 200 || res.status === 201) {
-            toast.success("Check out successfully.");
+            toast.success("Checking out successfully!");
             handleCloseModal();
             return;
           } else if (res.status === 401) {
             isUnauthorized = true;
           } else {
             statusAction(res.status);
+            toast.error("Please try again!");
             return;
           }
         } while (true);
@@ -197,8 +198,6 @@ const CheckoutModal = forwardRef<HTMLDialogElement, CheckoutModalProps>(
 
     const handleCheckOut = async (ticketId: string, plateNo: string) => {
       try {
-        // await resetScannerData();
-
         // validate plateNo
         const newId = eliminateSpecialChars(ticketId);
         const newPlate = eliminateSpecialChars(plateNo);
@@ -214,23 +213,19 @@ const CheckoutModal = forwardRef<HTMLDialogElement, CheckoutModalProps>(
           }
           const res = await checkOut(newToken, newId, newPlate);
           if (res.status === 201 || res.status === 200) {
-            // toast.success("Check out successfully.");
             const resData: TicketCheckoutDBGetType = res.data;
-
             setBill(resData);
-            // setCheckOutInfo(resData);
-            // handleOpenModal();
-            // resetScannerData();
-            // handleDeleteSlotLocal(resData.ticketId);
             return;
           } else if (res.status === 401) {
             isUnauthorized = true;
           } else {
+            toast.error("Failed to checking the vehicle out!");
+            toast.error("Please try again!");
             return;
           }
         } while (true);
       } catch (error) {
-        toast.error("Server error");
+        toast.error("Server error when checking out!");
         return;
       }
     };
@@ -353,12 +348,19 @@ const CheckinModal = forwardRef<HTMLDialogElement, CheckinModalProps>(
           const res = await checkIn(newToken, newPlate);
           if (res.status === 201 || res.status === 200) {
             // resetScannerData();
+            toast.success("Checking in successfully!");
             onReloadCheckinList();
             handleCloseModal();
             return;
           } else if (res.status === 401) {
             isUnauthorized = true;
+          } else if (res.status === 400) {
+            toast.error("Vehicle has not registered!");
+            handleCloseModal();
+            return;
           } else {
+            toast.error("Failed to checking the vehicle in!");
+            handleCloseModal();
             return;
           }
         } while (true);
@@ -547,45 +549,19 @@ export default function EmplpoyeeMap() {
     setIsReloadCheckInState(true);
   };
 
-  // onValue(dbRef, async (snapshot) => {
-  //   try {
-  //     const data: ScanDataType = snapshot.val();
-  //     if (data.plateNumberIn && !data.plateNumberOut && !data.qrCode) {
-  //       // check in
-  //       console.log("checking in...");
-  //       await set(dbRef, {
-  //         plateNumberIn: "",
-  //         plateNumberOut: "",
-  //         qrCode: "",
-  //       });
-  //       await handleCheckIn(data.plateNumberIn);
-  //     } else if (!data.plateNumberIn && data.plateNumberOut && data.qrCode) {
-  //       // turn on check out modal to confirm
-  //       await set(dbRef, {
-  //         plateNumberIn: "",
-  //         plateNumberOut: "",
-  //         qrCode: "",
-  //       });
-  //       await handleCheckOut(data.qrCode, data.plateNumberOut);
-  //     }
-  //   } catch (error) {
-  //     return;
-  //   }
-  // });
   onValue(dbRef, (snapshot) => {
     const data: ScanDataType = snapshot.val();
     if (data.plateNumberIn && !data.plateNumberOut && !data.qrCode) {
       // check in
-      console.log("checking in...");
+      // console.log("checking in...");
       resetScannerData();
       setCheckinPlateNo(data.plateNumberIn);
       handleOpenModalCheckin();
     } else if (!data.plateNumberIn && data.plateNumberOut && data.qrCode) {
       // turn on check out modal to confirm
-      console.log("checking out...");
+      // console.log("checking out...");
       setCheckOutInfo(data);
       resetScannerData();
-      // handleCheckOut(data.qrCode, data.plateNumberOut);
       handleOpenModalCheckout();
     }
   });

@@ -355,15 +355,15 @@ export default function EmployeeService() {
   const handleRejectRequest = async (id: number) => {
     try {
       let isUnauthorized = false;
-      // let newToken = token;
+      let newToken = token;
       do {
         if (isUnauthorized) {
           const isRefreshed = await refreshToken();
           if (!isRefreshed.valid) return;
-          // newToken = isRefreshed.access_token;
+          newToken = isRefreshed.access_token;
           isUnauthorized = false;
         }
-        const res = await rejectServiceBooking(token, id);
+        const res = await rejectServiceBooking(newToken, id);
         if (res.status === 200) {
           handleRejectRequestLocal(id);
           return;
@@ -402,7 +402,6 @@ export default function EmployeeService() {
           }));
           setDataStorage(newData);
           setData(newData);
-          // console.log(res.data);
           return;
         } else if (res.status === 401) {
           isUnauthorized = true;

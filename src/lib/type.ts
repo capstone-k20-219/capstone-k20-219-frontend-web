@@ -1,20 +1,4 @@
-export enum TableType {
-  Employee,
-  VehicleType,
-  Service,
-  ServiceRequest,
-}
-
 export type RoleType = "manager" | "employee" | "user";
-
-export type EmployeeData = {
-  [key: string]: any;
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  dob: string;
-};
 
 export type UserPersonalInfoType = {
   email: string;
@@ -87,21 +71,6 @@ export type ServiceDBGetType = {
   }[];
 };
 
-export type ServiceData = {
-  [key: string]: any;
-  id: string;
-  name: string;
-  price: number;
-  type: string;
-};
-
-export type TableData =
-  | EmployeeData[]
-  | VehicleTypeData[]
-  | ServiceData[]
-  | ServiceRequestData[]
-  | null;
-
 // Type for Sidebar nav items
 export interface NavItem {
   name: string;
@@ -110,52 +79,20 @@ export interface NavItem {
 }
 
 // Type for Auth Reducer _ auth-slice
-export type InitialState = {
+export interface InitialState {
   value: AuthState;
-};
+}
 
-export type AuthState = {
+export interface AuthState {
   token: string;
   uid: string;
   refresh_token: string;
   role: RoleType;
-};
-
-export type ActiveState = {
-  role: RoleType;
-  index: number;
-  name: string;
-};
-
-export type InitialActiveState = {
-  value: ActiveState;
-};
-
-export interface ProfileType {
-  id: string;
-  role: string;
-  name: string;
-  email: string;
-  phone: string;
-  dob: string;
 }
-
-export type FormStateType = {
-  error: {
-    [key: string]: string;
-  } | null;
-  success: boolean;
-  data: unknown;
-};
 
 export interface OptionType {
   value: string;
   name: string;
-}
-
-export interface LoginFormStateType {
-  success: boolean | null;
-  data: { username: string; role: string; id: string } | null;
 }
 
 export type FeedbackData = {
@@ -215,14 +152,14 @@ type ServiceBill = {
   cost: number;
 };
 
-type TicketBaseInfo = {
+interface TicketBaseInfo {
   ticketId: string;
   plateNo: string;
   checkInTime: string;
   checkOutTime: string;
   slotId: string;
   parkingCost: number;
-};
+}
 
 export type TicketCheckoutDBGetType = TicketBaseInfo & {
   services: ServiceBill[];

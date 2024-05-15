@@ -48,12 +48,6 @@ type VehicleProps = {
   color: string;
 };
 
-const initialVehicleProps: VehicleProps = {
-  id: "",
-  name: "",
-  color: "#c4c4c4",
-};
-
 function EditableSlot({
   slot,
   editable,

@@ -1,5 +1,3 @@
-import Card from "./Card";
-
 function InputSkeleton() {
   return (
     <div className="flex flex-col gap-1 animate-pulse">

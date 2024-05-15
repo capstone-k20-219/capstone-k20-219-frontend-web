@@ -1,9 +1,8 @@
 "use client";
 
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 import { FaCamera } from "react-icons/fa";
 import User from "@/img/user.jpg";
-import { useState } from "react";
 
 export default function UserAvatar({
   imageSrc,

@@ -7,7 +7,6 @@ import { getAllServices } from "@/lib/services/services";
 import toast from "react-hot-toast";
 import { OptionType, ServiceDBGetType } from "@/lib/type";
 import { useState } from "react";
-import { useAppSelector } from "@/redux/store";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -120,7 +119,6 @@ function ManagerFeedbackContent({ service }: { service: string }) {
         }
         const res = await deleteFeedbackById(newToken, newID);
         if (res.status === 200) {
-          // const dataTmp = [...data];
           const deletedData = data
             ? data.filter((item) => item.id !== newID)
             : null;

@@ -42,7 +42,6 @@ import Button from "@/components/Button";
 import { getVehicleTypes } from "@/lib/services/vehicle-types";
 import { getVehiclesByType } from "@/lib/services/vehicles";
 import useToken from "@/lib/hooks/refresh-token";
-import { AiOutlineLoading } from "react-icons/ai";
 
 function CardsContainer({ children }: { children: React.ReactNode }) {
   return (
@@ -72,7 +71,6 @@ export default function ManagerHome() {
   const { refreshToken, token } = useToken();
 
   const [reload, setReload] = useState(false);
-  // const [pageToken, setPageToken] = useState<string>(token);
 
   const [currentVehicle, setCurrentVehicle] = useState<number>(0);
   const [currentSlots, setCurrentSlots] = useState<number>(0);

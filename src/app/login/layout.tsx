@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppSelector } from "@/redux/store";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function LoginPageLayout({

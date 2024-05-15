@@ -24,7 +24,7 @@ function HeaderTimer() {
   useEffect(() => {
     const timerInterval = setInterval(
       () => setDate(formatCreatedTime(new Date().toISOString())),
-      1000
+      60000
     );
     return () => {
       clearInterval(timerInterval);

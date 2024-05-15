@@ -1,7 +1,6 @@
 "use client";
 
 import Button from "@/components/Button";
-import { ChangeEvent, RefObject, useState } from "react";
 import { IoClose, IoSearch } from "react-icons/io5";
 
 export default function SearchBar({
