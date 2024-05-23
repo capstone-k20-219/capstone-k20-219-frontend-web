@@ -285,8 +285,8 @@ const CheckoutModal = forwardRef<HTMLDialogElement, CheckoutModalProps>(
                 </span>
                 <span>
                   {"$" +
-                    bill.parkingCost +
-                    bill.services.reduce((acc, curr) => acc + curr.cost, 0)}
+                    (bill.parkingCost +
+                      bill.services.reduce((acc, curr) => acc + curr.cost, 0))}
                 </span>
               </p>
             </div>
