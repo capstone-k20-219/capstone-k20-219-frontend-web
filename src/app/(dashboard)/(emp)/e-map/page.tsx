@@ -146,10 +146,20 @@ type CheckoutModalProps = {
   onClose: () => void;
   onResetData: () => void;
   onDeleteSlotCheckout: (id: string) => void;
+  onResetRealtimeData: () => void;
 };
 
 const CheckoutModal = forwardRef<HTMLDialogElement, CheckoutModalProps>(
-  ({ checkOutInfo, onClose, onResetData, onDeleteSlotCheckout }, refModal) => {
+  (
+    {
+      checkOutInfo,
+      onClose,
+      onResetData,
+      onDeleteSlotCheckout,
+      onResetRealtimeData,
+    },
+    refModal
+  ) => {
     const { refreshToken, token } = useToken();
     const [bill, setBill] = useState<TicketCheckoutDBGetType | null>(null);
 
@@ -157,6 +167,7 @@ const CheckoutModal = forwardRef<HTMLDialogElement, CheckoutModalProps>(
       setBill(null);
       onDeleteSlotCheckout(checkOutInfo.qrCode);
       onResetData();
+      onResetRealtimeData();
       onClose();
     };
 
@@ -221,6 +232,7 @@ const CheckoutModal = forwardRef<HTMLDialogElement, CheckoutModalProps>(
           } else {
             toast.error("Failed to checking the vehicle out!");
             toast.error("Please try again!");
+            handleCloseModal();
             return;
           }
         } while (true);
@@ -321,13 +333,18 @@ type CheckinModalProps = {
   plateNo: string;
   onClose: () => void;
   onReloadCheckinList: () => void;
+  onResetRealtimeData: () => void;
 };
 
 const CheckinModal = forwardRef<HTMLDialogElement, CheckinModalProps>(
-  ({ plateNo, onClose, onReloadCheckinList }, refModal) => {
+  (
+    { plateNo, onClose, onReloadCheckinList, onResetRealtimeData },
+    refModal
+  ) => {
     const { refreshToken, token } = useToken();
 
     const handleCloseModal = () => {
+      onResetRealtimeData();
       onClose();
     };
 
@@ -626,6 +643,7 @@ export default function EmplpoyeeMap() {
         plateNo={checkinPlateNo}
         onClose={handleCloseModalCheckin}
         onReloadCheckinList={handleReloadCheckinList}
+        onResetRealtimeData={resetScannerData}
       />
       <CheckoutModal
         ref={refModalCheckout}
@@ -633,6 +651,7 @@ export default function EmplpoyeeMap() {
         onClose={handleCloseModalCheckout}
         onResetData={handleResetCheckoutInfo}
         onDeleteSlotCheckout={handleDeleteSlotLocal}
+        onResetRealtimeData={resetScannerData}
       />
     </>
   );
