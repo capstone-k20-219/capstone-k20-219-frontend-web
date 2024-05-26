@@ -390,6 +390,7 @@ const AddVehicleTypeForm = forwardRef<
             type="text"
             value={formData.id}
             label="Type id"
+            disable={isUpdate}
             onChangeFunction={handleFormChange}
           />
           <InputComponent
