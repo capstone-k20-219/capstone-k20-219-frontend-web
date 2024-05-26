@@ -127,6 +127,7 @@ function ManagerFeedbackContent({ service }: { service: string }) {
           );
           if (!deletedDatav2.length) handleDecreasePage();
           setData(deletedData);
+          toast.success("Feedback deleted successfully.");
           return;
         } else if (res.status === 401) {
           isUnauthorized = true;
