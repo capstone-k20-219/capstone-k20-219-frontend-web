@@ -42,10 +42,12 @@ type SlotProps = {
 
 function Slot({ slot, ticket }: SlotProps) {
   const [openMenu, setOpenMenu] = useState(false);
+  const [posMenu, setPosMenu] = useState({ x: 0, y: 0 });
   const refMenu = useRef<HTMLDivElement | null>(null);
 
   const handleContextMenu = (e: any) => {
     e.preventDefault();
+    setPosMenu({ x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY });
     setOpenMenu(true);
   };
 
@@ -76,12 +78,17 @@ function Slot({ slot, ticket }: SlotProps) {
           grid place-items-center cursor-pointer text-xs"
       onMouseMove={handleContextMenu}
     >
-      <span className="vertical-text">{slot.id}</span>
+      <span
+        className="vertical-text w-full h-full 
+        flex items-center justify-center"
+      >
+        {slot.id}
+      </span>
       {openMenu && (
         <div
           style={{
-            top: 0,
-            left: slot.x_end - slot.x_start,
+            top: posMenu.y + 10,
+            left: posMenu.x + 10,
           }}
           className="absolute bg-white rounded min-w-[200px] shadow-md p-1 
         border border-neutral-500 z-50 opacity-100"

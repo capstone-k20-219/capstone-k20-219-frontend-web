@@ -95,12 +95,17 @@ function EditableSlot({
           grid place-items-center cursor-pointer text-xs"
       onContextMenu={handleContextMenu}
     >
-      <span className="vertical-text">{slot.id}</span>
+      <span
+        className="vertical-text w-full h-full 
+        flex items-center justify-center"
+      >
+        {slot.id}
+      </span>
       {openMenu && (
         <div
           style={{
-            top: menuPos.y,
-            left: menuPos.x,
+            top: menuPos.y + 10,
+            left: menuPos.x + 10,
           }}
           className="absolute bg-white rounded min-w-[100px] shadow-md p-1 
         border border-neutral-500 z-50"
