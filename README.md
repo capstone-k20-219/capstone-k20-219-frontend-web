@@ -20,9 +20,10 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 
 ## Learn More
 
-- Status: Finished - This application have not been deployed yet.
-- To access to the website, please use those account to login:
-```bash
-  { username: manager123@gmail.com, password: manager123 }
-  { username: employee1@gmail.com, password: employee123 }
-```
+- Status: Finished
+- Deploy link: [https://pakislot-web.vercel.app/](https://pakislot-web.vercel.app/)
+- Note: Check my team's work in the following link: [https://github.com/capstone-k20-219](https://github.com/capstone-k20-219)
+
+## Demonstration video
+
+![Video](/capstone-demo-v6.mp4)
