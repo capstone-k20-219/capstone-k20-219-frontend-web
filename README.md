@@ -26,4 +26,4 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 
 ## Demonstration video
 
-![Video](/capstone-demo-v6.mp4)
+[Demonstration Video](https://drive.google.com/file/d/1E9vgt29YlSrzbmNblVoXtVQV_HpC19Ot/view?usp=sharing)
